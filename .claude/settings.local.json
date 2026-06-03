@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm -v)",
+      "Bash(git --version)",
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"C:\\\\Projects\\\\sustech-web\\\\public\\\\fonts\")",
+      "PowerShell(Write-Output \"core.hooksPath = $\\(git config core.hooksPath\\)\"; Get-ChildItem \"C:\\\\Projects\\\\sustech-web\\\\.husky\" -Force -ErrorAction SilentlyContinue | Select-Object Name | Format-Table -AutoSize)"
+    ]
+  }
+}

@@ -43,3 +43,10 @@ next-env.d.ts
 # Downloaded font archives (extracted woff2 already in public/fonts/)
 *.zip
 /test-results/
+/playwright-report/
+
+# lighthouse
+/.lighthouseci/
+/lhr-*.json
+/lhr-*.html
+*.log

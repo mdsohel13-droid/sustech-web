@@ -61,7 +61,7 @@
     "vitest": "^4.1.8"
   },
   "pnpm": {
-    "ignoredBuiltDependencies": [
+    "onlyBuiltDependencies": [
       "sharp",
       "unrs-resolver"
     ]

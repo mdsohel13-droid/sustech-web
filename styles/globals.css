@@ -19,28 +19,47 @@
   --color-brand-600: #0b4fb5;
   --color-brand-300: #6ea4f2;
   --color-energy: #16a34a;
+  --color-energy-300: #4ade80;
   --color-solar: #f59e0b;
   --color-solar-600: #d97706;
   --color-solar-text: #1a1206;
+
   /* radius */
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 16px;
   --radius-xl: 24px;
-  /* fonts (mapped to next/font/local CSS vars — wired in app/fonts.ts) */
-  --font-display: var(--font-cabinet);
-  --font-sans: var(--font-switzer);
-  --font-mono: var(--font-jetbrains);
+
+  /* fluid type scale (1.25 ratio) — DESIGN-SYSTEM.md §2 */
+  --text-display: clamp(2.75rem, 6vw, 4.5rem);
+  --text-display--line-height: 1.04;
+  --text-display--letter-spacing: -0.02em;
+  --text-h1: clamp(2rem, 4vw, 3rem);
+  --text-h1--line-height: 1.1;
+  --text-h1--letter-spacing: -0.02em;
+  --text-h2: clamp(1.5rem, 3vw, 2.25rem);
+  --text-h2--line-height: 1.12;
+  --text-h2--letter-spacing: -0.02em;
+  --text-h3: clamp(1.25rem, 2vw, 1.5rem);
+  --text-h3--line-height: 1.2;
+  --text-lede: clamp(1.125rem, 1.6vw, 1.3125rem);
+  --text-lede--line-height: 1.5;
+
+  /* soft, layered shadows — DESIGN-SYSTEM.md §4 */
+  --shadow-sm: 0 1px 2px rgba(11, 18, 32, 0.06);
+  --shadow-md: 0 6px 20px rgba(11, 18, 32, 0.08);
+  --shadow-lg: 0 18px 50px rgba(11, 18, 32, 0.12);
+
+  /* motion */
+  --ease-brand: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 :root {
+  color-scheme: light;
   --t-fast: 150ms;
   --t: 250ms;
   --t-slow: 450ms;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
-  --shadow-sm: 0 1px 2px rgba(11, 18, 32, 0.06);
-  --shadow-md: 0 6px 20px rgba(11, 18, 32, 0.08);
-  --shadow-lg: 0 18px 50px rgba(11, 18, 32, 0.12);
 }
 
 * {
@@ -49,6 +68,7 @@
 html {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
 }
 body {
   background: var(--color-surface);
@@ -65,17 +85,111 @@ h3 {
   letter-spacing: -0.02em;
 }
 
+::selection {
+  background: var(--color-brand);
+  color: #fff;
+}
+
 /* focus visibility */
 :focus-visible {
   outline: 2px solid var(--color-brand);
   outline-offset: 2px;
 }
 
+/* Rich-text (lexical) output — readable defaults for CMS body content. */
+.richtext {
+  color: var(--color-text);
+  line-height: 1.7;
+}
+.richtext h2 {
+  font-size: var(--text-h2);
+  font-weight: 600;
+  margin-top: 2rem;
+}
+.richtext h3 {
+  font-size: var(--text-h3);
+  font-weight: 600;
+  margin-top: 1.5rem;
+}
+.richtext p {
+  margin-top: 1rem;
+}
+.richtext ul,
+.richtext ol {
+  margin-top: 1rem;
+  padding-left: 1.5rem;
+  list-style: revert;
+}
+.richtext li {
+  margin-top: 0.375rem;
+}
+.richtext a {
+  color: var(--color-brand);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.richtext strong {
+  font-weight: 600;
+}
+
+/* Fine-line "engineering grid" motif — decorative, applied to aria-hidden layers. */
+@utility grid-motif {
+  background-image:
+    linear-gradient(to right, currentColor 1px, transparent 1px),
+    linear-gradient(to bottom, currentColor 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+/* Hero load reveal — CSS only so content is SSR-visible and LCP-safe. Resting state is
+   visible; the entrance animation is added solely under `no-preference`. */
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hero-rise {
+    animation: hero-rise var(--t-slow) var(--ease) both;
+  }
+}
+
+/* Scroll fade-rise (once), via CSS scroll-driven animations — no JavaScript, so it adds zero
+   hydration cost. The resting state is visible (crawlable, and safe when scroll-timelines are
+   unsupported or motion is reduced); the entrance is layered on only where supported. */
+@keyframes reveal-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    [data-reveal] {
+      animation: reveal-rise both;
+      animation-timeline: view();
+      animation-range: entry 5% cover 22%;
+    }
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
   *,
   *::before,
   *::after {
     animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
 }

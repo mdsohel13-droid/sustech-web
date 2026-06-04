@@ -5,8 +5,13 @@ build/
 coverage/
 playwright-report/
 test-results/
+.lighthouseci/
 pnpm-lock.yaml
 next-env.d.ts
+*.log
+payload-types.ts
+media/
+app/(payload)/admin/importMap.js
 
 # Project brief / documentation — keep verbatim, do not reformat
 *.md

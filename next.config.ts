@@ -1,3 +1,4 @@
+import { withPayload } from "@payloadcms/next/withPayload";
 import type { NextConfig } from "next";
 
 const securityHeaders = [
@@ -19,4 +20,4 @@ const nextConfig: NextConfig = {
 // NOTE: Content-Security-Policy is added via middleware once the asset/domain list
 // (chat widget, analytics) is known. `output: "standalone"` is added at the Docker
 // packaging stage (see DEPLOYMENT-AND-VPS.md).
-export default nextConfig;
+export default withPayload(nextConfig);

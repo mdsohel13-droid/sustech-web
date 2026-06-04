@@ -43,3 +43,17 @@ next-env.d.ts
 # Downloaded font archives (extracted woff2 already in public/fonts/)
 *.zip
 /test-results/
+/playwright-report/
+
+# lighthouse
+/.lighthouseci/
+/lhr-*.json
+/lhr-*.html
+*.log
+
+# CMS uploaded media (user content, not source)
+/media/
+
+# Sensitive source data (project-import workbook, ERP dumps). Docs in data/ are tracked.
+/data/*
+!/data/*.md

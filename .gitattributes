@@ -1,25 +1,46 @@
-# Auto-detect text files and normalize to LF in the repo
-* text=auto
+# Normalize line endings: LF in the repository AND in working trees (stops the cosmetic
+# CRLF churn on Windows checkouts). Binary files are never touched.
 
-# Explicit text types
-*.css     text
-*.csv     text
-*.env     text
-*.example text
-*.gitignore text
-*.json    text
-*.md      text
-*.mjs     text
-*.prettierrc text
-*.prettierignore text
-*.sh      text eol=lf
-*.ts      text
-*.tsx     text
-*.yaml    text
-*.yml     text
+* text=auto eol=lf
 
-# Binary files — never diff or touch line endings
-*.ico        binary
-*.woff2      binary
-*.xlsx       binary
-tsconfig.tsbuildinfo binary
+# Code & text — always LF
+*.ts             text eol=lf
+*.tsx            text eol=lf
+*.js             text eol=lf
+*.cjs            text eol=lf
+*.mjs            text eol=lf
+*.json           text eol=lf
+*.jsonc          text eol=lf
+*.css            text eol=lf
+*.scss           text eol=lf
+*.md             text eol=lf
+*.mdx            text eol=lf
+*.yml            text eol=lf
+*.yaml           text eol=lf
+*.html           text eol=lf
+*.svg            text eol=lf
+*.csv            text eol=lf
+*.sh             text eol=lf
+.gitignore       text eol=lf
+.gitattributes   text eol=lf
+.prettierrc      text eol=lf
+.prettierignore  text eol=lf
+.env.example     text eol=lf
+pnpm-lock.yaml   text eol=lf
+
+# Binary — never normalize or diff
+*.woff2  binary
+*.woff   binary
+*.ttf    binary
+*.otf    binary
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.webp   binary
+*.avif   binary
+*.ico    binary
+*.pdf    binary
+*.zip    binary
+*.xlsx   binary
+*.xls    binary

@@ -116,6 +116,22 @@ export const getTestimonials = cache(async (): Promise<Testimonial[]> => {
   return res.docs;
 });
 
+export const getProjects = cache(async (): Promise<Project[]> => {
+  try {
+    const payload = await getPayloadClient();
+    const res = await payload.find({
+      collection: "projects",
+      depth: 2,
+      limit: 200,
+      where: { _status: { equals: "published" } },
+      sort: "-year",
+    });
+    return res.docs;
+  } catch {
+    return []; // DB unavailable at build → render the empty state
+  }
+});
+
 export const getFeaturedProjects = cache(async (limit = 3): Promise<Project[]> => {
   const payload = await getPayloadClient();
   const res = await payload.find({

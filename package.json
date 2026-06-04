@@ -9,6 +9,7 @@
     "generate:types": "node --import jiti/register cms/scripts/gen-types.ts",
     "seed": "node --import jiti/register cms/scripts/seed.ts",
     "import:projects": "node --import jiti/register cms/scripts/import-projects.ts",
+    "enrich:projects": "node --import jiti/register cms/scripts/enrich-projects.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint --max-warnings=0",
     "format": "prettier --write .",

@@ -10,10 +10,10 @@
 
 | Metric | Count |
 |---|---|
-| Client rows read | 174 |
-| **Eligible (won/completed)** | 51 |
-| Drafts created | 51 |
-| Drafts updated (re-run) | 0 |
+| Client rows read | 175 |
+| **Eligible (won/completed)** | 52 |
+| Drafts created | 0 |
+| Drafts updated (re-run) | 52 |
 | Rows skipped | 123 |
 
 All eligible clients are drafted as **DRAFT** Projects, de-duplicated by client, with
@@ -24,8 +24,8 @@ and narratives left blank for Hermes.
 
 | Service | Projects |
 |---|---|
-| Testing, Inspection & Consultancy | 35 |
-| Electrical EPC | 31 |
+| Testing, Inspection & Consultancy | 36 |
+| Electrical EPC | 32 |
 | Grounding & Lightning Protection | 25 |
 | Solar & Energy | 18 |
 | Smart Systems | 14 |

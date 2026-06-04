@@ -36,11 +36,21 @@ export const Projects: CollectionConfig = {
           name: "sector",
           type: "relationship",
           relationTo: "sectors",
-          admin: { width: "50%" },
+          admin: {
+            width: "50%",
+            description: "Imported drafts leave this blank — assign on review.",
+          },
         },
         { name: "year", type: "number", admin: { width: "25%", step: 1 } },
         { name: "featured", type: "checkbox", admin: { width: "25%" } },
       ],
+    },
+    {
+      name: "services",
+      type: "relationship",
+      relationTo: "services",
+      hasMany: true,
+      admin: { description: "Service lines delivered on this project." },
     },
     {
       type: "row",
@@ -53,7 +63,24 @@ export const Projects: CollectionConfig = {
         },
       ],
     },
-    { name: "summary", type: "textarea", required: true },
+    {
+      name: "scaleNote",
+      type: "text",
+      admin: {
+        description: "Non-financial scale note (e.g. site size, count). Never a monetary value.",
+      },
+    },
+    {
+      name: "clientPublic",
+      type: "checkbox",
+      defaultValue: false,
+      admin: {
+        position: "sidebar",
+        description: "Off = client stays anonymous on the site until the MD approves naming.",
+      },
+    },
+    // Optional — Hermes writes the narrative; imported drafts leave it blank.
+    { name: "summary", type: "textarea" },
     {
       type: "collapsible",
       label: "Challenge → Solution → Outcome",
@@ -70,6 +97,40 @@ export const Projects: CollectionConfig = {
       fields: [{ name: "image", type: "upload", relationTo: "media", required: true }],
     },
     { name: "client", type: "relationship", relationTo: "clients" },
+    {
+      type: "collapsible",
+      label: "Import metadata (Hermes)",
+      admin: {
+        initCollapsed: true,
+        description: "Set by the project importer. Helps de-duplicate and flags review TODOs.",
+      },
+      fields: [
+        {
+          name: "importKey",
+          type: "text",
+          index: true,
+          admin: { readOnly: true, description: "Opaque, stable de-dup key from the source." },
+        },
+        {
+          name: "importSource",
+          type: "text",
+          admin: {
+            readOnly: true,
+            description: "Which adapter produced this draft (excel / erp).",
+          },
+        },
+        {
+          name: "needsSectorReview",
+          type: "checkbox",
+          admin: { description: "Sector was not in the source — assign it before publishing." },
+        },
+        {
+          name: "importNotes",
+          type: "textarea",
+          admin: { description: "Source service lines, proposed new service, and review TODOs." },
+        },
+      ],
+    },
     seoField,
   ],
 };

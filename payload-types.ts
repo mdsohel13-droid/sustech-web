@@ -553,15 +553,30 @@ export interface Project {
    * The URL path segment. Auto-filled from the title — edit only if you must.
    */
   slug: string;
+  /**
+   * Imported drafts leave this blank — assign on review.
+   */
   sector?: (number | null) | Sector;
   year?: number | null;
   featured?: boolean | null;
+  /**
+   * Service lines delivered on this project.
+   */
+  services?: (number | Service)[] | null;
   location?: string | null;
   /**
    * e.g. 2.5 MWp, 1× 2500 kVA substation.
    */
   capacity?: string | null;
-  summary: string;
+  /**
+   * Non-financial scale note (e.g. site size, count). Never a monetary value.
+   */
+  scaleNote?: string | null;
+  /**
+   * Off = client stays anonymous on the site until the MD approves naming.
+   */
+  clientPublic?: boolean | null;
+  summary?: string | null;
   challenge?: {
     root: {
       type: string;
@@ -614,6 +629,22 @@ export interface Project {
       }[]
     | null;
   client?: (number | null) | Client;
+  /**
+   * Opaque, stable de-dup key from the source.
+   */
+  importKey?: string | null;
+  /**
+   * Which adapter produced this draft (excel / erp).
+   */
+  importSource?: string | null;
+  /**
+   * Sector was not in the source — assign it before publishing.
+   */
+  needsSectorReview?: boolean | null;
+  /**
+   * Source service lines, proposed new service, and review TODOs.
+   */
+  importNotes?: string | null;
   /**
    * Search & social. Leave blank to use the site defaults.
    */
@@ -1388,8 +1419,11 @@ export interface ProjectsSelect<T extends boolean = true> {
   sector?: T;
   year?: T;
   featured?: T;
+  services?: T;
   location?: T;
   capacity?: T;
+  scaleNote?: T;
+  clientPublic?: T;
   summary?: T;
   challenge?: T;
   solution?: T;
@@ -1401,6 +1435,10 @@ export interface ProjectsSelect<T extends boolean = true> {
         id?: T;
       };
   client?: T;
+  importKey?: T;
+  importSource?: T;
+  needsSectorReview?: T;
+  importNotes?: T;
   seo?:
     | T
     | {

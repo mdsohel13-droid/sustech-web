@@ -54,6 +54,6 @@ next-env.d.ts
 # CMS uploaded media (user content, not source)
 /media/
 
-# Sensitive source data (project-import workbook, ERP dumps). Docs in data/ are tracked.
+# Sensitive source data (project-import workbook, ERP dumps, crosswalk). Docs in data/ are tracked.
 /data/*
 !/data/*.md

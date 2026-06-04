@@ -1,0 +1,25 @@
+# Auto-detect text files and normalize to LF in the repo
+* text=auto
+
+# Explicit text types
+*.css     text
+*.csv     text
+*.env     text
+*.example text
+*.gitignore text
+*.json    text
+*.md      text
+*.mjs     text
+*.prettierrc text
+*.prettierignore text
+*.sh      text eol=lf
+*.ts      text
+*.tsx     text
+*.yaml    text
+*.yml     text
+
+# Binary files — never diff or touch line endings
+*.ico        binary
+*.woff2      binary
+*.xlsx       binary
+tsconfig.tsbuildinfo binary

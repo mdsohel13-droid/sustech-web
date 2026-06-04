@@ -1,0 +1,46 @@
+# Normalize line endings: LF in the repository AND in working trees (stops the cosmetic
+# CRLF churn on Windows checkouts). Binary files are never touched.
+
+* text=auto eol=lf
+
+# Code & text — always LF
+*.ts             text eol=lf
+*.tsx            text eol=lf
+*.js             text eol=lf
+*.cjs            text eol=lf
+*.mjs            text eol=lf
+*.json           text eol=lf
+*.jsonc          text eol=lf
+*.css            text eol=lf
+*.scss           text eol=lf
+*.md             text eol=lf
+*.mdx            text eol=lf
+*.yml            text eol=lf
+*.yaml           text eol=lf
+*.html           text eol=lf
+*.svg            text eol=lf
+*.csv            text eol=lf
+*.sh             text eol=lf
+.gitignore       text eol=lf
+.gitattributes   text eol=lf
+.prettierrc      text eol=lf
+.prettierignore  text eol=lf
+.env.example     text eol=lf
+pnpm-lock.yaml   text eol=lf
+
+# Binary — never normalize or diff
+*.woff2  binary
+*.woff   binary
+*.ttf    binary
+*.otf    binary
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.webp   binary
+*.avif   binary
+*.ico    binary
+*.pdf    binary
+*.zip    binary
+*.xlsx   binary
+*.xls    binary

@@ -67,6 +67,14 @@ const SERVICES = [
     summary:
       "PLC automation, industrial lighting and intelligent controls that make your facility efficient and observable.",
   },
+  {
+    slug: "testing-inspection-consultancy",
+    title: "Testing, Inspection & Consultancy",
+    icon: "testing" as const,
+    order: 5,
+    summary:
+      "Insulation and earth-resistance (IR/ER) testing, thermography, electrical audits and safety inspection that keep your facility compliant, reliable and safe.",
+  },
 ];
 
 const SECTORS = [
@@ -158,7 +166,7 @@ async function main(): Promise<void> {
       tagline: "Single-point EPC for industrial power, solar and safety.",
       description:
         "Single-point EPC for commercial and industrial clients in Bangladesh: solar plants, " +
-        "substations, lightning protection and smart electrical systems, engineered to IEC, BNBC and NFPA standards.",
+        "substations, lightning protection, smart systems and electrical testing, engineered to IEC, BNBC and NFPA standards.",
       foundingYear: 2017,
       areaServed: "Bangladesh",
       // Contact details are intentionally left blank until confirmed (no invented values).
@@ -167,7 +175,7 @@ async function main(): Promise<void> {
       titleTemplate: "%s · Sustech Technology Ltd",
       defaultDescription:
         "Single-point EPC for commercial and industrial clients in Bangladesh: solar plants, " +
-        "substations, lightning protection and smart electrical systems, engineered to IEC, BNBC and NFPA standards.",
+        "substations, lightning protection, smart systems and electrical testing, engineered to IEC, BNBC and NFPA standards.",
     },
   });
 
@@ -240,21 +248,21 @@ async function main(): Promise<void> {
     {
       blockType: "statsCounters",
       appearance: "muted",
-      intro: "Proven across Bangladesh's industrial sector.",
-      // Values are ERP-sourced; left blank → honest skeleton, never invented.
+      intro: "Proven across Bangladesh's industrial sector since 2017.",
+      // Candidate figures from the 2017–2026 client/pipeline data — placeholders the admin/
+      // Hermes confirms before launch (editable in the CMS; not hardcoded as final).
       stats: [
-        { label: "Projects delivered" },
-        { label: "kWp solar installed" },
-        { label: "Substations commissioned" },
-        { label: "Years in operation" },
-        { label: "Industrial clients served" },
+        { value: 9, label: "Years of engineering" },
+        { value: 50, suffix: "+", label: "Clients served" },
+        { value: 95, suffix: "+", label: "Projects delivered" },
+        { value: 13, label: "Service lines" },
       ],
     },
     {
       blockType: "servicesGrid",
       source: "auto",
       heading: "End-to-end engineering, under one roof.",
-      lede: "Four capabilities that cover an industrial facility's power and safety from design to commissioning.",
+      lede: "Five capabilities that cover an industrial facility's power, safety and compliance from design to commissioning.",
     },
     {
       blockType: "sectorTiles",
@@ -365,7 +373,7 @@ async function main(): Promise<void> {
       title: "Sustech Technology Ltd — Industrial Solar, Electrical EPC & Safety Engineering",
       description:
         "Single-point EPC for commercial and industrial clients in Bangladesh: solar plants, " +
-        "substations, lightning protection and smart electrical systems, engineered to IEC, BNBC and NFPA standards.",
+        "substations, lightning protection, smart systems and electrical testing, engineered to IEC, BNBC and NFPA standards.",
     },
   };
   if (existingHome.docs.length > 0) {

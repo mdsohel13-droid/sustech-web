@@ -1,4 +1,14 @@
-import { Anchor, Building2, Cpu, Factory, PlugZap, ShieldCheck, Sun, Zap } from "lucide-react";
+import {
+  Anchor,
+  Building2,
+  ClipboardCheck,
+  Cpu,
+  Factory,
+  PlugZap,
+  ShieldCheck,
+  Sun,
+  Zap,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { SectorIconKey, ServiceIconKey } from "@/lib/home-content";
 
@@ -7,6 +17,7 @@ export const serviceIcons: Record<ServiceIconKey, LucideIcon> = {
   electrical: Zap,
   grounding: ShieldCheck,
   smart: Cpu,
+  testing: ClipboardCheck,
 };
 
 export const sectorIcons: Record<SectorIconKey, LucideIcon> = {

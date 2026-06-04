@@ -35,6 +35,7 @@ export const Services: CollectionConfig = {
             { label: "Electrical", value: "electrical" },
             { label: "Grounding / LPS", value: "grounding" },
             { label: "Smart systems", value: "smart" },
+            { label: "Testing / Inspection", value: "testing" },
           ],
           admin: { width: "50%" },
         },

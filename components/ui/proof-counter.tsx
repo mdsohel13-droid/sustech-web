@@ -8,11 +8,13 @@ interface ProofCounterProps {
   /** null until the real ERP figure is wired (renders a skeleton, never a fake number). */
   value: number | null;
   label: string;
+  /** Optional unit/suffix shown after the figure, e.g. "+" or "MWp". */
+  suffix?: string;
   className?: string;
 }
 
 /** Large mono figure that counts up to its value when scrolled into view. */
-export function ProofCounter({ value, label, className }: ProofCounterProps) {
+export function ProofCounter({ value, label, suffix, className }: ProofCounterProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [display, setDisplay] = useState(0);
   const started = useRef(false);
@@ -56,7 +58,10 @@ export function ProofCounter({ value, label, className }: ProofCounterProps) {
         {value === null ? (
           <Skeleton className="mx-auto h-10 w-28 md:h-12" />
         ) : (
-          <span>{display.toLocaleString("en-US")}</span>
+          <span>
+            {display.toLocaleString("en-US")}
+            {suffix ? <span>{suffix}</span> : null}
+          </span>
         )}
       </div>
       <p className="text-text-soft mt-2 text-sm">{label}</p>

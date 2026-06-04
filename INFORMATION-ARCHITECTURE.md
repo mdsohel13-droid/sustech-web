@@ -8,7 +8,7 @@ Sitemap, navigation, and per-page wireframe with content slots and schema. Build
 `Logo` · Solutions ▾ · Services ▾ · Projects · Capabilities · Knowledge · About · **[Request a Consultation]** (solar CTA) · (Client Login — later phase)
 
 - **Solutions ▾** (by sector — buyer self-selects): Manufacturing & RMG/Textile · Power & Utilities · Commercial Real Estate · Ports & Heavy Industry
-- **Services ▾** (by capability): Solar & Energy · Electrical EPC · Grounding & Lightning Protection · Smart Systems
+- **Services ▾** (by capability): Solar & Energy · Electrical EPC · Grounding & Lightning Protection · Smart Systems · Testing, Inspection & Consultancy
 
 **Footer:** company blurb + real address/phone/email/hours · Solutions · Services · Projects · Knowledge · About · Contact · Privacy · social. (No dead `javascript:void(0)` links — every link resolves.)
 
@@ -17,7 +17,7 @@ Sitemap, navigation, and per-page wireframe with content slots and schema. Build
 ```
 /                         Home
 /solutions/[sector]       4 sector pages
-/services/[service]       4 service pages
+/services/[service]       5 service pages
 /projects                 Portfolio index
 /projects/[slug]          Case study [CMS]
 /capabilities             Capabilities & compliance
@@ -35,8 +35,8 @@ Sitemap, navigation, and per-page wireframe with content slots and schema. Build
 The 50-millisecond credibility test. Sections top→bottom:
 
 1. **Hero** [static + CMS hero data] — dark band. Eyebrow ("EPC ENGINEERING · SINCE 2017"), `h1` one-line value prop ("Single-point EPC for industrial power, solar & safety — engineered to IEC, BNBC & NFPA"), supporting line, **primary CTA [Request a Consultation]** + secondary [See Projects]. Background: subtle gradient-mesh + fine engineering grid. Real project still or short muted video. Staggered load reveal.
-2. **Proof bar** [CMS] — animated real counters: projects, total kWp installed, substations commissioned, years, clients. (No "0+".)
-3. **What we do** [static] — 4 service cards (the four lines) with icon, one-line outcome, link.
+2. **Proof bar** [CMS] — four animated real counters: years of engineering, clients served, projects delivered, service lines. (No "0+"; the earlier kWp-installed and substations-commissioned stats are removed — not in the source data.)
+3. **What we do** [static] — 5 service cards (the five lines) with icon, one-line outcome, link.
 4. **Solutions by sector** [static] — 4 sector tiles; visitor self-identifies.
 5. **Featured projects** [CMS] — 3 case-study cards (sector-adaptive if personalization on).
 6. **Why Sustech / differentiators** [static] — "what competitors can't say": in-house engineering, standards-compliant design, NEBOSH-certified safety, after-sales/AMC. Each a concise claim + proof.
@@ -64,7 +64,7 @@ Schema: `Service`/`WebPage` + `BreadcrumbList` + `FAQPage`.
 
 ## 5. Service pages (`/services/[service]`)
 
-For each of the 4 lines (Solar & Energy, Electrical EPC, Grounding & LPS, Smart Systems):
+For each of the 5 lines (Solar & Energy, Electrical EPC, Grounding & LPS, Smart Systems, and Testing, Inspection & Consultancy at `/services/testing-inspection-consultancy`):
 1. Hero — service value prop.
 2. **Scope of work** — what's included (bulleted, scannable).
 3. **Standards & methodology** — IEC/BNBC/NFPA references; your SOP-based approach. (Authority + GEO gold.)
@@ -132,7 +132,7 @@ Schema: `ContactPage`. No public form posting to third parties; server-action on
 ## 12. Build order (pages)
 
 1. Layout shell (header/nav/footer) + design system + home.
-2. Service pages (4) → Sector pages (4).
+2. Service pages (5) → Sector pages (4).
 3. Projects index + case-study template.
 4. Capabilities + About + Contact/RFQ.
 5. Knowledge hub.

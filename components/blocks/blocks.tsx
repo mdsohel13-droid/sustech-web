@@ -134,10 +134,10 @@ export function StatsCountersView({ block }: { block: StatsCountersBlock }) {
           {block.intro}
         </p>
       )}
-      <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-4 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-4">
         {(block.stats ?? []).map((s, i) => (
           <Reveal key={s.id ?? i} delay={i * 0.06}>
-            <ProofCounter value={s.value ?? null} label={s.label} />
+            <ProofCounter value={s.value ?? null} label={s.label} suffix={s.suffix ?? undefined} />
           </Reveal>
         ))}
       </div>
@@ -168,7 +168,7 @@ export async function ServicesGridView({
       title={block.heading ?? undefined}
       lede={block.lede ?? undefined}
     >
-      <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {services.map((svc, i) => {
           const Icon = serviceIcons[svc.icon] ?? serviceIcons.solar;
           return (

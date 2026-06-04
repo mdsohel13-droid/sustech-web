@@ -82,11 +82,22 @@ const StatsCounters: Block = {
       labels: { singular: "Stat", plural: "Stats" },
       fields: [
         {
-          name: "value",
-          type: "number",
-          admin: {
-            description: "Leave blank until the real figure is confirmed (shows a skeleton).",
-          },
+          type: "row",
+          fields: [
+            {
+              name: "value",
+              type: "number",
+              admin: {
+                width: "66%",
+                description: "Leave blank until the real figure is confirmed (shows a skeleton).",
+              },
+            },
+            {
+              name: "suffix",
+              type: "text",
+              admin: { width: "34%", description: 'Optional, e.g. "+" or "MWp".' },
+            },
+          ],
         },
         { name: "label", type: "text", required: true },
       ],

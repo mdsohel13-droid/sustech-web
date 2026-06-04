@@ -7,7 +7,7 @@
 
 import { primaryCta } from "@/lib/navigation";
 
-export type ServiceIconKey = "solar" | "electrical" | "grounding" | "smart";
+export type ServiceIconKey = "solar" | "electrical" | "grounding" | "smart" | "testing";
 export type SectorIconKey = "manufacturing" | "power" | "commercial" | "ports";
 
 export interface ProofStat {

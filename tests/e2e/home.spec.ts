@@ -28,6 +28,27 @@ test.describe("CMS-driven site", () => {
     await expect(header.getByRole("link", { name: "Power & Utilities" })).toBeVisible();
   });
 
+  test("the 5th service appears in the Services menu and as a What-we-do card", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    const header = page.getByRole("banner");
+    await header.getByRole("button", { name: "Services" }).click();
+    await expect(
+      header.getByRole("link", { name: "Testing, Inspection & Consultancy" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { level: 3, name: "Testing, Inspection & Consultancy" }),
+    ).toBeVisible();
+  });
+
+  test("the proof bar shows the revised four stats", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByText("Years of engineering")).toBeVisible();
+    await expect(page.getByText("Service lines")).toBeVisible();
+    await expect(page.getByText("kWp solar installed")).toHaveCount(0);
+  });
+
   test("an unpublished (draft) page returns 404 publicly", async ({ page }) => {
     const res = await page.goto("/contact");
     expect(res?.status()).toBe(404);

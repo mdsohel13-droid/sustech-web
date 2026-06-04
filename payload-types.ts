@@ -339,6 +339,10 @@ export interface StatsCountersBlock {
          * Leave blank until the real figure is confirmed (shows a skeleton).
          */
         value?: number | null;
+        /**
+         * Optional, e.g. "+" or "MWp".
+         */
+        suffix?: string | null;
         label: string;
         id?: string | null;
       }[]
@@ -372,7 +376,7 @@ export interface Service {
    * The URL path segment. Auto-filled from the title — edit only if you must.
    */
   slug: string;
-  icon: 'solar' | 'electrical' | 'grounding' | 'smart';
+  icon: 'solar' | 'electrical' | 'grounding' | 'smart' | 'testing';
   order?: number | null;
   /**
    * One-line outcome shown on cards and grids.
@@ -1197,6 +1201,7 @@ export interface StatsCountersBlockSelect<T extends boolean = true> {
     | T
     | {
         value?: T;
+        suffix?: T;
         label?: T;
         id?: T;
       };

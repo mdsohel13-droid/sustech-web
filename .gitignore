@@ -50,3 +50,6 @@ next-env.d.ts
 /lhr-*.json
 /lhr-*.html
 *.log
+
+# CMS uploaded media (user content, not source)
+/media/

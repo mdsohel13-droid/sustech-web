@@ -1,23 +1,19 @@
-# Homepage Copy — Sustech Technology Ltd
+# Homepage Copy — Sustech Technology Ltd  (v2 — 5 services + revised proof bar)
 
 Real, build-ready copy for every home section (matches INFORMATION-ARCHITECTURE.md §3).
 Tone: premium, confident, technical, outcome-led — for corporate, commercial & industrial buyers.
 
-> **Markers:**
-> `{{...}}` = real data that MUST come from the ERP (via Hermes) or be confirmed by the MD. **Do not invent.**
-> `[CMS]` = section populated from the CMS (projects, logos, testimonials).
-> Everything else is final copy.
+> **Markers:** `{{...}}` = real data (confirm via Hermes/ERP — do not invent). `[CMS]` = from a collection.
+> **Changes in v2:** added a 5th service card (Testing, Inspection & Consultancy); proof bar now
+> uses four stats the data supports (kWp + substation counts removed — not in source data).
 
 ---
 
 ## 1. Hero (dark band)
 
 **Eyebrow:** EPC ENGINEERING · SINCE 2017
-
 **H1:** Single-point EPC for industrial power, solar and safety.
-
 **Subhead:** Sustech designs, builds and commissions solar plants, substations, lightning protection and smart electrical systems for commercial and industrial clients — engineered to IEC, BNBC and NFPA standards, and delivered by one accountable team.
-
 **Primary CTA:** Request a Consultation
 **Secondary CTA:** See Our Projects
 
@@ -25,29 +21,32 @@ Tone: premium, confident, technical, outcome-led — for corporate, commercial &
 
 ## 2. Proof bar (animated counters)
 
-Intro (optional, small): Proven across Bangladesh's industrial sector.
+Intro (optional, small): Proven across Bangladesh's industrial sector since 2017.
 
 | Counter | Value | Label |
 |---|---|---|
-| 1 | `{{projects_delivered}}` | Projects delivered |
-| 2 | `{{solar_capacity_kwp}}` | kWp solar installed |
-| 3 | `{{substations_commissioned}}` | Substations commissioned |
-| 4 | `{{years_operating}}` | Years in operation |
-| 5 | `{{clients_served}}` | Industrial clients served |
+| 1 | `{{years_operating}}` (candidate: 9) | Years of engineering |
+| 2 | `{{clients_served}}` (candidate: 50+) | Clients served |
+| 3 | `{{projects_delivered}}` (candidate: 95+) | Projects delivered |
+| 4 | `{{service_lines}}` (candidate: 13) | Service lines |
 
-> These five numbers are the credibility spine of the page — pull the real figures from the ERP via Hermes before launch. No "0+", no estimates.
+> Candidates are derived from the 2017–2026 client/pipeline data (won/billed clients, won work
+> orders, distinct service lines). Hermes proposes the exact figures; the MD confirms before
+> launch. No "0+", no estimates. (The earlier kWp and substation stats are removed — those
+> numbers aren't in the source data; these four are all verifiable.)
 
 ---
 
-## 3. What we do (4 service cards)
+## 3. What we do (5 service cards)
 
 **Section heading:** End-to-end engineering, under one roof.
-**Lede:** Four capabilities that cover an industrial facility's power and safety from design to commissioning.
+**Lede:** Five capabilities that cover an industrial facility's power, safety and compliance from design to commissioning.
 
 1. **Solar & Energy** — Grid-tied, hybrid and rooftop solar, plus energy audits that cut your power bill and carbon.
 2. **Electrical EPC** — Substations, panel boards and power distribution, engineered, built and commissioned to code.
 3. **Grounding & Lightning Protection** — IEC/NFPA-compliant earthing and lightning protection that safeguards people, plant and uptime.
 4. **Smart Systems** — PLC automation, industrial lighting and intelligent controls that make your facility efficient and observable.
+5. **Testing, Inspection & Consultancy** — Insulation and earth-resistance (IR/ER) testing, thermography, electrical audits and safety inspection that keep your facility compliant, reliable and safe.
 
 (Each card links to its service page.)
 
@@ -84,7 +83,7 @@ Intro (optional, small): Proven across Bangladesh's industrial sector.
 - **One accountable team.** Single-point responsibility from design through procurement, construction and commissioning — no finger-pointing between vendors.
 - **Support that lasts.** After-sales service and AMC keep your systems performing for their full design life.
 
-> Replace `{{safety_credentials_confirm}}` with your real, verifiable safety certifications/qualifications (e.g., named standards or personnel credentials). Don't claim a certification you can't evidence.
+> Replace `{{safety_credentials_confirm}}` with your real, verifiable safety credentials. Don't claim a certification you can't evidence.
 
 ---
 
@@ -133,5 +132,5 @@ Intro (optional, small): Proven across Bangladesh's industrial sector.
 ## Metadata (for the home route)
 
 - **Title:** Sustech Technology Ltd — Industrial Solar, Electrical EPC & Safety Engineering
-- **Description:** Single-point EPC for commercial and industrial clients in Bangladesh: solar plants, substations, lightning protection and smart electrical systems, engineered to IEC, BNBC and NFPA standards.
+- **Description:** Single-point EPC for commercial and industrial clients in Bangladesh: solar plants, substations, lightning protection, smart systems and electrical testing — engineered to IEC, BNBC and NFPA standards.
 - **OG image:** branded hero (1200×630).

@@ -3,19 +3,23 @@
 import { ChevronDown, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
+import { Logo } from "@/components/layout/logo";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
-import { Logo } from "@/components/layout/logo";
-import { mainNav, primaryCta, type NavGroup } from "@/lib/navigation";
+import type { NavItem, NavLeaf } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 
-export function Header() {
+interface HeaderProps {
+  items: NavItem[];
+  cta: NavLeaf | null;
+}
+
+export function Header({ items, cta }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
 
-  // Condense on scroll.
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
     onScroll();
@@ -23,7 +27,6 @@ export function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Escape closes any open menu; outside-click closes desktop dropdowns.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -60,10 +63,9 @@ export function Header() {
           <Logo />
         </div>
 
-        {/* Desktop nav */}
         <nav aria-label="Primary" className="hidden items-center gap-1 lg:flex">
-          {mainNav.map((item) =>
-            item.children ? (
+          {items.map((item) =>
+            item.children?.length ? (
               <DesktopDropdown
                 key={item.label}
                 item={item}
@@ -75,6 +77,7 @@ export function Header() {
               <Link
                 key={item.label}
                 href={item.href ?? "#"}
+                prefetch={false}
                 className="text-text-soft hover:text-ink-900 focus-visible:outline-brand rounded-md px-3 py-2 text-[0.9375rem] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
               >
                 {item.label}
@@ -84,9 +87,13 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Button asChild size="default" className="hidden sm:inline-flex">
-            <Link href={primaryCta.href}>{primaryCta.label}</Link>
-          </Button>
+          {cta && (
+            <Button asChild className="hidden sm:inline-flex">
+              <Link href={cta.href} prefetch={false}>
+                {cta.label}
+              </Link>
+            </Button>
+          )}
           <button
             type="button"
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
@@ -100,7 +107,7 @@ export function Header() {
         </div>
       </Container>
 
-      {mobileOpen && <MobileMenu onNavigate={() => setMobileOpen(false)} />}
+      {mobileOpen && <MobileMenu items={items} cta={cta} onNavigate={() => setMobileOpen(false)} />}
     </header>
   );
 }
@@ -111,7 +118,7 @@ function DesktopDropdown({
   onToggle,
   onClose,
 }: {
-  item: NavGroup;
+  item: NavItem;
   open: boolean;
   onToggle: () => void;
   onClose: () => void;
@@ -143,9 +150,10 @@ function DesktopDropdown({
         >
           <ul className="grid gap-1">
             {item.children?.map((leaf) => (
-              <li key={leaf.href}>
+              <li key={leaf.href + leaf.label}>
                 <Link
                   href={leaf.href}
+                  prefetch={false}
                   onClick={onClose}
                   className="hover:bg-surface-2 focus-visible:outline-brand block rounded-md p-3 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
                 >
@@ -165,20 +173,30 @@ function DesktopDropdown({
   );
 }
 
-function MobileMenu({ onNavigate }: { onNavigate: () => void }) {
+function MobileMenu({
+  items,
+  cta,
+  onNavigate,
+}: {
+  items: NavItem[];
+  cta: NavLeaf | null;
+  onNavigate: () => void;
+}) {
   const [openSection, setOpenSection] = useState<string | null>(null);
   return (
     <div id="mobile-menu" className="border-border bg-surface border-t lg:hidden">
       <Container className="py-4">
-        <Button asChild className="mb-4 w-full">
-          <Link href={primaryCta.href} onClick={onNavigate}>
-            {primaryCta.label}
-          </Link>
-        </Button>
+        {cta && (
+          <Button asChild className="mb-4 w-full">
+            <Link href={cta.href} prefetch={false} onClick={onNavigate}>
+              {cta.label}
+            </Link>
+          </Button>
+        )}
         <nav aria-label="Mobile">
           <ul className="grid gap-1">
-            {mainNav.map((item) =>
-              item.children ? (
+            {items.map((item) =>
+              item.children?.length ? (
                 <li key={item.label}>
                   <button
                     type="button"
@@ -200,9 +218,10 @@ function MobileMenu({ onNavigate }: { onNavigate: () => void }) {
                   {openSection === item.label && (
                     <ul className="border-border mb-1 ml-3 grid gap-0.5 border-l pl-3">
                       {item.children.map((leaf) => (
-                        <li key={leaf.href}>
+                        <li key={leaf.href + leaf.label}>
                           <Link
                             href={leaf.href}
+                            prefetch={false}
                             onClick={onNavigate}
                             className="text-text-soft hover:text-ink-900 focus-visible:outline-brand block rounded-md px-3 py-2.5 text-[0.9375rem] focus-visible:outline-2 focus-visible:outline-offset-2"
                           >
@@ -217,6 +236,7 @@ function MobileMenu({ onNavigate }: { onNavigate: () => void }) {
                 <li key={item.label}>
                   <Link
                     href={item.href ?? "#"}
+                    prefetch={false}
                     onClick={onNavigate}
                     className="text-ink-900 hover:bg-surface-2 focus-visible:outline-brand block rounded-md px-3 py-3 text-base font-medium focus-visible:outline-2 focus-visible:outline-offset-2"
                   >

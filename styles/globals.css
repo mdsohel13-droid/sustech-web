@@ -96,6 +96,42 @@ h3 {
   outline-offset: 2px;
 }
 
+/* Rich-text (lexical) output — readable defaults for CMS body content. */
+.richtext {
+  color: var(--color-text);
+  line-height: 1.7;
+}
+.richtext h2 {
+  font-size: var(--text-h2);
+  font-weight: 600;
+  margin-top: 2rem;
+}
+.richtext h3 {
+  font-size: var(--text-h3);
+  font-weight: 600;
+  margin-top: 1.5rem;
+}
+.richtext p {
+  margin-top: 1rem;
+}
+.richtext ul,
+.richtext ol {
+  margin-top: 1rem;
+  padding-left: 1.5rem;
+  list-style: revert;
+}
+.richtext li {
+  margin-top: 0.375rem;
+}
+.richtext a {
+  color: var(--color-brand);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.richtext strong {
+  font-weight: 600;
+}
+
 /* Fine-line "engineering grid" motif — decorative, applied to aria-hidden layers. */
 @utility grid-motif {
   background-image:

@@ -5,6 +5,25 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: sustech
+          POSTGRES_PASSWORD: sustech
+          POSTGRES_DB: sustech_cms
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URI: postgres://sustech:sustech@localhost:5432/sustech_cms
+      PAYLOAD_SECRET: ci-test-secret-not-used-in-production
+      NEXT_PUBLIC_SERVER_URL: http://localhost:4123
+      SITE_INDEXABLE: "false"
+      PREVIEW_SECRET: ci-preview-secret
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -16,6 +35,8 @@ jobs:
       - run: pnpm lint
       - run: pnpm format:check
       - run: pnpm test:unit
+      # Create the schema + seed initial content so the build and e2e have data.
+      - run: pnpm seed
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e
       - run: pnpm build

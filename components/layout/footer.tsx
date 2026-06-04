@@ -1,52 +1,46 @@
 import Link from "next/link";
-import { Container } from "@/components/ui/container";
 import { Logo } from "@/components/layout/logo";
-import { mainNav, primaryCta, sectors, services } from "@/lib/navigation";
-import { site } from "@/lib/site";
+import { Container } from "@/components/ui/container";
+import type { FooterColumn } from "@/lib/nav";
+import type { SiteSetting } from "@/payload-types";
 
-interface FooterColumn {
-  heading: string;
-  links: { label: string; href: string }[];
+interface FooterProps {
+  columns: FooterColumn[];
+  settings: SiteSetting;
 }
 
-const companyLinks = mainNav
-  .filter((item) => item.href)
-  .map((item) => ({ label: item.label, href: item.href as string }));
-
-const columns: FooterColumn[] = [
-  { heading: "Solutions", links: sectors.map((s) => ({ label: s.label, href: s.href })) },
-  { heading: "Services", links: services.map((s) => ({ label: s.label, href: s.href })) },
-  {
-    heading: "Company",
-    links: [...companyLinks, { label: "Contact", href: "/contact" }],
-  },
-];
-
-export function Footer() {
+export function Footer({ columns, settings }: FooterProps) {
   const year = new Date().getFullYear();
+  const phone = settings.phones?.[0]?.number;
 
   return (
     <footer className="bg-ink-950 text-text-invert">
       <Container className="py-16 md:py-20">
-        <div className="grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
+        <div className="grid gap-12 lg:grid-cols-[1.4fr_repeat(3,1fr)]">
           <div className="max-w-sm">
             <Logo onDark />
-            <p className="text-text-invert-soft mt-4 text-sm leading-relaxed">{site.description}</p>
+            {settings.description && (
+              <p className="text-text-invert-soft mt-4 text-sm leading-relaxed">
+                {settings.description}
+              </p>
+            )}
             <p className="text-text-invert-soft mt-4 text-sm">
-              Engineering for industry in {site.areaServed}, since {site.foundingYear}.
+              Engineering for industry in {settings.areaServed ?? "Bangladesh"}, since{" "}
+              {settings.foundingYear ?? 2017}.
             </p>
           </div>
 
-          {columns.map((col) => (
-            <nav key={col.heading} aria-label={col.heading}>
+          {columns.slice(0, 3).map((col) => (
+            <nav key={col.title} aria-label={col.title}>
               <h2 className="text-text-invert-soft font-mono text-xs font-medium tracking-[0.08em] uppercase">
-                {col.heading}
+                {col.title}
               </h2>
               <ul className="mt-4 grid gap-2.5">
                 {col.links.map((link) => (
-                  <li key={link.href}>
+                  <li key={link.href + link.label}>
                     <Link
                       href={link.href}
+                      prefetch={false}
                       className="text-text-invert-soft hover:text-text-invert focus-visible:outline-brand-300 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
                     >
                       {link.label}
@@ -58,37 +52,49 @@ export function Footer() {
           ))}
         </div>
 
-        {/* Contact block — honest pending states until confirmed via Hermes/MD. */}
         <div className="border-border-dark mt-14 flex flex-col gap-6 border-t pt-8 md:flex-row md:items-center md:justify-between">
           <div className="text-text-invert-soft text-sm">
             <span className="text-text-invert font-medium">Get in touch:</span>{" "}
-            {site.contact.phone ? (
-              <a href={`tel:${site.contact.phone}`} className="hover:text-text-invert">
-                {site.contact.phone}
+            {phone ? (
+              <a href={`tel:${phone}`} className="hover:text-text-invert">
+                {phone}
+              </a>
+            ) : settings.email ? (
+              <a href={`mailto:${settings.email}`} className="hover:text-text-invert">
+                {settings.email}
               </a>
             ) : (
               <Link
                 href="/contact"
+                prefetch={false}
                 className="hover:text-text-invert underline-offset-4 hover:underline"
               >
                 Contact details are being finalised — send an enquiry
               </Link>
             )}
           </div>
-          <Link
-            href={primaryCta.href}
-            className="text-brand-300 focus-visible:outline-brand-300 text-sm font-medium underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2"
-          >
-            {primaryCta.label} →
-          </Link>
+          <div className="flex gap-4">
+            {(settings.social ?? []).map((s) => (
+              <a
+                key={s.url}
+                href={s.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-text-invert-soft hover:text-text-invert text-sm"
+              >
+                {s.label}
+              </a>
+            ))}
+          </div>
         </div>
 
         <div className="text-text-invert-soft mt-8 flex flex-col gap-3 text-xs sm:flex-row sm:items-center sm:justify-between">
           <p>
-            © {year} {site.name}. All rights reserved.
+            © {year} {settings.companyName}. All rights reserved.
           </p>
           <Link
             href="/privacy"
+            prefetch={false}
             className="hover:text-text-invert focus-visible:outline-brand-300 focus-visible:outline-2 focus-visible:outline-offset-2"
           >
             Privacy Policy

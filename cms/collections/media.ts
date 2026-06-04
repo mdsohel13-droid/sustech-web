@@ -1,0 +1,51 @@
+import path from "path";
+import { fileURLToPath } from "url";
+import type { CollectionConfig } from "payload";
+import { anyone, isAdminOrEditor, isContentWriter } from "../access";
+
+const dirname = path.dirname(fileURLToPath(import.meta.url));
+
+export const Media: CollectionConfig = {
+  slug: "media",
+  admin: { group: "Content" },
+  access: {
+    read: anyone,
+    create: isContentWriter,
+    update: isContentWriter,
+    delete: isAdminOrEditor,
+  },
+  upload: {
+    staticDir: path.resolve(dirname, "../../media"),
+    mimeTypes: ["image/*"],
+    // Generate resized, optimized WebP variants. Next.js then serves AVIF/WebP on delivery
+    // (next.config images.formats), so the pipeline is modern end-to-end.
+    formatOptions: { format: "webp", options: { quality: 78 } },
+    imageSizes: [
+      {
+        name: "thumbnail",
+        width: 400,
+        formatOptions: { format: "webp", options: { quality: 78 } },
+      },
+      { name: "card", width: 768, formatOptions: { format: "webp", options: { quality: 78 } } },
+      { name: "feature", width: 1200, formatOptions: { format: "webp", options: { quality: 80 } } },
+      {
+        name: "og",
+        width: 1200,
+        height: 630,
+        position: "centre",
+        formatOptions: { format: "webp", options: { quality: 80 } },
+      },
+    ],
+  },
+  fields: [
+    {
+      name: "alt",
+      type: "text",
+      required: true,
+      admin: {
+        description: "Describe the image for screen readers and search engines (required).",
+      },
+    },
+    { name: "caption", type: "text" },
+  ],
+};

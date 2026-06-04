@@ -13,6 +13,8 @@ It must succeed at two things simultaneously:
 
 **The governing principle — design for two readers at once.** Every page is read by a human (who judges in ~50 ms) and a machine (which decides whether to cite us). These never conflict if we keep one discipline: **content lives in server-rendered, semantic HTML.** Never hide meaningful content inside client-only JavaScript, images of text, or login walls. Beauty is layered *on top of* that foundation, never instead of it.
 
+**The second governing principle — the site is fully CMS-driven.** Code is the *engine, the design, and the block types*; the CMS (Payload) owns **all content, navigation, pages, page sections (blocks), media, and SEO text**. Navigation tabs and dropdowns, pages and their URLs, the arrangement of blocks on a page, projects/services/sectors/testimonials/clients/articles, contact details, and images all live in the CMS and are managed by a non-technical admin from `/admin` — never hardcoded. **Adding a page, a menu tab, a block to a page, or any content must never require a code change or a deploy.** Developer work is reserved for new functionality, a brand-new *type* of block, or design-system changes. See `CMS-AND-DYNAMIC-CONTENT.md` for the full model. This principle composes with the first: CMS content is still server-rendered semantic HTML (SSR/ISR), so it stays crawlable and citable.
+
 ## 2. Tech stack (pinned — do not substitute without approval)
 
 - **Framework:** Next.js 16 (App Router) + React 19 + TypeScript (strict)

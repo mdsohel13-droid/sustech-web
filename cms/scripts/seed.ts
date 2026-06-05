@@ -108,6 +108,153 @@ const SECTORS = [
   },
 ];
 
+// Starter detail content for service pages — factual scope + real standards
+// references. Editable in the CMS; the admin/Hermes refines before launch.
+const SERVICE_DETAIL: Record<
+  string,
+  { scope: unknown; standards: unknown; faq: { question: string; answer: string }[] }
+> = {
+  "solar-energy": {
+    scope: doc(
+      para(
+        txt("A single EPC scope. ", true),
+        txt(
+          "Site assessment and energy analysis, system design and engineering, supply of quality components, installation, testing and grid-tie commissioning, then performance monitoring and AMC.",
+        ),
+      ),
+      para(
+        txt(
+          "We engineer grid-tied, hybrid and rooftop systems sized to your load profile and your roof or land constraints.",
+        ),
+      ),
+    ),
+    standards: doc(
+      para(
+        txt(
+          "Photovoltaic systems are engineered to IEC 61215 / 61730 (modules), IEC 62548 (array design) and IEC 60364-7-712 (PV installations), in line with BNBC and national grid-tie requirements.",
+        ),
+      ),
+    ),
+    faq: [
+      {
+        question: "Do you handle grid-tie approval?",
+        answer:
+          "Yes — our scope covers system design, documentation and coordination through to grid-tie commissioning.",
+      },
+      {
+        question: "Rooftop or ground-mount?",
+        answer:
+          "Both. We engineer rooftop, ground-mount and hybrid systems to suit your site and load.",
+      },
+    ],
+  },
+  "electrical-epc": {
+    scope: doc(
+      para(
+        txt("End-to-end electrical EPC. ", true),
+        txt(
+          "Load study and single-line design, substation and LT/HT distribution, panel and busbar engineering, supply and construction, testing and commissioning, and ongoing maintenance.",
+        ),
+      ),
+    ),
+    standards: doc(
+      para(
+        txt(
+          "Installations follow IEC 60364 (low-voltage), IEC 61439 (switchgear assemblies) and IEC 60076 (transformers), the Bangladesh Electricity Rules and BNBC.",
+        ),
+      ),
+    ),
+    faq: [
+      {
+        question: "Do you design and build substations?",
+        answer:
+          "Yes — from load study and single-line diagram through equipment supply, construction and commissioning.",
+      },
+      {
+        question: "Can you work to our existing drawings?",
+        answer: "Yes; we review, validate and engineer to standard, or design from scratch.",
+      },
+    ],
+  },
+  "grounding-lightning-protection": {
+    scope: doc(
+      para(
+        txt("Protection, engineered in. ", true),
+        txt(
+          "Risk assessment, earthing and lightning-protection-system (LPS) design, installation of air termination, down-conductors and earth electrodes, surge protection, and earth-resistance testing with documentation.",
+        ),
+      ),
+    ),
+    standards: doc(
+      para(
+        txt(
+          "Engineered to IEC 62305 (lightning protection), IEC 60364-5-54 (earthing and bonding) and NFPA 780.",
+        ),
+      ),
+    ),
+    faq: [
+      {
+        question: "Do you provide a risk assessment?",
+        answer:
+          "Yes — LPS design starts from an IEC 62305 risk assessment of your structure and contents.",
+      },
+      {
+        question: "Do you test existing earthing?",
+        answer:
+          "Yes; we measure earth resistance and provide a documented report with remediation if needed.",
+      },
+    ],
+  },
+  "smart-systems": {
+    scope: doc(
+      para(
+        txt("Efficient and observable. ", true),
+        txt(
+          "PLC and automation engineering, industrial and intelligent lighting, controls and instrumentation, and integration with monitoring.",
+        ),
+      ),
+    ),
+    standards: doc(
+      para(
+        txt(
+          "Control and automation work follows IEC 61131 (programmable controllers) and relevant IEC installation and EMC standards.",
+        ),
+      ),
+    ),
+    faq: [
+      {
+        question: "Can you retrofit automation to existing plant?",
+        answer:
+          "Yes — we assess the existing system and integrate controls and monitoring with minimal downtime.",
+      },
+    ],
+  },
+  "testing-inspection-consultancy": {
+    scope: doc(
+      para(
+        txt("Compliant, reliable, safe. ", true),
+        txt(
+          "Insulation-resistance (IR) and earth-resistance (ER) testing, thermographic surveys, electrical safety audits and inspection, with documented reports and recommendations.",
+        ),
+      ),
+    ),
+    standards: doc(
+      para(
+        txt(
+          "Verification and testing follow IEC 60364-6 and recognised IEC / IEEE test methods; thermography to standard survey practice.",
+        ),
+      ),
+    ),
+    faq: [
+      {
+        question: "Do you provide documented reports?",
+        answer:
+          "Yes — every test and audit comes with a documented report and prioritised recommendations.",
+      },
+    ],
+  },
+};
+
 const customLink = (label: string, url: string, extra: Record<string, unknown> = {}) => ({
   label,
   type: "custom" as const,
@@ -141,12 +288,18 @@ async function main(): Promise<void> {
 
   // --- Services & Sectors --------------------------------------------------
   for (const s of SERVICES) {
+    const detail = SERVICE_DETAIL[s.slug] ?? {};
     const found = await payload.find({
       collection: "services",
       where: { slug: { equals: s.slug } },
       limit: 1,
     });
-    if (found.docs.length === 0) await payload.create({ collection: "services", data: s });
+    if (found.docs.length === 0) {
+      await payload.create({ collection: "services", data: { ...s, ...detail } });
+    } else {
+      // Backfill detail content (scope / standards / FAQ) without clobbering edits to core fields.
+      await payload.update({ collection: "services", id: found.docs[0]!.id, data: detail });
+    }
   }
   for (const s of SECTORS) {
     const found = await payload.find({

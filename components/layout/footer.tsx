@@ -9,6 +9,16 @@ interface FooterProps {
   settings: SiteSetting;
 }
 
+const CERTIFICATIONS = [
+  "RJSC Registered",
+  "TIN & VAT",
+  "PWD Empanelled",
+  "e-GP Registered",
+  "SREDA Energy Auditor",
+  "BFSCD Fire Safety",
+  "Bureau Veritas Partner",
+];
+
 export function Footer({ columns, settings }: FooterProps) {
   const year = new Date().getFullYear();
   const phone = settings.phones?.[0]?.number;
@@ -52,7 +62,27 @@ export function Footer({ columns, settings }: FooterProps) {
           ))}
         </div>
 
-        <div className="border-border-dark mt-14 flex flex-col gap-6 border-t pt-8 md:flex-row md:items-center md:justify-between">
+        <div className="border-border-dark mt-14 border-t pt-8">
+          <h2 className="text-text-invert-soft font-mono text-xs font-medium tracking-[0.08em] uppercase">
+            Certifications &amp; partnerships
+          </h2>
+          <ul className="mt-4 flex flex-wrap gap-2">
+            {CERTIFICATIONS.map((c) => (
+              <li
+                key={c}
+                className="border-border-dark text-text-invert-soft rounded-full border px-3 py-1 text-xs"
+              >
+                {c}
+              </li>
+            ))}
+          </ul>
+          <p className="text-text-invert-soft mt-3 text-xs">
+            Sole distributor: Atomberg Technologies (Bangladesh) · Authorised partner: Growatt,
+            Hithium, JA Solar, Jinko Solar
+          </p>
+        </div>
+
+        <div className="border-border-dark mt-10 flex flex-col gap-6 border-t pt-8 md:flex-row md:items-center md:justify-between">
           <div className="text-text-invert-soft text-sm">
             <span className="text-text-invert font-medium">Get in touch:</span>{" "}
             {phone ? (

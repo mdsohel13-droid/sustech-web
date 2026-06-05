@@ -172,6 +172,7 @@ export interface Page {
         | ProjectsListBlock
         | ImageGalleryBlock
         | LogoWallBlock
+        | PartnerBarBlock
         | TestimonialsBlock
         | TeamGridBlock
         | StepsBlock
@@ -751,6 +752,27 @@ export interface LogoWallBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PartnerBarBlock".
+ */
+export interface PartnerBarBlock {
+  heading?: string | null;
+  appearance?: ('default' | 'muted' | 'dark') | null;
+  partners?:
+    | {
+        name: string;
+        /**
+         * Optional logo; the name is shown until a logo is added.
+         */
+        logo?: (number | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'partnerBar';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "TestimonialsBlock".
  */
 export interface TestimonialsBlock {
@@ -1266,6 +1288,7 @@ export interface PagesSelect<T extends boolean = true> {
         projectsList?: T | ProjectsListBlockSelect<T>;
         imageGallery?: T | ImageGalleryBlockSelect<T>;
         logoWall?: T | LogoWallBlockSelect<T>;
+        partnerBar?: T | PartnerBarBlockSelect<T>;
         testimonials?: T | TestimonialsBlockSelect<T>;
         teamGrid?: T | TeamGridBlockSelect<T>;
         steps?: T | StepsBlockSelect<T>;
@@ -1406,6 +1429,23 @@ export interface LogoWallBlockSelect<T extends boolean = true> {
   source?: T;
   appearance?: T;
   clients?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PartnerBarBlock_select".
+ */
+export interface PartnerBarBlockSelect<T extends boolean = true> {
+  heading?: T;
+  appearance?: T;
+  partners?:
+    | T
+    | {
+        name?: T;
+        logo?: T;
+        id?: T;
+      };
   id?: T;
   blockName?: T;
 }

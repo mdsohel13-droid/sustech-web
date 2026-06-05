@@ -1007,6 +1007,19 @@ async function main(): Promise<void> {
       ],
     },
     {
+      blockType: "partnerBar",
+      appearance: "muted",
+      heading: "Our global technology partners",
+      partners: [
+        { name: "Atomberg" },
+        { name: "Growatt" },
+        { name: "Hithium" },
+        { name: "JA Solar" },
+        { name: "Jinko Solar" },
+        { name: "Bureau Veritas" },
+      ],
+    },
+    {
       blockType: "statsCounters",
       appearance: "muted",
       intro: "Proven across Bangladesh's industrial sector since 2017.",

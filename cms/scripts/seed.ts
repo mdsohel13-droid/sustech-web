@@ -514,6 +514,83 @@ const TEAM = [
   { name: "RKD Rajib", role: "Engineer", order: 11, bio: ENGINEER_BIO },
 ];
 
+// Brief Part 6 — named showcase projects (clients approved for display). Published.
+interface FeaturedProject {
+  name: string;
+  sectorSlug: string;
+  serviceSlugs: string[];
+  summary: string;
+  capacity?: string;
+  location?: string;
+  year?: number;
+}
+const FEATURED_PROJECTS: FeaturedProject[] = [
+  {
+    name: "WFP Bhashanchar Substation",
+    sectorSlug: "ngo-un",
+    serviceSlugs: ["substation-hv", "bess-storage", "electrical-epc"],
+    summary:
+      "250 kVA + 200 kVA substation, a 110 kW generator and a 16 kWh BESS for a UN humanitarian island facility — UN-grade reliability where the grid is the last resort.",
+    capacity: "250 + 200 kVA · 110 kW gen · 16 kWh BESS",
+    location: "Bhashanchar",
+  },
+  {
+    name: "Commonwealth War Graves Commission — Chittagong Hybrid Solar",
+    sectorSlug: "heritage",
+    serviceSlugs: ["solar-renewable", "bess-storage"],
+    summary:
+      "A heritage-site hybrid solar system with zero visual intrusion, audited by the British Embassy — renewable energy meets irreplaceable history.",
+    location: "Chittagong",
+  },
+  {
+    name: "Eastport Cumilla — 100 kWp On-Grid Solar EPC",
+    sectorSlug: "industrial-chemical",
+    serviceSlugs: ["solar-renewable", "electrical-epc"],
+    summary:
+      "100 kWp on-grid solar EPC with Growatt inverters and JA Solar panels — full EPC from design to commissioning, from drawing to kWh.",
+    capacity: "100 kWp",
+    location: "Cumilla",
+  },
+  {
+    name: "Syngenta Bangladesh — Multi-Line Account",
+    sectorSlug: "industrial-chemical",
+    serviceSlugs: ["substation-hv", "inspection-testing", "lps-earthing", "lighting-distribution"],
+    summary:
+      "Substation renovation, transformer testing, DIFE compliance, thermography and flood lighting — 18 jobs over five years for a long-term industrial account.",
+    location: "Bangladesh",
+  },
+  {
+    name: "Vanguard Dress / BSA Group — Turnkey Factory",
+    sectorSlug: "garments-rmg",
+    serviceSlugs: ["electrical-epc", "substation-hv", "solar-renewable"],
+    summary:
+      "Full factory wiring, a new substation and rooftop solar — delivered turnkey, complete from first conduit to final lux reading.",
+  },
+  {
+    name: "CUET Rooftop Solar",
+    sectorSlug: "academic",
+    serviceSlugs: ["solar-renewable"],
+    summary: "University rooftop solar for Sustech's oldest institutional client (since 2021).",
+    location: "Chattogram",
+    year: 2025,
+  },
+  {
+    name: "WFP Cox's Bazar — Substation & Generator",
+    sectorSlug: "ngo-un",
+    serviceSlugs: ["substation-hv", "electrical-epc"],
+    summary: "A substation and generator for a humanitarian deployment with challenging logistics.",
+    location: "Cox's Bazar",
+  },
+  {
+    name: "United Group HQ Dhaka — Transformer Servicing",
+    sectorSlug: "commercial",
+    serviceSlugs: ["substation-hv", "inspection-testing"],
+    summary: "1600 kVA and 2000 kVA transformer oil centrifuging for a commercial HQ.",
+    capacity: "1600 + 2000 kVA",
+    location: "Dhaka",
+  },
+];
+
 const customLink = (label: string, url: string, extra: Record<string, unknown> = {}) => ({
   label,
   type: "custom" as const,
@@ -596,6 +673,43 @@ async function main(): Promise<void> {
   for (const d of allSectorDocs.docs) {
     if (!keepSectorSlugs.has(d.slug)) {
       await payload.delete({ collection: "sectors", id: d.id });
+    }
+  }
+
+  // --- Featured projects (Brief Part 6) — published showcase work -----------
+  const sectorIdBySlug = new Map<string, number>(
+    allSectorDocs.docs
+      .filter((d) => keepSectorSlugs.has(d.slug))
+      .map((d) => [d.slug, d.id as number]),
+  );
+  for (const p of FEATURED_PROJECTS) {
+    const sectorId = sectorIdBySlug.get(p.sectorSlug);
+    const serviceIds = p.serviceSlugs
+      .map((sl) => serviceIdBySlug.get(sl))
+      .filter((id): id is number => typeof id === "number");
+    const data = {
+      name: p.name,
+      summary: p.summary,
+      sector: sectorId,
+      services: serviceIds,
+      location: p.location,
+      capacity: p.capacity,
+      year: p.year,
+      featured: true,
+      clientPublic: true,
+      _status: "published" as const,
+    };
+    const found = await payload.find({
+      collection: "projects",
+      where: { name: { equals: p.name } },
+      draft: true,
+      limit: 1,
+      overrideAccess: true,
+    });
+    if (found.docs.length === 0) {
+      await payload.create({ collection: "projects", data });
+    } else {
+      await payload.update({ collection: "projects", id: found.docs[0]!.id, data });
     }
   }
 

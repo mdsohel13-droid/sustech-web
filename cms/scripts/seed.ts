@@ -416,19 +416,33 @@ async function main(): Promise<void> {
     data: {
       companyName: "Sustech Technology Ltd",
       shortName: "Sustech",
-      tagline: "Single-point EPC for industrial power, solar and safety.",
+      tagline: "Smart Energy. Strong Engineering. Sustainable Solution.",
       description:
-        "Single-point EPC for commercial and industrial clients in Bangladesh: solar plants, " +
-        "substations, lightning protection, smart systems and electrical testing, engineered to IEC, BNBC and NFPA standards.",
+        "Sustech Technology Ltd is a Chattogram-based integrated engineering and energy company, " +
+        "founded in 2017 — delivering solar & renewable EPC, battery energy storage, electrical & " +
+        "EPC works, lightning protection & earthing, substation & HV works, and inspection, testing " +
+        "& compliance for industrial, government, NGO/UN and commercial clients across Bangladesh.",
       foundingYear: 2017,
       areaServed: "Bangladesh",
-      // Contact details are intentionally left blank until confirmed (no invented values).
+      phones: [{ number: "+880 1867 655 599" }, { number: "+880 1722 002 125" }],
+      email: "info@sustechltd.com",
+      address: {
+        street: "House #98, Road #08, O.R. Nizam Road R/A, GEC, Nasirabad",
+        city: "Chattogram",
+        region: "Chattogram",
+        postalCode: "4000",
+        country: "BD",
+      },
+      geo: { latitude: 22.3709, longitude: 91.8317 },
+      hours: "Sunday–Thursday 9:00 AM–6:00 PM (BST)",
+      social: [{ label: "Facebook", url: "https://www.facebook.com/sustechltd" }],
       defaultTitle:
-        "Sustech Technology Ltd — Industrial Solar, Electrical EPC & Safety Engineering",
+        "Sustech Technology Ltd — Solar EPC, BESS & Electrical Engineering in Chattogram, Bangladesh",
       titleTemplate: "%s · Sustech Technology Ltd",
       defaultDescription:
-        "Single-point EPC for commercial and industrial clients in Bangladesh: solar plants, " +
-        "substations, lightning protection, smart systems and electrical testing, engineered to IEC, BNBC and NFPA standards.",
+        "Integrated engineering & energy company in Chattogram, Bangladesh since 2017 — solar EPC, " +
+        "BESS, substation/HV, lightning protection, electrical EPC and inspection & testing for " +
+        "industrial, government and commercial clients.",
     },
   });
 

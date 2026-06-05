@@ -1889,6 +1889,13 @@ export interface SiteSetting {
    * e.g. Sun–Thu, 9:00–18:00
    */
   hours?: string | null;
+  /**
+   * Map coordinates for LocalBusiness schema.
+   */
+  geo?: {
+    latitude?: number | null;
+    longitude?: number | null;
+  };
   social?:
     | {
         label: string;
@@ -2027,6 +2034,12 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         country?: T;
       };
   hours?: T;
+  geo?:
+    | T
+    | {
+        latitude?: T;
+        longitude?: T;
+      };
   social?:
     | T
     | {

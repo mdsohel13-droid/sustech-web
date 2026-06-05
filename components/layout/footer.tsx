@@ -56,7 +56,7 @@ export function Footer({ columns, settings }: FooterProps) {
           <div className="text-text-invert-soft text-sm">
             <span className="text-text-invert font-medium">Get in touch:</span>{" "}
             {phone ? (
-              <a href={`tel:${phone}`} className="hover:text-text-invert">
+              <a href={`tel:${phone.replace(/\s+/g, "")}`} className="hover:text-text-invert">
                 {phone}
               </a>
             ) : settings.email ? (

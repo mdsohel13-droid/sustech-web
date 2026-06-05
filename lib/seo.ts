@@ -76,6 +76,10 @@ export function siteJsonLd(settings: SiteSetting): Record<string, unknown> {
       addressCountry: a.country || undefined,
     };
   }
+  const geo = settings.geo;
+  if (geo && typeof geo.latitude === "number" && typeof geo.longitude === "number") {
+    lb.geo = { "@type": "GeoCoordinates", latitude: geo.latitude, longitude: geo.longitude };
+  }
 
   const web = {
     "@type": "WebSite",

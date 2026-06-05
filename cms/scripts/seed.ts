@@ -1125,6 +1125,11 @@ async function main(): Promise<void> {
       heading: "In our clients' words.",
     },
     {
+      blockType: "articlesList",
+      heading: "From our knowledge hub.",
+      lede: "Practical engineering guidance for industrial Bangladesh — solar, safety, testing and compliance.",
+    },
+    {
       blockType: "ctaBand",
       heading: "Planning an industrial power, solar or safety project?",
       subhead:

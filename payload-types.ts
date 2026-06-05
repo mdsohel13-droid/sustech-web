@@ -173,6 +173,7 @@ export interface Page {
         | ImageGalleryBlock
         | LogoWallBlock
         | PartnerBarBlock
+        | ArticlesListBlock
         | TestimonialsBlock
         | TeamGridBlock
         | StepsBlock
@@ -773,6 +774,19 @@ export interface PartnerBarBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ArticlesListBlock".
+ */
+export interface ArticlesListBlock {
+  heading?: string | null;
+  lede?: string | null;
+  appearance?: ('default' | 'muted' | 'dark') | null;
+  viewAllLabel?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'articlesList';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "TestimonialsBlock".
  */
 export interface TestimonialsBlock {
@@ -1289,6 +1303,7 @@ export interface PagesSelect<T extends boolean = true> {
         imageGallery?: T | ImageGalleryBlockSelect<T>;
         logoWall?: T | LogoWallBlockSelect<T>;
         partnerBar?: T | PartnerBarBlockSelect<T>;
+        articlesList?: T | ArticlesListBlockSelect<T>;
         testimonials?: T | TestimonialsBlockSelect<T>;
         teamGrid?: T | TeamGridBlockSelect<T>;
         steps?: T | StepsBlockSelect<T>;
@@ -1446,6 +1461,18 @@ export interface PartnerBarBlockSelect<T extends boolean = true> {
         logo?: T;
         id?: T;
       };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ArticlesListBlock_select".
+ */
+export interface ArticlesListBlockSelect<T extends boolean = true> {
+  heading?: T;
+  lede?: T;
+  appearance?: T;
+  viewAllLabel?: T;
   id?: T;
   blockName?: T;
 }

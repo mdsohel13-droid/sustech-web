@@ -48,4 +48,19 @@ test.describe("CMS-driven site", () => {
     const res = await page.goto("/careers");
     expect(res?.status()).toBe(404);
   });
+
+  test("the WhatsApp floating button is present", async ({ page }) => {
+    await page.goto("/");
+    const wa = page.getByRole("link", { name: "Chat with us on WhatsApp" });
+    await expect(wa).toBeVisible();
+    await expect(wa).toHaveAttribute("href", /wa\.me\/8801867655599/);
+  });
+
+  test("the home shows the knowledge preview", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByRole("heading", { name: "From our knowledge hub." })).toBeVisible();
+    // Latest 3 articles — assert the section renders article links (order-independent).
+    await expect(page.getByRole("link", { name: /read article$/ }).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: "Read the knowledge hub" })).toBeVisible();
+  });
 });

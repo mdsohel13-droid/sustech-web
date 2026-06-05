@@ -4,6 +4,7 @@ import "@/styles/globals.css";
 import { cabinet, jetbrains, switzer } from "@/app/fonts";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
+import { WhatsAppFab } from "@/components/layout/whatsapp-fab";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildFooterColumns, buildHeaderNav } from "@/lib/nav";
 import { getNavigation, getSiteSettings } from "@/lib/payload";
@@ -31,6 +32,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
         <JsonLd data={siteJsonLd(settings)} />
         <Header items={items} cta={cta} />
         <main id="main">{children}</main>
+        <WhatsAppFab phone={settings.phones?.[0]?.number} />
         <Footer columns={columns} settings={settings} />
         <noscript>
           <style>{`[data-reveal]{opacity:1 !important;transform:none !important;}`}</style>

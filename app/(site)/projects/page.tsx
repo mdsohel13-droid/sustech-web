@@ -155,7 +155,7 @@ export default async function ProjectsIndexPage({
                   label={`All (${all.length})`}
                 />
                 {sectorFilters.map(([slug, f]) => {
-                  const Icon = sectorIcons[f.icon] ?? sectorIcons.manufacturing;
+                  const Icon = sectorIcons[f.icon] ?? sectorIcons.industrial;
                   return (
                     <FilterChip
                       key={slug}

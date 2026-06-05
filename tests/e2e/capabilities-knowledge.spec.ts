@@ -20,7 +20,7 @@ test.describe("Capabilities page", () => {
     const h1 = page.getByRole("heading", { level: 1 });
     await expect(h1).toHaveCount(1);
     await expect(
-      page.getByRole("heading", { name: "Five service lines, one accountable team." }),
+      page.getByRole("heading", { name: "Ten service lines, one accountable team." }),
     ).toBeVisible();
   });
 });

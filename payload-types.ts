@@ -381,7 +381,17 @@ export interface Service {
    * The URL path segment. Auto-filled from the title — edit only if you must.
    */
   slug: string;
-  icon: 'solar' | 'electrical' | 'grounding' | 'smart' | 'testing';
+  icon:
+    | 'solar'
+    | 'bess'
+    | 'lps'
+    | 'electrical'
+    | 'inspection'
+    | 'substation'
+    | 'fire'
+    | 'lighting'
+    | 'training'
+    | 'consultancy';
   order?: number | null;
   /**
    * One-line outcome shown on cards and grids.
@@ -480,7 +490,17 @@ export interface Sector {
    * The URL path segment. Auto-filled from the title — edit only if you must.
    */
   slug: string;
-  icon: 'manufacturing' | 'power' | 'commercial' | 'ports';
+  icon:
+    | 'garments'
+    | 'government'
+    | 'ngo'
+    | 'industrial'
+    | 'ports'
+    | 'healthcare'
+    | 'academic'
+    | 'food'
+    | 'commercial'
+    | 'heritage';
   order?: number | null;
   summary: string;
   /**

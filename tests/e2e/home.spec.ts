@@ -25,28 +25,23 @@ test.describe("CMS-driven site", () => {
     const trigger = header.getByRole("button", { name: "Solutions" });
     await trigger.click();
     await expect(trigger).toHaveAttribute("aria-expanded", "true");
-    await expect(header.getByRole("link", { name: "Power & Utilities" })).toBeVisible();
+    await expect(header.getByRole("link", { name: "Government & Public Sector" })).toBeVisible();
   });
 
-  test("the 5th service appears in the Services menu and as a What-we-do card", async ({
-    page,
-  }) => {
+  test("the Services menu lists the catalog and renders What-we-do cards", async ({ page }) => {
     await page.goto("/");
     const header = page.getByRole("banner");
     await header.getByRole("button", { name: "Services" }).click();
+    await expect(header.getByRole("link", { name: "Solar & Renewable Energy" })).toBeVisible();
     await expect(
-      header.getByRole("link", { name: "Testing, Inspection & Consultancy" }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("heading", { level: 3, name: "Testing, Inspection & Consultancy" }),
+      page.getByRole("heading", { level: 3, name: "Solar & Renewable Energy" }),
     ).toBeVisible();
   });
 
-  test("the proof bar shows the revised four stats", async ({ page }) => {
+  test("the proof bar shows the real stats", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByText("Years of engineering")).toBeVisible();
-    await expect(page.getByText("Service lines")).toBeVisible();
-    await expect(page.getByText("kWp solar installed")).toHaveCount(0);
+    await expect(page.getByText("Clients served").first()).toBeVisible();
+    await expect(page.getByText("Years in operation").first()).toBeVisible();
   });
 
   test("an unpublished (draft) page returns 404 publicly", async ({ page }) => {

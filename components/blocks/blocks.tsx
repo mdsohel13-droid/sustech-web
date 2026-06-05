@@ -225,7 +225,7 @@ export async function SectorTilesView({
     >
       <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {sectors.map((sec, i) => {
-          const Icon = sectorIcons[sec.icon] ?? sectorIcons.manufacturing;
+          const Icon = sectorIcons[sec.icon] ?? sectorIcons.industrial;
           return (
             <li key={sec.id}>
               <Reveal delay={i * 0.06} className="h-full">

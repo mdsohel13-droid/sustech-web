@@ -36,309 +36,385 @@ const doc = (...children: unknown[]) => ({
 
 const SERVICES = [
   {
-    slug: "solar-energy",
-    title: "Solar & Energy",
+    slug: "solar-renewable",
+    title: "Solar & Renewable Energy",
     icon: "solar" as const,
     order: 1,
     summary:
-      "Grid-tied, hybrid and rooftop solar, plus energy audits that cut your power bill and carbon.",
+      "On-grid, off-grid and hybrid solar EPC from 1 kWp to utility scale — design, supply, install and commission.",
+  },
+  {
+    slug: "bess-storage",
+    title: "BESS & Energy Storage",
+    icon: "bess" as const,
+    order: 2,
+    summary:
+      "Lithium (LFP) battery energy storage from 100 kWh to 1 MWh — load-shifting, backup, peak-shaving and microgrids.",
+  },
+  {
+    slug: "lps-earthing",
+    title: "Lightning Protection & Earthing",
+    icon: "lps" as const,
+    order: 3,
+    summary:
+      "IEC 62305 / NFPA 780 lightning protection, earthing design, installation and re-testing that protect people and plant.",
   },
   {
     slug: "electrical-epc",
-    title: "Electrical EPC",
+    title: "Electrical & EPC Works",
     icon: "electrical" as const,
-    order: 2,
-    summary:
-      "Substations, panel boards and power distribution, engineered, built and commissioned to code.",
-  },
-  {
-    slug: "grounding-lightning-protection",
-    title: "Grounding & Lightning Protection",
-    icon: "grounding" as const,
-    order: 3,
-    summary:
-      "IEC/NFPA-compliant earthing and lightning protection that safeguards people, plant and uptime.",
-  },
-  {
-    slug: "smart-systems",
-    title: "Smart Systems",
-    icon: "smart" as const,
     order: 4,
     summary:
-      "PLC automation, industrial lighting and intelligent controls that make your facility efficient and observable.",
+      "Full MEP and electrical EPC — factory wiring, panels, switchgear and distribution, engineered and built to code.",
   },
   {
-    slug: "testing-inspection-consultancy",
-    title: "Testing, Inspection & Consultancy",
-    icon: "testing" as const,
+    slug: "inspection-testing",
+    title: "Inspection, Testing & Thermography",
+    icon: "inspection" as const,
     order: 5,
     summary:
-      "Insulation and earth-resistance (IR/ER) testing, thermography, electrical audits and safety inspection that keep your facility compliant, reliable and safe.",
+      "IR thermography, insulation and earth-resistance testing, DIFE inspection and third-party audit support.",
+  },
+  {
+    slug: "substation-hv",
+    title: "Substation & HV Works",
+    icon: "substation" as const,
+    order: 6,
+    summary:
+      "Substation design, construction and renovation; transformer testing, oil centrifuging, VCB and HT cable works.",
+  },
+  {
+    slug: "fire-safety",
+    title: "Fire & Safety Systems",
+    icon: "fire" as const,
+    order: 7,
+    summary:
+      "Fire detection and alarm systems, safety compliance and commissioning for industrial facilities.",
+  },
+  {
+    slug: "lighting-distribution",
+    title: "Lighting & Product Supply",
+    icon: "lighting" as const,
+    order: 8,
+    summary:
+      "Energy-efficient industrial lighting and the supply of solar, BLDC fans, LED and electrical products.",
+  },
+  {
+    slug: "training-safety",
+    title: "OH&S Training",
+    icon: "training" as const,
+    order: 9,
+    summary:
+      "Bureau Veritas channel-partner occupational health & safety, electrical safety and LOTO training.",
+  },
+  {
+    slug: "consultancy",
+    title: "Consultancy & Compliance",
+    icon: "consultancy" as const,
+    order: 10,
+    summary:
+      "Energy audits (SREDA), compliance consultancy, e-GP tender support and engineering advisory.",
   },
 ];
 
 const SECTORS = [
   {
-    slug: "manufacturing-rmg-textile",
-    title: "Manufacturing & RMG / Textile",
-    icon: "manufacturing" as const,
+    slug: "garments-rmg",
+    title: "Garments & RMG",
+    icon: "garments" as const,
     order: 1,
-    summary: "Reliable power and safety for high-uptime production floors.",
+    summary:
+      "Reliable power, safety and compliance for high-uptime garments and textile production.",
   },
   {
-    slug: "power-utilities",
-    title: "Power & Utilities",
-    icon: "power" as const,
+    slug: "government",
+    title: "Government & Public Sector",
+    icon: "government" as const,
     order: 2,
-    summary: "Substation and grid-side engineering built to utility standards.",
+    summary:
+      "PWD-empanelled, e-GP-registered engineering for government and public-sector projects.",
   },
   {
-    slug: "commercial-real-estate",
-    title: "Commercial Real Estate",
-    icon: "commercial" as const,
+    slug: "ngo-un",
+    title: "NGO & UN Agencies",
+    icon: "ngo" as const,
     order: 3,
-    summary: "Efficient, compliant electrical and solar systems for commercial buildings.",
+    summary:
+      "UN-grade reliability for humanitarian and development facilities, including off-grid sites.",
   },
   {
-    slug: "ports-heavy-industry",
-    title: "Ports & Heavy Industry",
-    icon: "ports" as const,
+    slug: "industrial-chemical",
+    title: "Industrial & Chemical",
+    icon: "industrial" as const,
     order: 4,
-    summary: "Robust power, protection and automation for demanding environments.",
+    summary:
+      "Robust electrical, substation and safety engineering for industrial and chemical plants.",
+  },
+  {
+    slug: "ports-logistics",
+    title: "Ports & Logistics",
+    icon: "ports" as const,
+    order: 5,
+    summary: "Power, protection and automation for ports, terminals and logistics infrastructure.",
+  },
+  {
+    slug: "healthcare",
+    title: "Healthcare",
+    icon: "healthcare" as const,
+    order: 6,
+    summary:
+      "Compliant, resilient power and safety systems for hospitals and healthcare facilities.",
+  },
+  {
+    slug: "academic",
+    title: "Academic & TVET",
+    icon: "academic" as const,
+    order: 7,
+    summary:
+      "Solar, electrical and safety engineering for universities, schools and TVET institutions.",
+  },
+  {
+    slug: "food-processing",
+    title: "Food Processing",
+    icon: "food" as const,
+    order: 8,
+    summary: "Hygienic, reliable power and controls for food processing and cold-chain facilities.",
+  },
+  {
+    slug: "commercial",
+    title: "Commercial & Hospitality",
+    icon: "commercial" as const,
+    order: 9,
+    summary:
+      "Efficient electrical, solar and smart systems for commercial buildings and hospitality.",
+  },
+  {
+    slug: "heritage",
+    title: "Heritage & Cultural",
+    icon: "heritage" as const,
+    order: 10,
+    summary: "Sensitive, low-intrusion engineering for heritage sites and cultural institutions.",
   },
 ];
 
-// Starter detail content for service pages — factual scope + real standards
-// references. Editable in the CMS; the admin/Hermes refines before launch.
+// Service detail content (Brief Part 7) — factual scope + real standards. Editable in the CMS.
+const sd = (
+  scopeText: string[],
+  standardsText: string,
+  faq: { question: string; answer: string }[],
+) => ({
+  scope: doc(...scopeText.map((t) => para(txt(t)))),
+  standards: doc(para(txt(standardsText))),
+  faq,
+});
 const SERVICE_DETAIL: Record<
   string,
   { scope: unknown; standards: unknown; faq: { question: string; answer: string }[] }
 > = {
-  "solar-energy": {
-    scope: doc(
-      para(
-        txt("A single EPC scope. ", true),
-        txt(
-          "Site assessment and energy analysis, system design and engineering, supply of quality components, installation, testing and grid-tie commissioning, then performance monitoring and AMC.",
-        ),
-      ),
-      para(
-        txt(
-          "We engineer grid-tied, hybrid and rooftop systems sized to your load profile and your roof or land constraints.",
-        ),
-      ),
-    ),
-    standards: doc(
-      para(
-        txt(
-          "Photovoltaic systems are engineered to IEC 61215 / 61730 (modules), IEC 62548 (array design) and IEC 60364-7-712 (PV installations), in line with BNBC and national grid-tie requirements.",
-        ),
-      ),
-    ),
-    faq: [
+  "solar-renewable": sd(
+    [
+      "On-grid, off-grid and hybrid solar EPC from 1 kWp to utility scale — site assessment, system design, supply of quality components (Growatt inverters, JA Solar and Jinko Tiger-Neo N-type panels), installation, testing, grid-tie commissioning and performance monitoring.",
+      "Reference projects include WFP Bhashanchar, the Commonwealth War Graves Commission in Chittagong, Eastport Cumilla (100 kWp) and CUET.",
+    ],
+    "PV systems are engineered to IEC 61215 / 61730 (modules), IEC 62548 (array design) and IEC 60364-7-712 (PV installations), in line with BNBC and DESCO/BPDB net-metering requirements.",
+    [
       {
-        question: "Do you handle grid-tie approval?",
+        question: "How long does a 50 kWp system take?",
         answer:
-          "Yes — our scope covers system design, documentation and coordination through to grid-tie commissioning.",
+          "Typically a few weeks from design to commissioning, depending on site readiness and net-metering approval.",
       },
       {
-        question: "Rooftop or ground-mount?",
+        question: "What is the ROI on solar in Bangladesh?",
         answer:
-          "Both. We engineer rooftop, ground-mount and hybrid systems to suit your site and load.",
+          "Most industrial rooftop systems pay back within a few years through grid-electricity savings — we provide a feasibility report with your numbers.",
+      },
+      {
+        question: "Do you handle DESCO/BPDB net-metering?",
+        answer:
+          "Yes — our scope covers design, documentation and coordination through to net-metering and grid-tie commissioning.",
       },
     ],
-  },
-  "electrical-epc": {
-    scope: doc(
-      para(
-        txt("End-to-end electrical EPC. ", true),
-        txt(
-          "Load study and single-line design, substation and LT/HT distribution, panel and busbar engineering, supply and construction, testing and commissioning, and ongoing maintenance.",
-        ),
-      ),
-    ),
-    standards: doc(
-      para(
-        txt(
-          "Installations follow IEC 60364 (low-voltage), IEC 61439 (switchgear assemblies) and IEC 60076 (transformers), the Bangladesh Electricity Rules and BNBC.",
-        ),
-      ),
-    ),
-    faq: [
+  ),
+  "bess-storage": sd(
+    [
+      "Lithium (LFP) battery energy storage from 100 kWh to 1 MWh industrial cabinets, plus Hero2 UPS — for load-shifting, backup, peak-shaving and microgrid stabilisation. Sustech is the Bangladesh agent for Hithium LFP storage.",
+      "Reference: WFP Bhashanchar 16 kWh BESS and the CWGC hybrid system.",
+    ],
+    "BESS uses LFP chemistry for safety and cycle life, integrated to IEC electrical-installation standards.",
+    [
       {
-        question: "Do you design and build substations?",
+        question: "LFP vs lead-acid — which is better?",
         answer:
-          "Yes — from load study and single-line diagram through equipment supply, construction and commissioning.",
+          "LFP offers far longer cycle life, higher usable depth-of-discharge and a smaller footprint — a better total cost for industrial use.",
+      },
+      {
+        question: "What sizes do you supply?",
+        answer: "From 100 kWh to 1 MWh cabinets, sized to your load profile and backup goals.",
+      },
+    ],
+  ),
+  "lps-earthing": sd(
+    [
+      "Risk assessment, lightning-protection-system (LPS) and earthing design, installation of air termination, down-conductors and earth electrodes, surge protection, soil-resistivity (Wenner method) and earth-resistance re-testing with documentation. 40+ LPS/earthing jobs delivered.",
+    ],
+    "Engineered to IEC 62305, NFPA 780 and BS EN 62305; testing with calibrated KYORITSU / FLUKE earth-resistance testers.",
+    [
+      {
+        question: "Why does sub-1 ohm earth resistance matter?",
+        answer:
+          "Low earth resistance lets fault and lightning currents dissipate safely, protecting people and equipment.",
+      },
+      {
+        question: "Do you re-test existing earthing?",
+        answer:
+          "Yes — we measure soil resistivity and earth resistance and provide a documented report with remediation.",
+      },
+    ],
+  ),
+  "electrical-epc": sd(
+    [
+      "Full MEP design and execution (LEED v4 capability) — factory wiring, cable laying, panel boards, switchgear and IP65 panels — from design to commissioning.",
+      "Reference: Vanguard Dress turnkey, Pacific Group and Independence Apparels.",
+    ],
+    "Installations follow IEC 60364 (low-voltage), IEC 61439 (switchgear assemblies) and IEC 60076 (transformers), the Bangladesh Electricity Rules and BNBC.",
+    [
+      {
+        question: "Do you do turnkey factory wiring?",
+        answer:
+          "Yes — from first conduit to final lux reading, including substation and rooftop solar where needed.",
       },
       {
         question: "Can you work to our existing drawings?",
         answer: "Yes; we review, validate and engineer to standard, or design from scratch.",
       },
     ],
-  },
-  "grounding-lightning-protection": {
-    scope: doc(
-      para(
-        txt("Protection, engineered in. ", true),
-        txt(
-          "Risk assessment, earthing and lightning-protection-system (LPS) design, installation of air termination, down-conductors and earth electrodes, surge protection, and earth-resistance testing with documentation.",
-        ),
-      ),
-    ),
-    standards: doc(
-      para(
-        txt(
-          "Engineered to IEC 62305 (lightning protection), IEC 60364-5-54 (earthing and bonding) and NFPA 780.",
-        ),
-      ),
-    ),
-    faq: [
+  ),
+  "inspection-testing": sd(
+    [
+      "IR thermography for predictive maintenance, insulation-resistance (Megger) and earth-resistance testing, DIFE annual inspection and third-party audit support (British Embassy reference). Equipment: FLIR thermal camera, Megger, TESTO and KYORITSU.",
+    ],
+    "Verification and testing follow IEC 60364-6 and recognised IEC / IEEE methods, with DIFE and ACCORD/RSC compliance.",
+    [
       {
-        question: "Do you provide a risk assessment?",
+        question: "What does thermography find?",
         answer:
-          "Yes — LPS design starts from an IEC 62305 risk assessment of your structure and contents.",
+          "Loose connections, overloaded circuits and failing components — before they cause downtime or fire.",
       },
       {
-        question: "Do you test existing earthing?",
-        answer:
-          "Yes; we measure earth resistance and provide a documented report with remediation if needed.",
+        question: "How often should we test?",
+        answer: "Annually for most facilities, or as your DIFE / insurer requirements specify.",
       },
     ],
-  },
-  "smart-systems": {
-    scope: doc(
-      para(
-        txt("Efficient and observable. ", true),
-        txt(
-          "PLC and automation engineering, industrial and intelligent lighting, controls and instrumentation, and integration with monitoring.",
-        ),
-      ),
-    ),
-    standards: doc(
-      para(
-        txt(
-          "Control and automation work follows IEC 61131 (programmable controllers) and relevant IEC installation and EMC standards.",
-        ),
-      ),
-    ),
-    faq: [
+  ),
+  "substation-hv": sd(
+    [
+      "Substation design, construction and renovation; transformer testing and oil centrifuging (CPC 100), VCB repair, ATS installation, and HT cable testing and replacement.",
+      "Reference: United Group Dhaka (1600 + 2000 kVA), WFP Bhashanchar (250 + 200 kVA) and Container Terminal Chittagong.",
+    ],
+    "Engineered to IEC 60076 (transformers), IEC 61439 (assemblies) and IEC 60364, the Bangladesh Electricity Rules and BNBC.",
+    [
       {
-        question: "Can you retrofit automation to existing plant?",
+        question: "Do you service live transformers?",
         answer:
-          "Yes — we assess the existing system and integrate controls and monitoring with minimal downtime.",
+          "We plan outages and carry out testing, oil centrifuging and servicing to extend transformer life safely.",
       },
     ],
-  },
-  "testing-inspection-consultancy": {
-    scope: doc(
-      para(
-        txt("Compliant, reliable, safe. ", true),
-        txt(
-          "Insulation-resistance (IR) and earth-resistance (ER) testing, thermographic surveys, electrical safety audits and inspection, with documented reports and recommendations.",
-        ),
-      ),
-    ),
-    standards: doc(
-      para(
-        txt(
-          "Verification and testing follow IEC 60364-6 and recognised IEC / IEEE test methods; thermography to standard survey practice.",
-        ),
-      ),
-    ),
-    faq: [
+  ),
+  "fire-safety": sd(
+    [
+      "Fire detection and alarm system design, supply, installation and commissioning, plus electrical fire-safety compliance for industrial facilities.",
+    ],
+    "Engineered to NFPA and BNBC fire-safety provisions.",
+    [
       {
-        question: "Do you provide documented reports?",
-        answer:
-          "Yes — every test and audit comes with a documented report and prioritised recommendations.",
+        question: "Do you commission and hand over?",
+        answer: "Yes — design, install, commission and hand over with full documentation.",
       },
     ],
-  },
+  ),
+  "lighting-distribution": sd(
+    [
+      "Energy-efficient industrial and high-bay LED lighting and solar street lighting, plus supply and distribution of solar components, BLDC fans (Atomberg) and electrical products.",
+    ],
+    "Lighting designed to required lux levels and energy-efficiency best practice.",
+    [
+      {
+        question: "Are you an Atomberg distributor?",
+        answer: "Yes — Sustech is the sole distributor of Atomberg BLDC fans in Bangladesh.",
+      },
+    ],
+  ),
+  "training-safety": sd(
+    [
+      "Occupational health & safety, electrical safety and LOTO training, delivered as a Bureau Veritas channel partner.",
+    ],
+    "Training aligned to OH&S best practice and Bureau Veritas curricula.",
+    [
+      {
+        question: "Who is the training for?",
+        answer: "Industrial and factory teams needing electrical-safety, LOTO and OH&S competency.",
+      },
+    ],
+  ),
+  consultancy: sd(
+    [
+      "SREDA energy audits, compliance consultancy, e-GP government-tender support and engineering advisory — helping facilities plan, comply and procure.",
+    ],
+    "Audits and advisory aligned to SREDA, DIFE and relevant IEC / BNBC standards.",
+    [
+      {
+        question: "Do you carry out SREDA energy audits?",
+        answer: "Yes — our Managing Director is a SREDA-certified Energy Auditor.",
+      },
+    ],
+  ),
 };
 
-// Starter detail content for sector pages — challenges + relevant services.
-// Factual and editable in the CMS; no invented client names or figures.
+const cd = (challengesText: string, serviceSlugs: string[]) => ({
+  challenges: doc(para(txt(challengesText))),
+  serviceSlugs,
+});
 const SECTOR_DETAIL: Record<string, { challenges: unknown; serviceSlugs: string[] }> = {
-  "manufacturing-rmg-textile": {
-    challenges: doc(
-      para(
-        txt(
-          "Production floors run on uptime. Unplanned power interruptions, heat and electrical faults stop lines, spoil work-in-progress and put people at risk — and compliance audits demand documented safety.",
-        ),
-      ),
-      para(
-        txt(
-          "Sustech engineers reliable distribution, solar to cut energy cost, grounding and lightning protection for safety, and smart controls for visibility — delivered by one accountable team to IEC, BNBC and NFPA standards.",
-        ),
-      ),
-    ),
-    serviceSlugs: [
-      "electrical-epc",
-      "solar-energy",
-      "grounding-lightning-protection",
-      "smart-systems",
-      "testing-inspection-consultancy",
-    ],
-  },
-  "power-utilities": {
-    challenges: doc(
-      para(
-        txt(
-          "Power and utility infrastructure must meet utility-grade reliability and protection standards, with substations, switchgear and earthing engineered and tested to defensible specifications.",
-        ),
-      ),
-      para(
-        txt(
-          "Sustech designs, builds and commissions substation and distribution systems, integrates solar and renewable capacity, and verifies them with insulation and earth-resistance testing.",
-        ),
-      ),
-    ),
-    serviceSlugs: [
-      "electrical-epc",
-      "solar-energy",
-      "grounding-lightning-protection",
-      "testing-inspection-consultancy",
-    ],
-  },
-  "commercial-real-estate": {
-    challenges: doc(
-      para(
-        txt(
-          "Commercial buildings have to balance running cost, occupant safety and code compliance — efficient electrical systems, rooftop solar, and protection that passes inspection.",
-        ),
-      ),
-      para(
-        txt(
-          "Sustech delivers compliant electrical installations, rooftop solar, intelligent lighting and controls, and grounding and lightning protection for commercial properties.",
-        ),
-      ),
-    ),
-    serviceSlugs: [
-      "electrical-epc",
-      "solar-energy",
-      "smart-systems",
-      "grounding-lightning-protection",
-    ],
-  },
-  "ports-heavy-industry": {
-    challenges: doc(
-      para(
-        txt(
-          "Ports and heavy industry operate in demanding environments — heavy loads, harsh conditions and high consequences from downtime or electrical failure.",
-        ),
-      ),
-      para(
-        txt(
-          "Sustech engineers robust power distribution, grounding and lightning protection, automation and controls, and testing and inspection for demanding industrial sites.",
-        ),
-      ),
-    ),
-    serviceSlugs: [
-      "electrical-epc",
-      "grounding-lightning-protection",
-      "smart-systems",
-      "testing-inspection-consultancy",
-    ],
-  },
+  "garments-rmg": cd(
+    "Garments and RMG floors run on uptime and must pass ACCORD/RSC and DIFE electrical-safety audits — reliable power, compliant wiring and documented safety are non-negotiable.",
+    ["electrical-epc", "solar-renewable", "lps-earthing", "inspection-testing", "fire-safety"],
+  ),
+  government: cd(
+    "Government and public-sector projects demand PWD-empanelled, e-GP-compliant engineering with defensible documentation and tender compliance.",
+    ["electrical-epc", "solar-renewable", "substation-hv", "consultancy"],
+  ),
+  "ngo-un": cd(
+    "Humanitarian and development sites — often off-grid or remote — need UN-grade reliability from solar, storage and backup power.",
+    ["solar-renewable", "bess-storage", "substation-hv", "electrical-epc"],
+  ),
+  "industrial-chemical": cd(
+    "Industrial and chemical plants need robust distribution, protection and testing in demanding, sometimes hazardous environments.",
+    ["electrical-epc", "substation-hv", "lps-earthing", "inspection-testing"],
+  ),
+  "ports-logistics": cd(
+    "Ports, terminals and logistics infrastructure require resilient power, protection and automation for heavy, continuous operations.",
+    ["substation-hv", "electrical-epc", "lps-earthing", "inspection-testing"],
+  ),
+  healthcare: cd(
+    "Hospitals and healthcare facilities require resilient, compliant power and safety systems where downtime is not an option.",
+    ["electrical-epc", "solar-renewable", "fire-safety", "inspection-testing"],
+  ),
+  academic: cd(
+    "Universities, schools and TVET institutions invest in rooftop solar, efficient electrical systems and safety compliance.",
+    ["solar-renewable", "electrical-epc", "lps-earthing", "training-safety"],
+  ),
+  "food-processing": cd(
+    "Food processing and cold-chain facilities need hygienic, reliable power, controls and backup to protect product and uptime.",
+    ["electrical-epc", "solar-renewable", "bess-storage", "inspection-testing"],
+  ),
+  commercial: cd(
+    "Commercial buildings and hospitality balance running cost, occupant safety and code compliance — efficient electrical, solar and smart systems.",
+    ["electrical-epc", "solar-renewable", "lighting-distribution", "fire-safety"],
+  ),
+  heritage: cd(
+    "Heritage and cultural sites need sensitive, low-intrusion engineering — renewable energy and safety that respects irreplaceable structures.",
+    ["solar-renewable", "bess-storage", "lps-earthing", "electrical-epc"],
+  ),
 };
 
 // --- About content (Brief Parts 2–5) ---------------------------------------
@@ -507,6 +583,22 @@ async function main(): Promise<void> {
     }
   }
 
+  // Remove any services/sectors from the previous taxonomy (slugs no longer in use).
+  const keepServiceSlugs = new Set(SERVICES.map((s) => s.slug));
+  const allServiceDocs = await payload.find({ collection: "services", limit: 100, depth: 0 });
+  for (const d of allServiceDocs.docs) {
+    if (!keepServiceSlugs.has(d.slug)) {
+      await payload.delete({ collection: "services", id: d.id });
+    }
+  }
+  const keepSectorSlugs = new Set(SECTORS.map((s) => s.slug));
+  const allSectorDocs = await payload.find({ collection: "sectors", limit: 100, depth: 0 });
+  for (const d of allSectorDocs.docs) {
+    if (!keepSectorSlugs.has(d.slug)) {
+      await payload.delete({ collection: "sectors", id: d.id });
+    }
+  }
+
   // --- SiteSettings --------------------------------------------------------
   await payload.updateGlobal({
     slug: "site-settings",
@@ -616,17 +708,17 @@ async function main(): Promise<void> {
       // Candidate figures from the 2017–2026 client/pipeline data — placeholders the admin/
       // Hermes confirms before launch (editable in the CMS; not hardcoded as final).
       stats: [
-        { value: 9, label: "Years of engineering" },
-        { value: 50, suffix: "+", label: "Clients served" },
-        { value: 95, suffix: "+", label: "Projects delivered" },
-        { value: 13, label: "Service lines" },
+        { value: 175, suffix: "+", label: "Clients served" },
+        { value: 103, suffix: "+", label: "Projects executed" },
+        { value: 8, suffix: "+", label: "Years in operation" },
+        { value: 100, suffix: "+ kWp", label: "Solar installed" },
       ],
     },
     {
       blockType: "servicesGrid",
       source: "auto",
       heading: "End-to-end engineering, under one roof.",
-      lede: "Five capabilities that cover an industrial facility's power, safety and compliance from design to commissioning.",
+      lede: "Ten service lines covering an industrial facility's power, energy, safety and compliance — from design to commissioning.",
     },
     {
       blockType: "sectorTiles",
@@ -898,7 +990,7 @@ async function main(): Promise<void> {
     {
       blockType: "servicesGrid",
       source: "auto",
-      heading: "Five service lines, one accountable team.",
+      heading: "Ten service lines, one accountable team.",
       lede: "Covering an industrial facility's power, safety and compliance from design to commissioning.",
     },
     {
@@ -906,10 +998,10 @@ async function main(): Promise<void> {
       appearance: "muted",
       intro: "Proven across Bangladesh's industrial sector since 2017.",
       stats: [
-        { value: 9, label: "Years of engineering" },
-        { value: 50, suffix: "+", label: "Clients served" },
-        { value: 95, suffix: "+", label: "Projects delivered" },
-        { value: 13, label: "Service lines" },
+        { value: 175, suffix: "+", label: "Clients served" },
+        { value: 103, suffix: "+", label: "Projects executed" },
+        { value: 8, suffix: "+", label: "Years in operation" },
+        { value: 100, suffix: "+ kWp", label: "Solar installed" },
       ],
     },
     {

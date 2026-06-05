@@ -12,10 +12,16 @@ import {
 } from "./types";
 
 const PRIORITY: ServiceSlug[] = [
-  "solar-energy",
+  "solar-renewable",
+  "bess-storage",
+  "substation-hv",
   "electrical-epc",
-  "grounding-lightning-protection",
-  "smart-systems",
+  "lps-earthing",
+  "inspection-testing",
+  "fire-safety",
+  "lighting-distribution",
+  "training-safety",
+  "consultancy",
 ];
 
 const hashKey = (s: string): string =>

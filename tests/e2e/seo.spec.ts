@@ -14,8 +14,8 @@ test.describe("SEO / GEO endpoints", () => {
     expect(res?.status()).toBe(200);
     const body = (await res?.text()) ?? "";
     expect(body).toContain("<urlset");
-    expect(body).toContain("/services/solar-energy");
-    expect(body).toContain("/solutions/manufacturing-rmg-textile");
+    expect(body).toContain("/services/solar-renewable");
+    expect(body).toContain("/solutions/garments-rmg");
   });
 
   test("llms.txt maps the authoritative pages", async ({ page }) => {
@@ -23,7 +23,7 @@ test.describe("SEO / GEO endpoints", () => {
     expect(res?.status()).toBe(200);
     const body = (await res?.text()) ?? "";
     expect(body).toContain("# Sustech Technology Ltd");
-    expect(body).toContain("/services/solar-energy");
+    expect(body).toContain("/services/solar-renewable");
     expect(body).toContain("## Sectors");
   });
 

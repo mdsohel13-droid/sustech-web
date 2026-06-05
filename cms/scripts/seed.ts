@@ -600,7 +600,13 @@ const article = (
   faq: { question: string; answer: string }[],
 ) => ({
   title,
-  slug: title.toLowerCase().trim().replace(/[^\w\s-]/g,"").replace(/[\s_]+/g,"-").replace(/-+/g,"-").replace(/^-|-$/g,""),
+  slug: title
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, ""),
   author: "Sustech Engineering Team",
   publishedDate,
   excerpt,
@@ -1436,7 +1442,9 @@ async function main(): Promise<void> {
     }
   }
 
-  payload.logger.info("Seed complete: services, sectors, navigation, settings, articles, home + draft page.");
+  payload.logger.info(
+    "Seed complete: services, sectors, navigation, settings, articles, home + draft page.",
+  );
 }
 
 main()

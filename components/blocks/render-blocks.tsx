@@ -14,6 +14,7 @@ import {
   SpacerView,
   StatsCountersView,
   StepsView,
+  TeamGridView,
   TestimonialsView,
 } from "./blocks";
 
@@ -39,6 +40,8 @@ function BlockSwitch({ block, index }: { block: Block; index: number }) {
       return <LogoWallView block={block} />;
     case "testimonials":
       return <TestimonialsView block={block} />;
+    case "teamGrid":
+      return <TeamGridView block={block} />;
     case "steps":
       return <StepsView block={block} />;
     case "ctaBand":

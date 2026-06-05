@@ -10,6 +10,7 @@ import type {
   Sector,
   Service,
   SiteSetting,
+  Team,
   Testimonial,
 } from "@/payload-types";
 
@@ -113,6 +114,12 @@ export const getClients = cache(async (): Promise<Client[]> => {
 export const getTestimonials = cache(async (): Promise<Testimonial[]> => {
   const payload = await getPayloadClient();
   const res = await payload.find({ collection: "testimonials", depth: 1, limit: 50 });
+  return res.docs;
+});
+
+export const getTeam = cache(async (): Promise<Team[]> => {
+  const payload = await getPayloadClient();
+  const res = await payload.find({ collection: "team", depth: 1, limit: 100, sort: "order" });
   return res.docs;
 });
 

@@ -18,6 +18,7 @@ import {
   getFeaturedProjects,
   getSectors,
   getServices,
+  getTeam,
   getTestimonials,
 } from "@/lib/payload";
 import { pagePath } from "@/cms/utils/preview";
@@ -37,6 +38,7 @@ import type {
   SpacerBlock,
   StatsCountersBlock,
   StepsBlock,
+  Team,
   Testimonial,
 } from "@/payload-types";
 import { CtaButtons, toneOf, type Cta } from "./shared";
@@ -341,6 +343,60 @@ export async function ProjectsListView({
           {block.viewAllLabel ?? "View all projects"} <ArrowRight className="h-4 w-4" aria-hidden />
         </Link>
       </div>
+    </Section>
+  );
+}
+
+// --- TeamGrid ---------------------------------------------------------------
+
+export async function TeamGridView({
+  block,
+}: {
+  block: {
+    heading?: string | null;
+    lede?: string | null;
+    appearance?: string | null;
+    source?: string | null;
+    members?: (number | Team)[] | null;
+  };
+}) {
+  const members = block.source === "selected" ? objs<Team>(block.members) : await getTeam();
+  if (members.length === 0) return null;
+  return (
+    <Section
+      tone={toneOf(block.appearance as never)}
+      eyebrow="Our team"
+      title={block.heading ?? undefined}
+      lede={block.lede ?? undefined}
+    >
+      <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {members.map((m, i) => {
+          const photo = mediaUrl(m.photo);
+          return (
+            <li key={m.id}>
+              <Reveal delay={Math.min(i, 6) * 0.05} className="h-full">
+                <Card className="flex h-full flex-col overflow-hidden">
+                  <div className="bg-surface-2 aspect-square w-full">
+                    {photo ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={photo.url} alt={photo.alt} className="h-full w-full object-cover" />
+                    ) : (
+                      <Skeleton className="h-full w-full rounded-none" />
+                    )}
+                  </div>
+                  <div className="flex flex-1 flex-col p-5">
+                    <h3 className="text-h3 text-ink-900 font-semibold">{m.name}</h3>
+                    <p className="text-brand mt-1 font-mono text-xs tracking-[0.08em] uppercase">
+                      {m.role}
+                    </p>
+                    {m.bio && <p className="text-text-soft mt-3 text-[0.9375rem]">{m.bio}</p>}
+                  </div>
+                </Card>
+              </Reveal>
+            </li>
+          );
+        })}
+      </ul>
     </Section>
   );
 }

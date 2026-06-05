@@ -12,6 +12,7 @@ import { Pages } from "./cms/collections/pages";
 import { Projects } from "./cms/collections/projects";
 import { Sectors } from "./cms/collections/sectors";
 import { Services } from "./cms/collections/services";
+import { Team } from "./cms/collections/team";
 import { Testimonials } from "./cms/collections/testimonials";
 import { Users } from "./cms/collections/users";
 import { Navigation } from "./cms/globals/navigation";
@@ -28,7 +29,18 @@ export default buildConfig({
   },
   serverURL,
   editor: lexicalEditor(),
-  collections: [Pages, Projects, Services, Sectors, Testimonials, Clients, Articles, Media, Users],
+  collections: [
+    Pages,
+    Projects,
+    Services,
+    Sectors,
+    Team,
+    Testimonials,
+    Clients,
+    Articles,
+    Media,
+    Users,
+  ],
   globals: [SiteSettings, Navigation],
   db: postgresAdapter({
     pool: { connectionString: process.env.DATABASE_URI },

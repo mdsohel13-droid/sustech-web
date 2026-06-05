@@ -152,7 +152,7 @@ export default async function ProjectsIndexPage({
         </Container>
       </section>
 
-      <section className="bg-surface border-b border-border" aria-label="Project statistics">
+      <section className="bg-surface border-border border-b" aria-label="Project statistics">
         <Container className="py-8">
           <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
             {STATS.map((s, i) => (

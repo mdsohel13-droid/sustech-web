@@ -10,6 +10,7 @@ import { Clients } from "./cms/collections/clients";
 import { Media } from "./cms/collections/media";
 import { Pages } from "./cms/collections/pages";
 import { Projects } from "./cms/collections/projects";
+import { RfqRequests } from "./cms/collections/rfq-requests";
 import { Sectors } from "./cms/collections/sectors";
 import { Services } from "./cms/collections/services";
 import { Team } from "./cms/collections/team";
@@ -39,6 +40,7 @@ export default buildConfig({
     Clients,
     Articles,
     Media,
+    RfqRequests,
     Users,
   ],
   globals: [SiteSettings, Navigation],

@@ -746,6 +746,104 @@ async function main(): Promise<void> {
     await payload.create({ collection: "pages", data: aboutData });
   }
 
+  // Capabilities — a published overview page assembled from existing blocks.
+  const capabilitiesLayout = [
+    {
+      blockType: "hero",
+      eyebrow: "Capabilities",
+      heading: "Everything an industrial facility needs, engineered under one roof.",
+      subhead:
+        "From solar and substations to lightning protection, smart controls and electrical " +
+        "testing — Sustech engineers, builds and commissions the full electrical and energy " +
+        "scope to IEC, BNBC and NFPA standards, with single-point accountability.",
+      tone: "dark",
+      ctas: [
+        customLink("Request a Consultation", "/request-quote", { style: "primary" }),
+        customLink("See Our Projects", "/projects", { style: "secondary" }),
+      ],
+    },
+    {
+      blockType: "servicesGrid",
+      source: "auto",
+      heading: "Five service lines, one accountable team.",
+      lede: "Covering an industrial facility's power, safety and compliance from design to commissioning.",
+    },
+    {
+      blockType: "statsCounters",
+      appearance: "muted",
+      intro: "Proven across Bangladesh's industrial sector since 2017.",
+      stats: [
+        { value: 9, label: "Years of engineering" },
+        { value: 50, suffix: "+", label: "Clients served" },
+        { value: 95, suffix: "+", label: "Projects delivered" },
+        { value: 13, label: "Service lines" },
+      ],
+    },
+    {
+      blockType: "sectorTiles",
+      source: "auto",
+      heading: "Built for your industry.",
+      lede: "We engineer to the realities of your sector — its loads, standards and compliance.",
+    },
+    {
+      blockType: "steps",
+      eyebrow: "How we work",
+      heading: "From brief to commissioning, in four clear stages.",
+      steps: [
+        { title: "Discover", body: "We assess your site, loads, constraints and goals." },
+        {
+          title: "Engineer",
+          body: "We design to standard, with full documentation and a defensible BOQ.",
+        },
+        { title: "Deliver", body: "We procure quality components and build to specification." },
+        {
+          title: "Commission",
+          body: "We test, certify and hand over a system that performs — then support it.",
+        },
+      ],
+    },
+    {
+      blockType: "logoWall",
+      appearance: "muted",
+      source: "auto",
+      heading: "Trusted by leading industrial and commercial clients.",
+    },
+    {
+      blockType: "ctaBand",
+      heading: "Have a project in mind?",
+      subhead:
+        "Tell us what you're building — our engineers will scope it with you, no obligation.",
+      ctas: [customLink("Request a Consultation", "/request-quote", { style: "primary" })],
+    },
+  ];
+  const existingCapabilities = await payload.find({
+    collection: "pages",
+    where: { slug: { equals: "capabilities" } },
+    limit: 1,
+    draft: true,
+  });
+  const capabilitiesData = {
+    title: "Capabilities",
+    slug: "capabilities",
+    _status: "published" as const,
+    layout: capabilitiesLayout,
+    seo: {
+      title: "Capabilities — Sustech Technology Ltd",
+      description:
+        "Sustech's full EPC engineering capability for commercial and industrial clients in " +
+        "Bangladesh: solar, electrical, grounding & lightning protection, smart systems and testing.",
+    },
+  };
+  if (existingCapabilities.docs.length > 0) {
+    await payload.update({
+      collection: "pages",
+      id: existingCapabilities.docs[0]!.id,
+      data: capabilitiesData,
+    });
+  } else {
+    await payload.create({ collection: "pages", data: capabilitiesData });
+  }
+
   // A draft page (work-in-progress) — demonstrates draft status and stays 404 publicly.
   const existingDraft = await payload.find({
     collection: "pages",

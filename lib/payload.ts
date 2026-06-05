@@ -91,6 +91,22 @@ export const getArticleBySlug = cache(
   },
 );
 
+export const getArticles = cache(async (): Promise<Article[]> => {
+  try {
+    const payload = await getPayloadClient();
+    const res = await payload.find({
+      collection: "articles",
+      depth: 1,
+      limit: 100,
+      where: { _status: { equals: "published" } },
+      sort: "-publishedDate",
+    });
+    return res.docs;
+  } catch {
+    return []; // DB unavailable at build → render the empty state
+  }
+});
+
 export const getServiceBySlug = cache(async (slug: string): Promise<Service | null> => {
   const payload = await getPayloadClient();
   const res = await payload.find({

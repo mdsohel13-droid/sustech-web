@@ -90,6 +90,20 @@ export const SiteSettings: GlobalConfig = {
             },
             { name: "hours", type: "text", admin: { description: "e.g. Sun–Thu, 9:00–18:00" } },
             {
+              name: "geo",
+              type: "group",
+              admin: { description: "Map coordinates for LocalBusiness schema." },
+              fields: [
+                {
+                  type: "row",
+                  fields: [
+                    { name: "latitude", type: "number", admin: { width: "50%" } },
+                    { name: "longitude", type: "number", admin: { width: "50%" } },
+                  ],
+                },
+              ],
+            },
+            {
               name: "social",
               type: "array",
               labels: { singular: "Social link", plural: "Social links" },

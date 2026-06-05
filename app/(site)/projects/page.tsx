@@ -11,6 +11,7 @@ import { Reveal } from "@/components/ui/reveal";
 import { Section } from "@/components/ui/section";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getProjects } from "@/lib/payload";
+import { ProofCounter } from "@/components/ui/proof-counter";
 import { serverUrl } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 import type { Project, Service } from "@/payload-types";
@@ -20,6 +21,13 @@ export const revalidate = 3600;
 const TITLE = "Projects";
 const LEDE =
   "Completed engineering work for corporate, commercial and industrial clients across Bangladesh — solar, electrical EPC, grounding & lightning protection, smart systems, and testing.";
+
+const STATS = [
+  { value: 103, suffix: "+", label: "Projects executed" },
+  { value: 175, suffix: "+", label: "Clients served" },
+  { value: 10, suffix: "+", label: "Sectors covered" },
+  { value: 8, suffix: "+", label: "Years in operation" },
+] as const;
 
 export function generateMetadata(): Metadata {
   const noindex = process.env.SITE_INDEXABLE !== "true";
@@ -141,6 +149,18 @@ export default async function ProjectsIndexPage({
           <Eyebrow onDark>Our work</Eyebrow>
           <h1 className="text-display mt-4 max-w-3xl font-bold text-balance">{TITLE}</h1>
           <p className="text-lede text-text-invert-soft mt-4 max-w-2xl">{LEDE}</p>
+        </Container>
+      </section>
+
+      <section className="bg-surface border-b border-border" aria-label="Project statistics">
+        <Container className="py-8">
+          <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
+            {STATS.map((s, i) => (
+              <Reveal key={s.label} delay={i * 0.06}>
+                <ProofCounter value={s.value} suffix={s.suffix} label={s.label} />
+              </Reveal>
+            ))}
+          </div>
         </Container>
       </section>
 

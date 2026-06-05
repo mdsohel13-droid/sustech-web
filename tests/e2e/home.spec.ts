@@ -59,8 +59,8 @@ test.describe("CMS-driven site", () => {
   test("the home shows the knowledge preview", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByRole("heading", { name: "From our knowledge hub." })).toBeVisible();
-    await expect(
-      page.getByRole("heading", { level: 3, name: /How to Size a Solar System/ }),
-    ).toBeVisible();
+    // Latest 3 articles — assert the section renders article links (order-independent).
+    await expect(page.getByRole("link", { name: /read article$/ }).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: "Read the knowledge hub" })).toBeVisible();
   });
 });

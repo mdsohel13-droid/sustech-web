@@ -845,9 +845,10 @@ async function main(): Promise<void> {
   }
 
   // A draft page (work-in-progress) — demonstrates draft status and stays 404 publicly.
+  // (Slug `careers`, not `contact`: /contact is now a real route.)
   const existingDraft = await payload.find({
     collection: "pages",
-    where: { slug: { equals: "contact" } },
+    where: { slug: { equals: "careers" } },
     limit: 1,
     draft: true,
   });
@@ -855,13 +856,13 @@ async function main(): Promise<void> {
     await payload.create({
       collection: "pages",
       data: {
-        title: "Contact",
-        slug: "contact",
+        title: "Careers",
+        slug: "careers",
         _status: "draft",
         layout: [
           {
-            blockType: "contactRFQ",
-            heading: "Contact us",
+            blockType: "ctaBand",
+            heading: "Careers at Sustech",
             subhead: "This page is being prepared.",
           },
         ],

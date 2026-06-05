@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "generate:types": "node --import jiti/register cms/scripts/gen-types.ts",
+    "generate:importmap": "node --import jiti/register cms/scripts/gen-importmap.ts",
     "seed": "node --import jiti/register cms/scripts/seed.ts",
     "import:projects": "node --import jiti/register cms/scripts/import-projects.ts",
     "enrich:projects": "node --import jiti/register cms/scripts/enrich-projects.ts",

@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getProjects } from "@/lib/payload";
 import { serverUrl } from "@/lib/seo";
 import { cn } from "@/lib/utils";
-import type { Project } from "@/payload-types";
+import type { Project, Service } from "@/payload-types";
 
 export const revalidate = 3600;
 
@@ -32,9 +32,14 @@ export function generateMetadata(): Metadata {
 }
 
 type SectorRef = NonNullable<Extract<Project["sector"], object>>;
+type Filters = { sector?: string; service?: string; year?: string };
 
 function projectSector(p: Project): SectorRef | null {
   return p.sector && typeof p.sector === "object" ? p.sector : null;
+}
+
+function projectServices(p: Project): Service[] {
+  return (p.services ?? []).filter((x): x is Service => typeof x === "object" && x !== null);
 }
 
 function coverImage(p: Project): { url: string; alt: string } | null {
@@ -43,28 +48,61 @@ function coverImage(p: Project): { url: string; alt: string } | null {
   return { url: img.url, alt: img.alt ?? "" };
 }
 
+/** Build a /projects URL that toggles one filter while preserving the others. */
+function hrefWith(current: Filters, key: keyof Filters, value?: string): string {
+  const next: Filters = { ...current, [key]: value };
+  const qs = new URLSearchParams();
+  if (next.sector) qs.set("sector", next.sector);
+  if (next.service) qs.set("service", next.service);
+  if (next.year) qs.set("year", next.year);
+  const s = qs.toString();
+  return s ? `/projects?${s}` : "/projects";
+}
+
 export default async function ProjectsIndexPage({
   searchParams,
 }: {
-  searchParams: Promise<{ sector?: string }>;
+  searchParams: Promise<Filters>;
 }) {
-  const { sector: activeSector } = await searchParams;
+  const current = await searchParams;
+  const { sector: activeSector, service: activeService, year: activeYear } = current;
   const all = await getProjects();
 
-  // Filter chips: only sectors that actually have published projects, with counts.
+  // Derive filter options + counts across the full published set.
   const sectorCounts = new Map<string, { title: string; icon: SectorRef["icon"]; count: number }>();
+  const serviceCounts = new Map<string, { title: string; count: number }>();
+  const yearCounts = new Map<number, number>();
   for (const p of all) {
-    const s = projectSector(p);
-    if (!s) continue;
-    const entry = sectorCounts.get(s.slug);
-    if (entry) entry.count += 1;
-    else sectorCounts.set(s.slug, { title: s.title, icon: s.icon, count: 1 });
+    const sec = projectSector(p);
+    if (sec) {
+      const e = sectorCounts.get(sec.slug);
+      if (e) e.count += 1;
+      else sectorCounts.set(sec.slug, { title: sec.title, icon: sec.icon, count: 1 });
+    }
+    for (const svc of projectServices(p)) {
+      const e = serviceCounts.get(svc.slug);
+      if (e) e.count += 1;
+      else serviceCounts.set(svc.slug, { title: svc.title, count: 1 });
+    }
+    if (typeof p.year === "number") yearCounts.set(p.year, (yearCounts.get(p.year) ?? 0) + 1);
   }
-  const filters = [...sectorCounts.entries()].sort((a, b) => a[1].title.localeCompare(b[1].title));
+  const sectorFilters = [...sectorCounts.entries()].sort((a, b) =>
+    a[1].title.localeCompare(b[1].title),
+  );
+  const serviceFilters = [...serviceCounts.entries()].sort((a, b) =>
+    a[1].title.localeCompare(b[1].title),
+  );
+  const yearFilters = [...yearCounts.keys()].sort((a, b) => b - a);
+  const hasFilters =
+    sectorFilters.length > 0 || serviceFilters.length > 0 || yearFilters.length > 0;
+  const anyActive = Boolean(activeSector || activeService || activeYear);
 
-  const projects = activeSector ? all.filter((p) => projectSector(p)?.slug === activeSector) : all;
-
-  const activeTitle = activeSector ? sectorCounts.get(activeSector)?.title : undefined;
+  const projects = all.filter((p) => {
+    if (activeSector && projectSector(p)?.slug !== activeSector) return false;
+    if (activeService && !projectServices(p).some((s) => s.slug === activeService)) return false;
+    if (activeYear && String(p.year ?? "") !== activeYear) return false;
+    return true;
+  });
 
   return (
     <>
@@ -106,29 +144,71 @@ export default async function ProjectsIndexPage({
         </Container>
       </section>
 
-      <Section srTitle={activeTitle ? `${activeTitle} projects` : "All projects"}>
-        {filters.length > 0 && (
-          <nav aria-label="Filter projects by sector" className="mb-10 flex flex-wrap gap-2">
-            <FilterChip href="/projects" active={!activeSector} label={`All (${all.length})`} />
-            {filters.map(([slug, f]) => {
-              const Icon = sectorIcons[f.icon] ?? sectorIcons.manufacturing;
-              return (
+      <Section srTitle="All projects">
+        {hasFilters && (
+          <div className="mb-10 space-y-4">
+            {sectorFilters.length > 0 && (
+              <FilterRow label="Sector">
                 <FilterChip
-                  key={slug}
-                  href={`/projects?sector=${slug}`}
-                  active={activeSector === slug}
-                  label={`${f.title} (${f.count})`}
-                  icon={<Icon className="h-3.5 w-3.5" aria-hidden />}
+                  href={hrefWith(current, "sector", undefined)}
+                  active={!activeSector}
+                  label={`All (${all.length})`}
                 />
-              );
-            })}
-          </nav>
+                {sectorFilters.map(([slug, f]) => {
+                  const Icon = sectorIcons[f.icon] ?? sectorIcons.manufacturing;
+                  return (
+                    <FilterChip
+                      key={slug}
+                      href={hrefWith(current, "sector", slug)}
+                      active={activeSector === slug}
+                      label={`${f.title} (${f.count})`}
+                      icon={<Icon className="h-3.5 w-3.5" aria-hidden />}
+                    />
+                  );
+                })}
+              </FilterRow>
+            )}
+            {serviceFilters.length > 0 && (
+              <FilterRow label="Service">
+                <FilterChip
+                  href={hrefWith(current, "service", undefined)}
+                  active={!activeService}
+                  label="All"
+                />
+                {serviceFilters.map(([slug, f]) => (
+                  <FilterChip
+                    key={slug}
+                    href={hrefWith(current, "service", slug)}
+                    active={activeService === slug}
+                    label={`${f.title} (${f.count})`}
+                  />
+                ))}
+              </FilterRow>
+            )}
+            {yearFilters.length > 0 && (
+              <FilterRow label="Year">
+                <FilterChip
+                  href={hrefWith(current, "year", undefined)}
+                  active={!activeYear}
+                  label="All"
+                />
+                {yearFilters.map((y) => (
+                  <FilterChip
+                    key={y}
+                    href={hrefWith(current, "year", String(y))}
+                    active={activeYear === String(y)}
+                    label={`${y} (${yearCounts.get(y)})`}
+                  />
+                ))}
+              </FilterRow>
+            )}
+          </div>
         )}
 
         {projects.length === 0 ? (
           <p className="text-text-soft border-border bg-surface-2 rounded-lg border border-dashed px-6 py-12 text-center">
-            {activeSector
-              ? "No published projects in this sector yet."
+            {anyActive
+              ? "No published projects match these filters."
               : "Project case studies are being published — check back soon."}
           </p>
         ) : (
@@ -151,11 +231,9 @@ export default async function ProjectsIndexPage({
                         <Skeleton className="aspect-[4/3] w-full rounded-none" />
                       )}
                       <div className="p-6">
-                        {sectorName && (
-                          <p className="text-brand font-mono text-xs tracking-[0.08em] uppercase">
-                            {sectorName}
-                          </p>
-                        )}
+                        <p className="text-brand font-mono text-xs tracking-[0.08em] uppercase">
+                          {[sectorName, p.year].filter(Boolean).join(" · ")}
+                        </p>
                         <h3 className="text-h3 text-ink-900 mt-2 font-semibold">{p.name}</h3>
                         {p.summary && (
                           <p className="text-text-soft mt-2 text-[0.9375rem]">{p.summary}</p>
@@ -176,6 +254,20 @@ export default async function ProjectsIndexPage({
         )}
       </Section>
     </>
+  );
+}
+
+function FilterRow({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <nav
+      aria-label={`Filter projects by ${label.toLowerCase()}`}
+      className="flex flex-wrap items-center gap-2"
+    >
+      <span className="text-text-soft mr-1 w-16 shrink-0 font-mono text-xs tracking-[0.08em] uppercase">
+        {label}
+      </span>
+      {children}
+    </nav>
   );
 }
 

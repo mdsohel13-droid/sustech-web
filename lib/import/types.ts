@@ -6,10 +6,16 @@
  */
 
 export const CANONICAL_SERVICES = {
-  "solar-energy": "Solar & Energy",
-  "electrical-epc": "Electrical EPC",
-  "grounding-lightning-protection": "Grounding & Lightning Protection",
-  "smart-systems": "Smart Systems",
+  "solar-renewable": "Solar & Renewable Energy",
+  "bess-storage": "BESS & Energy Storage",
+  "lps-earthing": "Lightning Protection & Earthing",
+  "electrical-epc": "Electrical & EPC Works",
+  "inspection-testing": "Inspection, Testing & Thermography",
+  "substation-hv": "Substation & HV Works",
+  "fire-safety": "Fire & Safety Systems",
+  "lighting-distribution": "Lighting & Product Supply",
+  "training-safety": "OH&S Training",
+  consultancy: "Consultancy & Compliance",
 } as const;
 
 export type ServiceSlug = keyof typeof CANONICAL_SERVICES;

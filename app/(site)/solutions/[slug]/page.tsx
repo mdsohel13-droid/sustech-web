@@ -57,7 +57,7 @@ export default async function SectorPage({ params }: { params: Promise<{ slug: s
   const sector = await getSectorBySlug(slug);
   if (!sector) notFound();
 
-  const Icon = sectorIcons[sector.icon] ?? sectorIcons.manufacturing;
+  const Icon = sectorIcons[sector.icon] ?? sectorIcons.industrial;
   const sectorServices = services(sector.services);
   const related = await getProjectsBySector(sector.id);
 

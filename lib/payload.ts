@@ -132,6 +132,33 @@ export const getSectors = cache(async (): Promise<Sector[]> => {
   return res.docs;
 });
 
+export const getSectorBySlug = cache(async (slug: string): Promise<Sector | null> => {
+  const payload = await getPayloadClient();
+  const res = await payload.find({
+    collection: "sectors",
+    depth: 2,
+    limit: 1,
+    where: { slug: { equals: slug } },
+  });
+  return res.docs[0] ?? null;
+});
+
+export const getProjectsBySector = cache(async (sectorId: number): Promise<Project[]> => {
+  try {
+    const payload = await getPayloadClient();
+    const res = await payload.find({
+      collection: "projects",
+      depth: 1,
+      limit: 6,
+      where: { and: [{ _status: { equals: "published" } }, { sector: { equals: sectorId } }] },
+      sort: "-year",
+    });
+    return res.docs;
+  } catch {
+    return [];
+  }
+});
+
 export const getClients = cache(async (): Promise<Client[]> => {
   const payload = await getPayloadClient();
   const res = await payload.find({ collection: "clients", depth: 1, limit: 100, sort: "order" });

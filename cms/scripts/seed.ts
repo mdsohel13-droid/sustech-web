@@ -591,6 +591,181 @@ const FEATURED_PROJECTS: FeaturedProject[] = [
   },
 ];
 
+// Knowledge articles (Brief Part 8, Tier 1) — educational engineering content. Published.
+const article = (
+  title: string,
+  publishedDate: string,
+  excerpt: string,
+  sections: [string, string][],
+  faq: { question: string; answer: string }[],
+) => ({
+  title,
+  author: "Sustech Engineering Team",
+  publishedDate,
+  excerpt,
+  body: doc(...sections.flatMap(([h, b]) => [heading("h2", h), para(txt(b))])),
+  faq,
+  _status: "published" as const,
+});
+
+const ARTICLES = [
+  article(
+    "How to Size a Solar System for a Garments Factory in Bangladesh",
+    "2026-05-04",
+    "A practical guide to sizing rooftop solar for a Bangladeshi garments factory — load assessment, roof area, grid tie-in and payback.",
+    [
+      [
+        "Start with your load profile",
+        "Sizing begins with how much electricity you use and when. Pull 12 months of utility bills, identify your daytime base load (machines, lighting, HVAC) and your peak demand. Rooftop solar offsets daytime consumption, so the daytime load — not the monthly total — sets the useful system size.",
+      ],
+      [
+        "Roof area and capacity",
+        "As a rule of thumb, each kWp of modern mono-PERC or N-type panels needs roughly 5–7 m² of usable, shade-free roof. A typical RMG shed roof can host hundreds of kWp. We assess structural capacity, orientation and shading before fixing the array layout.",
+      ],
+      [
+        "Grid tie-in and net-metering",
+        "On-grid systems in Bangladesh connect under DESCO/BPDB net-metering, which credits exported energy. Our scope covers single-line design, protection, documentation and coordination through to net-metering approval and grid-tie commissioning.",
+      ],
+      [
+        "Estimating payback",
+        "Payback depends on your tariff, daytime self-consumption and system cost. Most industrial rooftop systems in Bangladesh recover their cost within a few years and then deliver decades of low-cost generation. We provide a feasibility report with your actual numbers.",
+      ],
+    ],
+    [
+      {
+        question: "How big a system can my factory roof take?",
+        answer:
+          "Most garments sheds can host hundreds of kWp; we confirm the exact figure from a structural and shading survey of your roof.",
+      },
+      {
+        question: "Do you handle net-metering with DESCO/BPDB?",
+        answer: "Yes — design, documentation and coordination through to net-metering approval.",
+      },
+    ],
+  ),
+  article(
+    "DIFE Electrical Inspection Checklist 2026 — What Bangladesh Factories Must Know",
+    "2026-05-11",
+    "What DIFE electrical inspectors look for, the common findings, and how to prepare your factory to pass.",
+    [
+      [
+        "What DIFE checks",
+        "The Department of Inspection for Factories and Establishments (DIFE) assesses electrical safety as part of its compliance regime: distribution boards, earthing and bonding, cable condition and loading, protection settings, and documentation. Inspectors look for hazards that put workers and continuity at risk.",
+      ],
+      [
+        "Common findings",
+        "Typical gaps include loose or overheated connections (often found on a thermographic scan), inadequate or untested earthing, overloaded circuits, missing or mis-rated protection, and incomplete single-line diagrams and test records.",
+      ],
+      [
+        "How to prepare",
+        "Carry out an electrical safety audit ahead of the inspection: thermography of boards and busbars, earth-resistance testing, a protection-coordination review, and an up-to-date single-line diagram with test certificates. Remediate findings before the inspector arrives.",
+      ],
+    ],
+    [
+      {
+        question: "How often is DIFE inspection required?",
+        answer:
+          "Inspections are periodic and may be triggered by compliance programmes or incidents — an annual self-audit keeps you ready.",
+      },
+      {
+        question: "Can Sustech prepare us for DIFE?",
+        answer:
+          "Yes — we audit, thermograph, test earthing and remediate findings, then document everything for the inspection.",
+      },
+    ],
+  ),
+  article(
+    "IEC 62305 Lightning Protection System Design — A Bangladesh Guide",
+    "2026-05-18",
+    "How a standards-based lightning protection system is designed under IEC 62305 — risk assessment, protection levels and components.",
+    [
+      [
+        "Start with a risk assessment",
+        "IEC 62305 design begins with a risk assessment of the structure and its contents — location, dimensions, occupancy, services and the consequences of a strike. The assessment determines the required Lightning Protection Level (LPL I–IV) and whether protection is needed at all.",
+      ],
+      [
+        "Air termination, down-conductors and earthing",
+        "The system comprises an air-termination network (rods, meshes or catenaries sized by the rolling-sphere method), down-conductors that route the current safely to ground, and a low-impedance earth-termination system. Bonding and surge protection (SPDs) protect internal systems.",
+      ],
+      [
+        "Soil resistivity and earthing",
+        "Effective earthing depends on soil resistivity, which we measure with the Wenner four-pin method. Electrode design (rods, plates or rings) is then chosen to achieve a low, stable earth resistance suitable for the protection level.",
+      ],
+    ],
+    [
+      {
+        question: "Which standards apply in Bangladesh?",
+        answer:
+          "We design to IEC 62305 and NFPA 780, with BS EN 62305 as the harmonised reference.",
+      },
+      {
+        question: "Do I need a risk assessment first?",
+        answer: "Yes — IEC 62305 design always starts from a structure-specific risk assessment.",
+      },
+    ],
+  ),
+  article(
+    "Earth Resistance Testing: Why Sub-1 Ohm Matters for Your Factory",
+    "2026-05-25",
+    "What earth-resistance testing measures, why a low value matters, the method, and how often to test.",
+    [
+      [
+        "Why earth resistance matters",
+        "Your earthing system gives fault currents and lightning a safe path to ground. A high earth resistance means dangerous touch voltages, nuisance trips and poor protection. A low, stable earth resistance keeps people safe and equipment protected.",
+      ],
+      [
+        "The Wenner method",
+        "Soil resistivity is measured with the Wenner four-pin method, and earth resistance with calibrated KYORITSU or FLUKE testers using the fall-of-potential technique. Results are documented against the design target for the installation and protection level.",
+      ],
+      [
+        "How often to test",
+        "Earth resistance drifts with soil moisture, corrosion and changes on site. Test at commissioning and at least annually thereafter — and after any significant electrical works. We provide a documented report with remediation where values exceed target.",
+      ],
+    ],
+    [
+      {
+        question: "What earth resistance should I target?",
+        answer:
+          "The target depends on the installation and protection level; many industrial earths aim for a low single-digit ohm value or better, verified by test.",
+      },
+      {
+        question: "How often should earthing be re-tested?",
+        answer: "At commissioning, annually, and after major electrical works.",
+      },
+    ],
+  ),
+  article(
+    "Battery Energy Storage (BESS) for Industrial Bangladesh: LFP vs Lead-Acid",
+    "2026-06-01",
+    "A practical comparison of LFP and lead-acid storage for industrial Bangladesh — cycle life, footprint, safety and total cost.",
+    [
+      [
+        "Why storage now",
+        "Battery energy storage lets a factory shift solar into the evening, ride through outages, shave demand peaks and stabilise a microgrid. The technology choice — lithium iron phosphate (LFP) versus lead-acid — drives the cost and reliability of all of these.",
+      ],
+      [
+        "LFP vs lead-acid",
+        "LFP offers far longer cycle life, higher usable depth-of-discharge, a much smaller footprint and a flat, safe chemistry. Lead-acid is cheaper upfront but heavier, shorter-lived and limited in usable capacity — so its total cost per usable kWh over the system life is usually higher for industrial duty.",
+      ],
+      [
+        "Sizing and use cases",
+        "Sustech supplies LFP cabinets from 100 kWh to 1 MWh (Hithium agency) sized to your use case: load-shifting, backup, peak-shaving or microgrid stabilisation. We model your load and tariff to size storage that pays its way.",
+      ],
+    ],
+    [
+      {
+        question: "Is LFP safe for an industrial site?",
+        answer:
+          "LFP is among the safest lithium chemistries — thermally stable with robust battery-management — and is well suited to industrial duty.",
+      },
+      {
+        question: "What sizes do you supply?",
+        answer: "From 100 kWh to 1 MWh cabinets, sized to your load and backup goals.",
+      },
+    ],
+  ),
+];
+
 const customLink = (label: string, url: string, extra: Record<string, unknown> = {}) => ({
   label,
   type: "custom" as const,
@@ -710,6 +885,22 @@ async function main(): Promise<void> {
       await payload.create({ collection: "projects", data });
     } else {
       await payload.update({ collection: "projects", id: found.docs[0]!.id, data });
+    }
+  }
+
+  // --- Knowledge articles (Brief Part 8) -----------------------------------
+  for (const a of ARTICLES) {
+    const found = await payload.find({
+      collection: "articles",
+      where: { title: { equals: a.title } },
+      draft: true,
+      limit: 1,
+      overrideAccess: true,
+    });
+    if (found.docs.length === 0) {
+      await payload.create({ collection: "articles", data: a });
+    } else {
+      await payload.update({ collection: "articles", id: found.docs[0]!.id, data: a });
     }
   }
 

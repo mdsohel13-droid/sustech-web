@@ -600,6 +600,7 @@ const article = (
   faq: { question: string; answer: string }[],
 ) => ({
   title,
+  slug: title.toLowerCase().trim().replace(/[^\w\s-]/g,"").replace(/[\s_]+/g,"-").replace(/-+/g,"-").replace(/^-|-$/g,""),
   author: "Sustech Engineering Team",
   publishedDate,
   excerpt,
@@ -1418,7 +1419,24 @@ async function main(): Promise<void> {
     });
   }
 
-  payload.logger.info("Seed complete: services, sectors, navigation, settings, home + draft page.");
+  // --- Knowledge articles --------------------------------------------------
+  for (const a of ARTICLES) {
+    const found = await payload.find({
+      collection: "articles",
+      where: { slug: { equals: a.slug } },
+      limit: 1,
+      draft: true,
+    });
+    if (found.docs.length === 0) {
+      await payload.create({ collection: "articles", data: a });
+      payload.logger.info(`Created article: ${a.title}`);
+    } else {
+      await payload.update({ collection: "articles", id: found.docs[0].id, data: a });
+      payload.logger.info(`Updated article: ${a.title}`);
+    }
+  }
+
+  payload.logger.info("Seed complete: services, sectors, navigation, settings, articles, home + draft page.");
 }
 
 main()

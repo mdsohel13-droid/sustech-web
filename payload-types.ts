@@ -76,6 +76,7 @@ export interface Config {
     clients: Client;
     articles: Article;
     media: Media;
+    'rfq-requests': RfqRequest;
     users: User;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
@@ -94,6 +95,7 @@ export interface Config {
     clients: ClientsSelect<false> | ClientsSelect<true>;
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'rfq-requests': RfqRequestsSelect<false> | RfqRequestsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
@@ -972,6 +974,29 @@ export interface Article {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Consultation / quote requests submitted from the website.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rfq-requests".
+ */
+export interface RfqRequest {
+  id: number;
+  name: string;
+  company?: string | null;
+  email: string;
+  phone?: string | null;
+  serviceInterest?: string | null;
+  location?: string | null;
+  message: string;
+  status?: ('new' | 'contacted' | 'qualified' | 'won' | 'closed') | null;
+  /**
+   * Page the request came from.
+   */
+  sourcePath?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
@@ -1152,6 +1177,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'rfq-requests';
+        value: number | RfqRequest;
       } | null)
     | ({
         relationTo: 'users';
@@ -1705,6 +1734,23 @@ export interface MediaSelect<T extends boolean = true> {
               filename?: T;
             };
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rfq-requests_select".
+ */
+export interface RfqRequestsSelect<T extends boolean = true> {
+  name?: T;
+  company?: T;
+  email?: T;
+  phone?: T;
+  serviceInterest?: T;
+  location?: T;
+  message?: T;
+  status?: T;
+  sourcePath?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

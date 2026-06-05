@@ -91,6 +91,33 @@ export const getArticleBySlug = cache(
   },
 );
 
+export const getServiceBySlug = cache(async (slug: string): Promise<Service | null> => {
+  const payload = await getPayloadClient();
+  const res = await payload.find({
+    collection: "services",
+    depth: 1,
+    limit: 1,
+    where: { slug: { equals: slug } },
+  });
+  return res.docs[0] ?? null;
+});
+
+export const getProjectsByService = cache(async (serviceId: number): Promise<Project[]> => {
+  try {
+    const payload = await getPayloadClient();
+    const res = await payload.find({
+      collection: "projects",
+      depth: 1,
+      limit: 6,
+      where: { and: [{ _status: { equals: "published" } }, { services: { in: [serviceId] } }] },
+      sort: "-year",
+    });
+    return res.docs;
+  } catch {
+    return [];
+  }
+});
+
 // Lists ----------------------------------------------------------------------
 
 export const getServices = cache(async (): Promise<Service[]> => {

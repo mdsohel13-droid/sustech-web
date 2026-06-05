@@ -1,5 +1,6 @@
 import type { Page } from "@/payload-types";
 import {
+  ArticlesListView,
   CalculatorEmbedView,
   CTABandView,
   ContactRFQView,
@@ -41,6 +42,8 @@ function BlockSwitch({ block, index }: { block: Block; index: number }) {
       return <LogoWallView block={block} />;
     case "partnerBar":
       return <PartnerBarView block={block} />;
+    case "articlesList":
+      return <ArticlesListView block={block} />;
     case "testimonials":
       return <TestimonialsView block={block} />;
     case "teamGrid":

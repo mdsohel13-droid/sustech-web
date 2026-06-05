@@ -379,6 +379,18 @@ const PartnerBar: Block = {
   ],
 };
 
+const ArticlesList: Block = {
+  slug: "articlesList",
+  interfaceName: "ArticlesListBlock",
+  labels: { singular: "Articles list", plural: "Articles lists" },
+  fields: [
+    { name: "heading", type: "text" },
+    { name: "lede", type: "textarea" },
+    { type: "row", fields: [appearance] },
+    { name: "viewAllLabel", type: "text", defaultValue: "Read the knowledge hub" },
+  ],
+};
+
 /** Every block type an editor can stack inside a Page's layout. */
 export const layoutBlocks: Block[] = [
   Hero,
@@ -390,6 +402,7 @@ export const layoutBlocks: Block[] = [
   ImageGallery,
   LogoWall,
   PartnerBar,
+  ArticlesList,
   TestimonialsBlock,
   TeamGrid,
   Steps,

@@ -14,6 +14,7 @@ import { Reveal } from "@/components/ui/reveal";
 import { Section } from "@/components/ui/section";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  getArticles,
   getClients,
   getFeaturedProjects,
   getSectors,
@@ -23,6 +24,7 @@ import {
 } from "@/lib/payload";
 import { pagePath } from "@/cms/utils/preview";
 import type {
+  ArticlesListBlock,
   CalculatorEmbedBlock,
   Client,
   ContactRFQBlock,
@@ -398,6 +400,55 @@ export async function TeamGridView({
           );
         })}
       </ul>
+    </Section>
+  );
+}
+
+// --- ArticlesList -----------------------------------------------------------
+
+export async function ArticlesListView({ block }: { block: ArticlesListBlock }) {
+  const articles = (await getArticles()).slice(0, 3);
+  if (articles.length === 0) return null;
+  return (
+    <Section
+      tone={toneOf(block.appearance)}
+      eyebrow="Knowledge"
+      title={block.heading ?? undefined}
+      lede={block.lede ?? undefined}
+    >
+      <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {articles.map((a, i) => (
+          <li key={a.id}>
+            <Reveal delay={i * 0.06} className="h-full">
+              <Card interactive className="relative flex h-full flex-col p-6">
+                <h3 className="text-h3 text-ink-900 font-semibold">{a.title}</h3>
+                {a.excerpt && (
+                  <p className="text-text-soft mt-2 flex-1 text-[0.9375rem]">{a.excerpt}</p>
+                )}
+                <span className="text-brand mt-4 inline-flex items-center gap-1.5 text-sm font-medium">
+                  Read <ArrowRight className="h-4 w-4" aria-hidden />
+                </span>
+                <Link
+                  href={`/knowledge/${a.slug}`}
+                  prefetch={false}
+                  aria-label={`${a.title} — read article`}
+                  className="focus-visible:outline-brand absolute inset-0 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2"
+                />
+              </Card>
+            </Reveal>
+          </li>
+        ))}
+      </ul>
+      <div className="mt-10">
+        <Link
+          href="/knowledge"
+          prefetch={false}
+          className="text-brand focus-visible:outline-brand inline-flex items-center gap-1.5 font-medium underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2"
+        >
+          {block.viewAllLabel ?? "Read the knowledge hub"}{" "}
+          <ArrowRight className="h-4 w-4" aria-hidden />
+        </Link>
+      </div>
     </Section>
   );
 }

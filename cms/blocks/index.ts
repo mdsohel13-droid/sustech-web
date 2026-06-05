@@ -335,6 +335,27 @@ const Spacer: Block = {
   ],
 };
 
+const TeamGrid: Block = {
+  slug: "teamGrid",
+  interfaceName: "TeamGridBlock",
+  labels: { singular: "Team grid", plural: "Team grids" },
+  fields: [
+    { name: "heading", type: "text" },
+    { name: "lede", type: "textarea" },
+    { type: "row", fields: [sourceSelect("team members"), appearance] },
+    {
+      name: "members",
+      type: "relationship",
+      relationTo: "team",
+      hasMany: true,
+      admin: {
+        condition: (_d, s) => s?.source === "selected",
+        description: "Pick and order the people to show.",
+      },
+    },
+  ],
+};
+
 /** Every block type an editor can stack inside a Page's layout. */
 export const layoutBlocks: Block[] = [
   Hero,
@@ -346,6 +367,7 @@ export const layoutBlocks: Block[] = [
   ImageGallery,
   LogoWall,
   TestimonialsBlock,
+  TeamGrid,
   Steps,
   CTABand,
   FAQ,

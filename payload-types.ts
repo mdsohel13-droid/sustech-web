@@ -71,6 +71,7 @@ export interface Config {
     projects: Project;
     services: Service;
     sectors: Sector;
+    team: Team;
     testimonials: Testimonial;
     clients: Client;
     articles: Article;
@@ -88,6 +89,7 @@ export interface Config {
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
     services: ServicesSelect<false> | ServicesSelect<true>;
     sectors: SectorsSelect<false> | SectorsSelect<true>;
+    team: TeamSelect<false> | TeamSelect<true>;
     testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
     clients: ClientsSelect<false> | ClientsSelect<true>;
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
@@ -169,6 +171,7 @@ export interface Page {
         | ImageGalleryBlock
         | LogoWallBlock
         | TestimonialsBlock
+        | TeamGridBlock
         | StepsBlock
         | CTABandBlock
         | FAQBlock
@@ -756,6 +759,51 @@ export interface Testimonial {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TeamGridBlock".
+ */
+export interface TeamGridBlock {
+  heading?: string | null;
+  lede?: string | null;
+  source?: ('auto' | 'selected') | null;
+  appearance?: ('default' | 'muted' | 'dark') | null;
+  /**
+   * Pick and order the people to show.
+   */
+  members?: (number | Team)[] | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'teamGrid';
+}
+/**
+ * Leadership and key people, shown via the Team block on pages like About.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team".
+ */
+export interface Team {
+  id: number;
+  name: string;
+  /**
+   * e.g. Managing Director, Head of Engineering.
+   */
+  role: string;
+  /**
+   * Headshot. Square images look best.
+   */
+  photo?: (number | null) | Media;
+  /**
+   * Short professional bio (2–3 sentences). Real details only.
+   */
+  bio?: string | null;
+  /**
+   * Lower numbers appear first.
+   */
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "StepsBlock".
  */
 export interface StepsBlock {
@@ -1086,6 +1134,10 @@ export interface PayloadLockedDocument {
         value: number | Sector;
       } | null)
     | ({
+        relationTo: 'team';
+        value: number | Team;
+      } | null)
+    | ({
         relationTo: 'testimonials';
         value: number | Testimonial;
       } | null)
@@ -1166,6 +1218,7 @@ export interface PagesSelect<T extends boolean = true> {
         imageGallery?: T | ImageGalleryBlockSelect<T>;
         logoWall?: T | LogoWallBlockSelect<T>;
         testimonials?: T | TestimonialsBlockSelect<T>;
+        teamGrid?: T | TeamGridBlockSelect<T>;
         steps?: T | StepsBlockSelect<T>;
         ctaBand?: T | CTABandBlockSelect<T>;
         faq?: T | FAQBlockSelect<T>;
@@ -1316,6 +1369,19 @@ export interface TestimonialsBlockSelect<T extends boolean = true> {
   source?: T;
   appearance?: T;
   testimonials?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TeamGridBlock_select".
+ */
+export interface TeamGridBlockSelect<T extends boolean = true> {
+  heading?: T;
+  lede?: T;
+  source?: T;
+  appearance?: T;
+  members?: T;
   id?: T;
   blockName?: T;
 }
@@ -1504,6 +1570,19 @@ export interface SectorsSelect<T extends boolean = true> {
         image?: T;
         noindex?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team_select".
+ */
+export interface TeamSelect<T extends boolean = true> {
+  name?: T;
+  role?: T;
+  photo?: T;
+  bio?: T;
+  order?: T;
   updatedAt?: T;
   createdAt?: T;
 }

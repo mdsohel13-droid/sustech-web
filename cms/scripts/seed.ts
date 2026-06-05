@@ -386,6 +386,113 @@ async function main(): Promise<void> {
     await payload.create({ collection: "pages", data: homeData });
   }
 
+  // About — starter structure (draft). Generic copy uses only already-established facts;
+  // real story, leadership photos/bios and any certifications are filled in the CMS.
+  const aboutLayout = [
+    {
+      blockType: "hero",
+      eyebrow: "About Sustech",
+      heading: "One accountable engineering team for industrial Bangladesh.",
+      subhead:
+        "Since 2017, Sustech has delivered single-point EPC for commercial and industrial clients — " +
+        "solar, electrical, grounding & lightning protection and smart systems, engineered to IEC, " +
+        "BNBC and NFPA standards.",
+      tone: "dark",
+      ctas: [
+        customLink("Request a Consultation", "/request-quote", { style: "primary" }),
+        customLink("See Our Projects", "/projects", { style: "secondary" }),
+      ],
+    },
+    {
+      blockType: "richText",
+      content: doc(
+        heading("h2", "Our story"),
+        para(
+          txt(
+            "Sustech Technology Ltd is an EPC engineering firm serving corporate, commercial and " +
+              "industrial clients across Bangladesh. (Replace this with the company's real story, " +
+              "milestones and mission before publishing.)",
+          ),
+        ),
+      ),
+    },
+    {
+      blockType: "statsCounters",
+      appearance: "muted",
+      intro: "Proven across Bangladesh's industrial sector since 2017.",
+      stats: [
+        { value: 9, label: "Years of engineering" },
+        { value: 50, suffix: "+", label: "Clients served" },
+        { value: 95, suffix: "+", label: "Projects delivered" },
+        { value: 13, label: "Service lines" },
+      ],
+    },
+    {
+      blockType: "steps",
+      eyebrow: "What we stand for",
+      heading: "The principles behind every project.",
+      steps: [
+        {
+          title: "In-house engineering",
+          body: "Our own engineers design every system — the solution fits your site, not a catalogue.",
+        },
+        {
+          title: "Compliant by design",
+          body: "Engineered to IEC, BNBC and NFPA standards, documented and verifiable.",
+        },
+        {
+          title: "Safety-first",
+          body: "Protection of people and plant is engineered in, not bolted on.",
+        },
+        {
+          title: "Support that lasts",
+          body: "After-sales service and AMC keep your systems performing for their design life.",
+        },
+      ],
+    },
+    {
+      blockType: "teamGrid",
+      appearance: "muted",
+      source: "auto",
+      heading: "Leadership",
+      lede: "Add the company's leadership and key engineers in the CMS (Team collection).",
+    },
+    {
+      blockType: "logoWall",
+      source: "auto",
+      heading: "Trusted by leading industrial and commercial clients.",
+    },
+    {
+      blockType: "ctaBand",
+      heading: "Want to work with us?",
+      subhead: "Tell us about your project — our engineers will scope it with you, no obligation.",
+      ctas: [customLink("Request a Consultation", "/request-quote", { style: "primary" })],
+    },
+  ];
+  const existingAbout = await payload.find({
+    collection: "pages",
+    where: { slug: { equals: "about" } },
+    limit: 1,
+    draft: true,
+  });
+  const aboutData = {
+    title: "About",
+    slug: "about",
+    _status: "draft" as const,
+    layout: aboutLayout,
+    seo: {
+      title: "About Sustech Technology Ltd — EPC Engineering in Bangladesh",
+      description:
+        "Sustech Technology Ltd is a single-point EPC engineering firm for commercial and " +
+        "industrial clients in Bangladesh — solar, electrical, safety and smart systems since 2017.",
+    },
+  };
+  if (existingAbout.docs.length > 0) {
+    await payload.update({ collection: "pages", id: existingAbout.docs[0]!.id, data: aboutData });
+  } else {
+    await payload.create({ collection: "pages", data: aboutData });
+  }
+
   // A draft page (work-in-progress) — demonstrates draft status and stays 404 publicly.
   const existingDraft = await payload.find({
     collection: "pages",

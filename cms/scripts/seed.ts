@@ -255,6 +255,92 @@ const SERVICE_DETAIL: Record<
   },
 };
 
+// Starter detail content for sector pages — challenges + relevant services.
+// Factual and editable in the CMS; no invented client names or figures.
+const SECTOR_DETAIL: Record<string, { challenges: unknown; serviceSlugs: string[] }> = {
+  "manufacturing-rmg-textile": {
+    challenges: doc(
+      para(
+        txt(
+          "Production floors run on uptime. Unplanned power interruptions, heat and electrical faults stop lines, spoil work-in-progress and put people at risk — and compliance audits demand documented safety.",
+        ),
+      ),
+      para(
+        txt(
+          "Sustech engineers reliable distribution, solar to cut energy cost, grounding and lightning protection for safety, and smart controls for visibility — delivered by one accountable team to IEC, BNBC and NFPA standards.",
+        ),
+      ),
+    ),
+    serviceSlugs: [
+      "electrical-epc",
+      "solar-energy",
+      "grounding-lightning-protection",
+      "smart-systems",
+      "testing-inspection-consultancy",
+    ],
+  },
+  "power-utilities": {
+    challenges: doc(
+      para(
+        txt(
+          "Power and utility infrastructure must meet utility-grade reliability and protection standards, with substations, switchgear and earthing engineered and tested to defensible specifications.",
+        ),
+      ),
+      para(
+        txt(
+          "Sustech designs, builds and commissions substation and distribution systems, integrates solar and renewable capacity, and verifies them with insulation and earth-resistance testing.",
+        ),
+      ),
+    ),
+    serviceSlugs: [
+      "electrical-epc",
+      "solar-energy",
+      "grounding-lightning-protection",
+      "testing-inspection-consultancy",
+    ],
+  },
+  "commercial-real-estate": {
+    challenges: doc(
+      para(
+        txt(
+          "Commercial buildings have to balance running cost, occupant safety and code compliance — efficient electrical systems, rooftop solar, and protection that passes inspection.",
+        ),
+      ),
+      para(
+        txt(
+          "Sustech delivers compliant electrical installations, rooftop solar, intelligent lighting and controls, and grounding and lightning protection for commercial properties.",
+        ),
+      ),
+    ),
+    serviceSlugs: [
+      "electrical-epc",
+      "solar-energy",
+      "smart-systems",
+      "grounding-lightning-protection",
+    ],
+  },
+  "ports-heavy-industry": {
+    challenges: doc(
+      para(
+        txt(
+          "Ports and heavy industry operate in demanding environments — heavy loads, harsh conditions and high consequences from downtime or electrical failure.",
+        ),
+      ),
+      para(
+        txt(
+          "Sustech engineers robust power distribution, grounding and lightning protection, automation and controls, and testing and inspection for demanding industrial sites.",
+        ),
+      ),
+    ),
+    serviceSlugs: [
+      "electrical-epc",
+      "grounding-lightning-protection",
+      "smart-systems",
+      "testing-inspection-consultancy",
+    ],
+  },
+};
+
 const customLink = (label: string, url: string, extra: Record<string, unknown> = {}) => ({
   label,
   type: "custom" as const,
@@ -301,13 +387,27 @@ async function main(): Promise<void> {
       await payload.update({ collection: "services", id: found.docs[0]!.id, data: detail });
     }
   }
+  // Resolve service ids so sectors can reference their relevant services.
+  const allServices = await payload.find({ collection: "services", limit: 50, depth: 0 });
+  const serviceIdBySlug = new Map<string, number>(
+    allServices.docs.map((d) => [d.slug, d.id as number]),
+  );
   for (const s of SECTORS) {
+    const detail = SECTOR_DETAIL[s.slug];
+    const serviceIds = (detail?.serviceSlugs ?? [])
+      .map((sl) => serviceIdBySlug.get(sl))
+      .filter((id): id is number => typeof id === "number");
+    const detailData = detail ? { challenges: detail.challenges, services: serviceIds } : {};
     const found = await payload.find({
       collection: "sectors",
       where: { slug: { equals: s.slug } },
       limit: 1,
     });
-    if (found.docs.length === 0) await payload.create({ collection: "sectors", data: s });
+    if (found.docs.length === 0) {
+      await payload.create({ collection: "sectors", data: { ...s, ...detailData } });
+    } else {
+      await payload.update({ collection: "sectors", id: found.docs[0]!.id, data: detailData });
+    }
   }
 
   // --- SiteSettings --------------------------------------------------------

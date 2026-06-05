@@ -50,7 +50,7 @@ test.describe("CMS-driven site", () => {
   });
 
   test("an unpublished (draft) page returns 404 publicly", async ({ page }) => {
-    const res = await page.goto("/contact");
+    const res = await page.goto("/careers");
     expect(res?.status()).toBe(404);
   });
 });

@@ -356,6 +356,29 @@ const TeamGrid: Block = {
   ],
 };
 
+const PartnerBar: Block = {
+  slug: "partnerBar",
+  interfaceName: "PartnerBarBlock",
+  labels: { singular: "Partner bar", plural: "Partner bars" },
+  fields: [
+    { type: "row", fields: [{ name: "heading", type: "text" }, appearance] },
+    {
+      name: "partners",
+      type: "array",
+      labels: { singular: "Partner", plural: "Partners" },
+      fields: [
+        { name: "name", type: "text", required: true },
+        {
+          name: "logo",
+          type: "upload",
+          relationTo: "media",
+          admin: { description: "Optional logo; the name is shown until a logo is added." },
+        },
+      ],
+    },
+  ],
+};
+
 /** Every block type an editor can stack inside a Page's layout. */
 export const layoutBlocks: Block[] = [
   Hero,
@@ -366,6 +389,7 @@ export const layoutBlocks: Block[] = [
   ProjectsList,
   ImageGallery,
   LogoWall,
+  PartnerBar,
   TestimonialsBlock,
   TeamGrid,
   Steps,

@@ -7,6 +7,7 @@ import {
   HeroView,
   ImageGalleryView,
   LogoWallView,
+  PartnerBarView,
   ProjectsListView,
   RichTextView,
   SectorTilesView,
@@ -38,6 +39,8 @@ function BlockSwitch({ block, index }: { block: Block; index: number }) {
       return <ImageGalleryView block={block} />;
     case "logoWall":
       return <LogoWallView block={block} />;
+    case "partnerBar":
+      return <PartnerBarView block={block} />;
     case "testimonials":
       return <TestimonialsView block={block} />;
     case "teamGrid":

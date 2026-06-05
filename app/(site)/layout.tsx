@@ -4,9 +4,10 @@ import "@/styles/globals.css";
 import { cabinet, jetbrains, switzer } from "@/app/fonts";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
+import { JsonLd } from "@/components/seo/json-ld";
 import { buildFooterColumns, buildHeaderNav } from "@/lib/nav";
 import { getNavigation, getSiteSettings } from "@/lib/payload";
-import { serverUrl } from "@/lib/seo";
+import { serverUrl, siteJsonLd } from "@/lib/seo";
 
 export const metadata: Metadata = {
   metadataBase: new URL(serverUrl),
@@ -27,6 +28,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
         >
           Skip to content
         </a>
+        <JsonLd data={siteJsonLd(settings)} />
         <Header items={items} cta={cta} />
         <main id="main">{children}</main>
         <Footer columns={columns} settings={settings} />

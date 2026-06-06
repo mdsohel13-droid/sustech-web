@@ -17,7 +17,7 @@ export function pageMetadata(page: Page | null, settings: SiteSetting, path: str
       : settings.defaultTitle || settings.companyName);
   const description =
     seo?.description || settings.defaultDescription || settings.description || undefined;
-  const og = mediaUrl(seo?.image) || mediaUrl(settings.ogImage);
+  const og = mediaUrl(seo?.image) || mediaUrl(settings.ogImage) || "/og-default.jpg";
   const noindex = !indexable || Boolean(seo?.noindex);
 
   return {

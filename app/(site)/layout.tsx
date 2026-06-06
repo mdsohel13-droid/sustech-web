@@ -13,6 +13,12 @@ import { serverUrl, siteJsonLd } from "@/lib/seo";
 export const metadata: Metadata = {
   metadataBase: new URL(serverUrl),
   title: { default: "Sustech Technology Ltd", template: "%s · Sustech Technology Ltd" },
+  openGraph: {
+    type: "website",
+    siteName: "Sustech Technology Ltd",
+    images: [{ url: "/og-default.jpg", width: 1200, height: 630 }],
+  },
+  twitter: { card: "summary_large_image", images: ["/og-default.jpg"] },
 };
 
 export default async function SiteLayout({ children }: { children: ReactNode }) {

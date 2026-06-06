@@ -27,6 +27,14 @@ test.describe("SEO / GEO endpoints", () => {
     expect(body).toContain("## Sectors");
   });
 
+  test("pages carry a default Open Graph image", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator('meta[property="og:image"]').first()).toHaveAttribute(
+      "content",
+      /og-default\.jpg/,
+    );
+  });
+
   test("home carries site-wide Organization/LocalBusiness JSON-LD", async ({ page }) => {
     await page.goto("/");
     const blocks = await page.locator('script[type="application/ld+json"]').allTextContents();

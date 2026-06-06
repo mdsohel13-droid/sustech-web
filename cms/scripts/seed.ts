@@ -1,4 +1,5 @@
 import "./load-env";
+import path from "node:path";
 import { getPayload } from "payload";
 import config from "../../payload.config";
 
@@ -997,6 +998,24 @@ async function main(): Promise<void> {
     },
   });
 
+  // --- Hero media (committed seed asset → CMS media) -----------------------
+  const heroAlt =
+    "Sustech engineers installing rooftop solar on a factory roof in Chittagong, Bangladesh";
+  const existingHeroMedia = await payload.find({
+    collection: "media",
+    where: { alt: { equals: heroAlt } },
+    limit: 1,
+  });
+  const heroMediaId =
+    existingHeroMedia.docs[0]?.id ??
+    (
+      await payload.create({
+        collection: "media",
+        data: { alt: heroAlt },
+        filePath: path.resolve("cms/seed-assets/hero-home.webp"),
+      })
+    ).id;
+
   // --- Home page (from content/homepage-copy.md) ---------------------------
   const homeLayout = [
     {
@@ -1008,6 +1027,7 @@ async function main(): Promise<void> {
         "and smart electrical systems for commercial and industrial clients — engineered to IEC, " +
         "BNBC and NFPA standards, and delivered by one accountable team.",
       tone: "dark",
+      backgroundImage: heroMediaId,
       ctas: [
         customLink("Request a Consultation", "/request-quote", { style: "primary" }),
         customLink("See Our Projects", "/projects", { style: "secondary" }),

@@ -42,7 +42,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
           Skip to content
         </a>
         <JsonLd data={siteJsonLd(settings)} />
-        <Header items={items} cta={cta} />
+        <Header items={items} cta={cta} logo={settings.logo} />
         <main id="main">{children}</main>
         <WhatsAppFab phone={settings.phones?.[0]?.number} />
         <ChatWidget services={services.map((s) => s.title)} phone={settings.phones?.[0]?.number} />

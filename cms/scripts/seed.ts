@@ -1113,6 +1113,45 @@ async function main(): Promise<void> {
     "cms/seed-assets/hero-home-loop.mp4",
   );
 
+  // --- Service explainer videos (BESS + LPS) -------------------------------
+  // Short 10s autoplay-muted-loop animations rendered on the matching service page (Brief Part 10).
+  const SERVICE_EXPLAINERS: Record<
+    string,
+    { videoAlt: string; videoFile: string; posterAlt: string; posterFile: string }
+  > = {
+    "bess-storage": {
+      videoAlt:
+        "Animation of electricity flowing from solar panels to battery storage cabinets to factory machines, blue and green energy flow lines",
+      videoFile: "cms/seed-assets/service-bess-explainer.mp4",
+      posterAlt: "BESS explainer animation poster — solar to battery to factory energy flow",
+      posterFile: "cms/seed-assets/service-bess-explainer-poster.webp",
+    },
+    "lps-earthing": {
+      videoAlt:
+        "Slow-motion lightning strike connecting to a factory's air terminal and travelling safely down the conductor to ground",
+      videoFile: "cms/seed-assets/service-lps-protection.mp4",
+      posterAlt:
+        "Lightning protection explainer poster — air terminal channelling a strike to ground",
+      posterFile: "cms/seed-assets/service-lps-protection-poster.webp",
+    },
+  };
+  for (const [slug, asset] of Object.entries(SERVICE_EXPLAINERS)) {
+    const videoId = await uploadMedia(asset.videoAlt, asset.videoFile);
+    const posterId = await uploadMedia(asset.posterAlt, asset.posterFile);
+    const found = await payload.find({
+      collection: "services",
+      where: { slug: { equals: slug } },
+      limit: 1,
+    });
+    if (found.docs[0]) {
+      await payload.update({
+        collection: "services",
+        id: found.docs[0].id,
+        data: { explainerVideo: videoId, explainerPoster: posterId },
+      });
+    }
+  }
+
   // --- Team photos (3 confident matches; the rest are admin-owned uploads) -
   const TEAM_PHOTOS: Record<string, string> = {
     "Md. Sohel Sikder": "cms/seed-assets/team-sohel.webp",

@@ -411,6 +411,14 @@ export interface Service {
    */
   heroImage?: (number | null) | Media;
   /**
+   * Optional 8–15s MP4 — autoplays muted in a loop on the service page. Use a poster image (below) for the still frame.
+   */
+  explainerVideo?: (number | null) | Media;
+  /**
+   * Poster frame for the explainer video (still image shown before/while it loads, and to reduced-motion users).
+   */
+  explainerPoster?: (number | null) | Media;
+  /**
    * Scope of work — what's included.
    */
   scope?: {
@@ -1793,6 +1801,8 @@ export interface ServicesSelect<T extends boolean = true> {
   order?: T;
   summary?: T;
   heroImage?: T;
+  explainerVideo?: T;
+  explainerPoster?: T;
   scope?: T;
   standards?: T;
   faq?:

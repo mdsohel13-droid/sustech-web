@@ -32,7 +32,7 @@ export const RfqRequests: CollectionConfig = {
     {
       type: "row",
       fields: [
-        { name: "email", type: "email", required: true, admin: { width: "50%" } },
+        { name: "email", type: "email", admin: { width: "50%" } },
         { name: "phone", type: "text", admin: { width: "50%" } },
       ],
     },

@@ -1,7 +1,7 @@
 import { RichText } from "@payloadcms/richtext-lexical/react";
 import { ArrowRight, Calculator, Check, Quote } from "lucide-react";
 import Link from "next/link";
-import type { ComponentProps } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import { sectorIcons, serviceIcons } from "@/components/icons";
 import { JsonLd } from "@/components/seo/json-ld";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { ProofCounter } from "@/components/ui/proof-counter";
 import { Reveal } from "@/components/ui/reveal";
 import { Section } from "@/components/ui/section";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import {
   getArticles,
   getClients,
@@ -61,6 +62,34 @@ const objs = <T,>(arr?: (number | T)[] | null): T[] =>
 function mediaUrl(m?: number | Media | null): { url: string; alt: string } | null {
   if (!m || typeof m !== "object" || !m.url) return null;
   return { url: m.url, alt: m.alt ?? "" };
+}
+
+/**
+ * Smoothly expands a description below the card's persistent header (image + title + meta)
+ * when the parent `group` is hovered (desktop), focused (Tab) or tap-focused (mobile).
+ *
+ * Same `grid-template-rows: 0fr → 1fr` technique used by the nav dropdown reveal and the
+ * team-bio reveal — pure CSS, GPU-only, no JS, no layout thrash. The 150ms `--delay-reveal`
+ * applies only on the way IN (anti-flicker on fast mouse-sweeps); collapse is instant.
+ *
+ * Under prefers-reduced-motion the description is shown statically (no animation).
+ * For the reveal to fire, the ANCESTOR card needs the `group` class.
+ */
+function HoverRevealText({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <div className="ease-standard grid grid-rows-[0fr] transition-[grid-template-rows] delay-0 duration-[var(--duration-base)] group-focus-within:grid-rows-[1fr] group-focus-within:delay-[var(--delay-reveal)] group-hover:grid-rows-[1fr] group-hover:delay-[var(--delay-reveal)] motion-reduce:grid-rows-[1fr]">
+      <div className="overflow-hidden">
+        <p
+          className={cn(
+            "text-text-soft ease-standard -translate-y-1 text-[0.9375rem] opacity-0 transition-[opacity,transform] duration-[var(--duration-base)] group-focus-within:translate-y-0 group-focus-within:opacity-100 group-focus-within:delay-[var(--delay-reveal)] group-hover:translate-y-0 group-hover:opacity-100 group-hover:delay-[var(--delay-reveal)] motion-reduce:translate-y-0 motion-reduce:opacity-100",
+            className,
+          )}
+        >
+          {children}
+        </p>
+      </div>
+    </div>
+  );
 }
 
 // --- Hero -------------------------------------------------------------------
@@ -325,13 +354,21 @@ export async function ProjectsListView({
             return (
               <li key={p.id}>
                 <Reveal delay={i * 0.06}>
-                  <Card interactive className="relative h-full overflow-hidden">
+                  {/*
+                   * `group` enables the hover/focus-within reveal of the summary below the
+                   * meta line. The image + sector + name stay always visible so the card is
+                   * scannable at a glance; the longer summary expands smoothly on interaction.
+                   */}
+                  <Card
+                    interactive
+                    className="group focus-within:border-brand/30 relative h-full overflow-hidden focus-within:-translate-y-0.5 focus-within:shadow-md"
+                  >
                     {img ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={img.url}
                         alt={img.alt}
-                        className="aspect-[4/3] w-full object-cover"
+                        className="ease-standard aspect-[4/3] w-full object-cover transition-transform duration-[var(--duration-slow)] group-focus-within:scale-[1.03] group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-focus-within:scale-100 motion-reduce:group-hover:scale-100"
                       />
                     ) : (
                       <Skeleton className="aspect-[4/3] w-full rounded-none" />
@@ -343,7 +380,7 @@ export async function ProjectsListView({
                         </p>
                       )}
                       <h3 className="text-h3 text-ink-900 mt-2 font-semibold">{p.name}</h3>
-                      <p className="text-text-soft mt-2 text-[0.9375rem]">{p.summary}</p>
+                      {p.summary && <HoverRevealText className="mt-2">{p.summary}</HoverRevealText>}
                     </div>
                     <Link
                       href={`/projects/${p.slug}`}
@@ -396,14 +433,40 @@ export async function TeamGridView({
       <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {members.map((m, i) => {
           const photo = mediaUrl(m.photo);
+          const hasBio = Boolean(m.bio);
           return (
             <li key={m.id}>
               <Reveal delay={Math.min(i, 6) * 0.05} className="h-full">
-                <Card className="flex h-full flex-col overflow-hidden">
-                  <div className="bg-surface-2 aspect-square w-full">
+                {/*
+                 * The whole card is the disclosure target. Image + name + role are always
+                 * visible. The bio expands BELOW the role on hover (desktop), focus (keyboard)
+                 * or tap (mobile tap = focus). Pure CSS — the same grid-rows trick used by
+                 * the nav dropdown reveal, so the height animates smoothly with no layout
+                 * thrash. `tabIndex={0}` (when there's a bio) makes the card reachable by Tab
+                 * and discoverable by touch. Reduced-motion users get the bio shown statically.
+                 */}
+                <Card
+                  className={cn(
+                    "group ease-standard relative flex h-full flex-col overflow-hidden transition-[border-color,box-shadow,transform] duration-[var(--duration-base)]",
+                    hasBio &&
+                      "focus-visible:outline-brand hover:border-brand/30 focus:border-brand/30 cursor-pointer hover:-translate-y-0.5 hover:shadow-md focus:-translate-y-0.5 focus:shadow-md focus-visible:outline-2 focus-visible:-outline-offset-2",
+                  )}
+                  // Whole card is one trigger; we don't double-tabstop on the image.
+                  // No role="button" / aria-expanded — without JS toggling it would lie to AT;
+                  // the bio is in the DOM at all times and always read by assistive tech.
+                >
+                  <div
+                    tabIndex={hasBio ? 0 : -1}
+                    className="bg-surface-2 aspect-square w-full overflow-hidden focus:outline-none"
+                    aria-label={hasBio ? `${m.name} — show biography` : undefined}
+                  >
                     {photo ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={photo.url} alt={photo.alt} className="h-full w-full object-cover" />
+                      <img
+                        src={photo.url}
+                        alt={photo.alt}
+                        className="ease-standard h-full w-full object-cover transition-transform duration-[var(--duration-slow)] group-focus-within:scale-[1.04] group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-focus-within:scale-100 motion-reduce:group-hover:scale-100"
+                      />
                     ) : (
                       <Skeleton className="h-full w-full rounded-none" />
                     )}
@@ -413,7 +476,7 @@ export async function TeamGridView({
                     <p className="text-brand mt-1 font-mono text-xs tracking-[0.08em] uppercase">
                       {m.role}
                     </p>
-                    {m.bio && <p className="text-text-soft mt-3 text-[0.9375rem]">{m.bio}</p>}
+                    {hasBio && <HoverRevealText className="mt-3">{m.bio}</HoverRevealText>}
                   </div>
                 </Card>
               </Reveal>
@@ -496,15 +559,19 @@ export async function ProductShowcaseView({ block }: { block: ProductShowcaseBlo
           return (
             <li key={p.id}>
               <Reveal delay={Math.min(i, 6) * 0.06} className="h-full">
-                <Card interactive className="relative flex h-full flex-col overflow-hidden">
-                  <div className="bg-surface-2 aspect-[3/2] w-full">
+                {/* `group` enables the hover/focus reveal of the summary below brand + title. */}
+                <Card
+                  interactive
+                  className="group focus-within:border-brand/30 relative flex h-full flex-col overflow-hidden focus-within:-translate-y-0.5 focus-within:shadow-md"
+                >
+                  <div className="bg-surface-2 aspect-[3/2] w-full overflow-hidden">
                     {img ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={img.url}
                         alt={img.alt || p.title}
                         loading="lazy"
-                        className="h-full w-full object-cover"
+                        className="ease-standard h-full w-full object-cover transition-transform duration-[var(--duration-slow)] group-focus-within:scale-[1.04] group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-focus-within:scale-100 motion-reduce:group-hover:scale-100"
                       />
                     ) : (
                       <Skeleton className="h-full w-full rounded-none" />
@@ -517,9 +584,7 @@ export async function ProductShowcaseView({ block }: { block: ProductShowcaseBlo
                       </p>
                     )}
                     <h3 className="text-h3 text-ink-900 mt-1 font-semibold">{p.title}</h3>
-                    {p.summary && (
-                      <p className="text-text-soft mt-3 flex-1 text-[0.9375rem]">{p.summary}</p>
-                    )}
+                    {p.summary && <HoverRevealText className="mt-3">{p.summary}</HoverRevealText>}
                     {p.externalUrl && (
                       <span className="text-brand mt-4 inline-flex items-center gap-1.5 text-sm font-medium">
                         Learn more <ArrowRight className="h-4 w-4" aria-hidden />

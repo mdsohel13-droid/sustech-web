@@ -13,6 +13,7 @@ import { ProofCounter } from "@/components/ui/proof-counter";
 import { Reveal } from "@/components/ui/reveal";
 import { Section } from "@/components/ui/section";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import {
   getArticles,
   getClients,
@@ -396,14 +397,40 @@ export async function TeamGridView({
       <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {members.map((m, i) => {
           const photo = mediaUrl(m.photo);
+          const hasBio = Boolean(m.bio);
           return (
             <li key={m.id}>
               <Reveal delay={Math.min(i, 6) * 0.05} className="h-full">
-                <Card className="flex h-full flex-col overflow-hidden">
-                  <div className="bg-surface-2 aspect-square w-full">
+                {/*
+                 * The whole card is the disclosure target. Image + name + role are always
+                 * visible. The bio expands BELOW the role on hover (desktop), focus (keyboard)
+                 * or tap (mobile tap = focus). Pure CSS — the same grid-rows trick used by
+                 * the nav dropdown reveal, so the height animates smoothly with no layout
+                 * thrash. `tabIndex={0}` (when there's a bio) makes the card reachable by Tab
+                 * and discoverable by touch. Reduced-motion users get the bio shown statically.
+                 */}
+                <Card
+                  className={cn(
+                    "group ease-standard relative flex h-full flex-col overflow-hidden transition-[border-color,box-shadow,transform] duration-[var(--duration-base)]",
+                    hasBio &&
+                      "focus-visible:outline-brand hover:border-brand/30 focus:border-brand/30 cursor-pointer hover:-translate-y-0.5 hover:shadow-md focus:-translate-y-0.5 focus:shadow-md focus-visible:outline-2 focus-visible:-outline-offset-2",
+                  )}
+                  // Whole card is one trigger; we don't double-tabstop on the image.
+                  // No role="button" / aria-expanded — without JS toggling it would lie to AT;
+                  // the bio is in the DOM at all times and always read by assistive tech.
+                >
+                  <div
+                    tabIndex={hasBio ? 0 : -1}
+                    className="bg-surface-2 aspect-square w-full overflow-hidden focus:outline-none"
+                    aria-label={hasBio ? `${m.name} — show biography` : undefined}
+                  >
                     {photo ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={photo.url} alt={photo.alt} className="h-full w-full object-cover" />
+                      <img
+                        src={photo.url}
+                        alt={photo.alt}
+                        className="ease-standard h-full w-full object-cover transition-transform duration-[var(--duration-slow)] group-focus-within:scale-[1.04] group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-focus-within:scale-100 motion-reduce:group-hover:scale-100"
+                      />
                     ) : (
                       <Skeleton className="h-full w-full rounded-none" />
                     )}
@@ -413,7 +440,18 @@ export async function TeamGridView({
                     <p className="text-brand mt-1 font-mono text-xs tracking-[0.08em] uppercase">
                       {m.role}
                     </p>
-                    {m.bio && <p className="text-text-soft mt-3 text-[0.9375rem]">{m.bio}</p>}
+                    {hasBio && (
+                      // Hidden by default; expands smoothly downward on hover/focus.
+                      // Same grid-rows technique used by the nav dropdown — zero layout thrash,
+                      // GPU-friendly. Under prefers-reduced-motion the bio is shown statically.
+                      <div className="ease-standard grid grid-rows-[0fr] transition-[grid-template-rows] delay-0 duration-[var(--duration-base)] group-focus-within:grid-rows-[1fr] group-focus-within:delay-[var(--delay-reveal)] group-hover:grid-rows-[1fr] group-hover:delay-[var(--delay-reveal)] motion-reduce:grid-rows-[1fr]">
+                        <div className="overflow-hidden">
+                          <p className="text-text-soft ease-standard mt-3 -translate-y-1 text-[0.9375rem] opacity-0 transition-[opacity,transform] duration-[var(--duration-base)] group-focus-within:translate-y-0 group-focus-within:opacity-100 group-focus-within:delay-[var(--delay-reveal)] group-hover:translate-y-0 group-hover:opacity-100 group-hover:delay-[var(--delay-reveal)] motion-reduce:translate-y-0 motion-reduce:opacity-100">
+                            {m.bio}
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </Card>
               </Reveal>

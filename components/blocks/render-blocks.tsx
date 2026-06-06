@@ -9,6 +9,7 @@ import {
   ImageGalleryView,
   LogoWallView,
   PartnerBarView,
+  ProductShowcaseView,
   ProjectsListView,
   RichTextView,
   SectorTilesView,
@@ -42,6 +43,8 @@ function BlockSwitch({ block, index }: { block: Block; index: number }) {
       return <LogoWallView block={block} />;
     case "partnerBar":
       return <PartnerBarView block={block} />;
+    case "productShowcase":
+      return <ProductShowcaseView block={block} />;
     case "articlesList":
       return <ArticlesListView block={block} />;
     case "testimonials":

@@ -53,6 +53,15 @@ export const Services: CollectionConfig = {
       required: true,
       admin: { description: "One-line outcome shown on cards and grids." },
     },
+    {
+      name: "heroImage",
+      type: "upload",
+      relationTo: "media",
+      admin: {
+        description:
+          "Hero image used at the top of the service page. Wide 3:2 or 16:9 ratio works best.",
+      },
+    },
     { name: "scope", type: "richText", admin: { description: "Scope of work — what's included." } },
     {
       name: "standards",

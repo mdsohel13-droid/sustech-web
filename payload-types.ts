@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     pages: Page;
     projects: Project;
+    products: Product;
     services: Service;
     sectors: Sector;
     team: Team;
@@ -88,6 +89,7 @@ export interface Config {
   collectionsSelect: {
     pages: PagesSelect<false> | PagesSelect<true>;
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
+    products: ProductsSelect<false> | ProductsSelect<true>;
     services: ServicesSelect<false> | ServicesSelect<true>;
     sectors: SectorsSelect<false> | SectorsSelect<true>;
     team: TeamSelect<false> | TeamSelect<true>;
@@ -173,6 +175,7 @@ export interface Page {
         | ImageGalleryBlock
         | LogoWallBlock
         | PartnerBarBlock
+        | ProductShowcaseBlock
         | ArticlesListBlock
         | TestimonialsBlock
         | TeamGridBlock
@@ -227,9 +230,13 @@ export interface HeroBlock {
   subhead?: string | null;
   tone?: ('dark' | 'light') | null;
   /**
-   * Optional background image.
+   * Optional background image (also used as the video poster).
    */
   backgroundImage?: (number | null) | Media;
+  /**
+   * Optional MP4 (autoplay, muted, looping, ≤ 10s). Falls back to the image when motion is reduced, on small screens, or when missing.
+   */
+  backgroundVideo?: (number | null) | Media;
   ctas?:
     | {
         label: string;
@@ -399,6 +406,10 @@ export interface Service {
    * One-line outcome shown on cards and grids.
    */
   summary: string;
+  /**
+   * Hero image used at the top of the service page. Wide 3:2 or 16:9 ratio works best.
+   */
+  heroImage?: (number | null) | Media;
   /**
    * Scope of work — what's included.
    */
@@ -771,6 +782,96 @@ export interface PartnerBarBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'partnerBar';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductShowcaseBlock".
+ */
+export interface ProductShowcaseBlock {
+  heading?: string | null;
+  lede?: string | null;
+  source?: ('featured' | 'selected') | null;
+  appearance?: ('default' | 'muted' | 'dark') | null;
+  products?: (number | Product)[] | null;
+  viewAllLabel?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'productShowcase';
+}
+/**
+ * Products & distribution showcase — the cards rendered by the Product Showcase block.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products".
+ */
+export interface Product {
+  id: number;
+  title: string;
+  /**
+   * The URL path segment. Auto-filled from the title — edit only if you must.
+   */
+  slug: string;
+  /**
+   * e.g. Atomberg, Growatt, Hithium.
+   */
+  brand?: string | null;
+  category: 'energy' | 'solar' | 'lighting' | 'safety' | 'power';
+  /**
+   * One-line outcome shown on the product card.
+   */
+  summary: string;
+  /**
+   * Card image. 3:2 product photography looks best.
+   */
+  image: number | Media;
+  featured?: boolean | null;
+  order?: number | null;
+  /**
+   * Optional — partner site or datasheet.
+   */
+  externalUrl?: string | null;
+  /**
+   * Optional — longer-form copy.
+   */
+  details?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Search & social. Leave blank to use the site defaults.
+   */
+  seo?: {
+    /**
+     * Overrides the page/site title.
+     */
+    title?: string | null;
+    /**
+     * Canonical URL (advanced; usually leave blank).
+     */
+    canonical?: string | null;
+    /**
+     * ~150–160 characters. Shown in search results and link previews.
+     */
+    description?: string | null;
+    /**
+     * Social share image (Open Graph), 1200×630.
+     */
+    image?: (number | null) | Media;
+    noindex?: boolean | null;
+  };
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1207,6 +1308,10 @@ export interface PayloadLockedDocument {
         value: number | Project;
       } | null)
     | ({
+        relationTo: 'products';
+        value: number | Product;
+      } | null)
+    | ({
         relationTo: 'services';
         value: number | Service;
       } | null)
@@ -1303,6 +1408,7 @@ export interface PagesSelect<T extends boolean = true> {
         imageGallery?: T | ImageGalleryBlockSelect<T>;
         logoWall?: T | LogoWallBlockSelect<T>;
         partnerBar?: T | PartnerBarBlockSelect<T>;
+        productShowcase?: T | ProductShowcaseBlockSelect<T>;
         articlesList?: T | ArticlesListBlockSelect<T>;
         testimonials?: T | TestimonialsBlockSelect<T>;
         teamGrid?: T | TeamGridBlockSelect<T>;
@@ -1337,6 +1443,7 @@ export interface HeroBlockSelect<T extends boolean = true> {
   subhead?: T;
   tone?: T;
   backgroundImage?: T;
+  backgroundVideo?: T;
   ctas?:
     | T
     | {
@@ -1461,6 +1568,20 @@ export interface PartnerBarBlockSelect<T extends boolean = true> {
         logo?: T;
         id?: T;
       };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductShowcaseBlock_select".
+ */
+export interface ProductShowcaseBlockSelect<T extends boolean = true> {
+  heading?: T;
+  lede?: T;
+  source?: T;
+  appearance?: T;
+  products?: T;
+  viewAllLabel?: T;
   id?: T;
   blockName?: T;
 }
@@ -1636,6 +1757,33 @@ export interface ProjectsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products_select".
+ */
+export interface ProductsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  brand?: T;
+  category?: T;
+  summary?: T;
+  image?: T;
+  featured?: T;
+  order?: T;
+  externalUrl?: T;
+  details?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        canonical?: T;
+        description?: T;
+        image?: T;
+        noindex?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "services_select".
  */
 export interface ServicesSelect<T extends boolean = true> {
@@ -1644,6 +1792,7 @@ export interface ServicesSelect<T extends boolean = true> {
   icon?: T;
   order?: T;
   summary?: T;
+  heroImage?: T;
   scope?: T;
   standards?: T;
   faq?:

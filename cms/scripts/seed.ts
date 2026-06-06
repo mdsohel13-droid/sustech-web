@@ -912,10 +912,28 @@ async function main(): Promise<void> {
     }
   }
 
+  // --- Brand logo (committed seed asset → CMS media → site-settings) -------
+  const logoAlt = "Sustech Technology Ltd logo";
+  const existingLogoMedia = await payload.find({
+    collection: "media",
+    where: { alt: { equals: logoAlt } },
+    limit: 1,
+  });
+  const logoMediaId =
+    existingLogoMedia.docs[0]?.id ??
+    (
+      await payload.create({
+        collection: "media",
+        data: { alt: logoAlt },
+        filePath: path.resolve("cms/seed-assets/logo.png"),
+      })
+    ).id;
+
   // --- SiteSettings --------------------------------------------------------
   await payload.updateGlobal({
     slug: "site-settings",
     data: {
+      logo: logoMediaId,
       companyName: "Sustech Technology Ltd",
       shortName: "Sustech",
       tagline: "Smart Energy. Strong Engineering. Sustainable Solution.",

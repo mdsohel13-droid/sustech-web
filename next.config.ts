@@ -14,9 +14,31 @@ const securityHeaders = [
 // robots.txt and per-page robots meta). See DEPLOYMENT-AND-VPS.md §4.
 const indexable = process.env.SITE_INDEXABLE === "true";
 
+// Payload serves CMS media at same-origin absolute URLs (e.g.
+// `https://sustechltd.com/api/media/file/logo.webp`). next/image rejects external hosts
+// unless they're in `remotePatterns`, so we whitelist the configured server URL host (it's
+// "external" only in name — same Next.js process serves it) plus the dev hosts.
+const serverUrlHost = (() => {
+  try {
+    const u = process.env.NEXT_PUBLIC_SERVER_URL ?? process.env.SITE_URL;
+    return u ? new URL(u).hostname : null;
+  } catch {
+    return null;
+  }
+})();
+const imageHosts = Array.from(
+  new Set([serverUrlHost, "localhost", "127.0.0.1"].filter((h): h is string => Boolean(h))),
+);
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  images: { formats: ["image/avif", "image/webp"] },
+  images: {
+    formats: ["image/avif", "image/webp"],
+    remotePatterns: imageHosts.flatMap((hostname) => [
+      { protocol: "http", hostname },
+      { protocol: "https", hostname },
+    ]),
+  },
   async headers() {
     const headers = indexable
       ? securityHeaders

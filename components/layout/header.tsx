@@ -7,14 +7,16 @@ import { Logo } from "@/components/layout/logo";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import type { NavItem, NavLeaf } from "@/lib/nav";
+import type { SiteSetting } from "@/payload-types";
 import { cn } from "@/lib/utils";
 
 interface HeaderProps {
   items: NavItem[];
   cta: NavLeaf | null;
+  logo?: SiteSetting["logo"];
 }
 
-export function Header({ items, cta }: HeaderProps) {
+export function Header({ items, cta, logo }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -60,7 +62,7 @@ export function Header({ items, cta }: HeaderProps) {
             scrolled ? "h-16" : "h-20",
           )}
         >
-          <Logo />
+          <Logo logo={logo} />
         </div>
 
         <nav aria-label="Primary" className="hidden items-center gap-1 lg:flex">

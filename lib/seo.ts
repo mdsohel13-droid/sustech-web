@@ -49,6 +49,8 @@ export function siteJsonLd(settings: SiteSetting): Record<string, unknown> {
     foundingDate: settings.foundingYear ? String(settings.foundingYear) : undefined,
     areaServed: settings.areaServed || undefined,
   };
+  const logo = mediaUrl(settings.logo);
+  if (logo) org.logo = logo.startsWith("http") ? logo : `${serverUrl}${logo}`;
   const social = (settings.social ?? []).map((s) => s.url).filter(Boolean);
   if (social.length) org.sameAs = social;
 

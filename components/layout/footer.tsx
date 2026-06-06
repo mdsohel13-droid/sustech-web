@@ -28,7 +28,7 @@ export function Footer({ columns, settings }: FooterProps) {
       <Container className="py-16 md:py-20">
         <div className="grid gap-12 lg:grid-cols-[1.4fr_repeat(3,1fr)]">
           <div className="max-w-sm">
-            <Logo onDark />
+            <Logo onDark logo={settings.logo} />
             {settings.description && (
               <p className="text-text-invert-soft mt-4 text-sm leading-relaxed">
                 {settings.description}

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { SiteSetting } from "@/payload-types";
-import { cn } from "@/lib/utils";
+import { cn, toRelativeIfSameOrigin } from "@/lib/utils";
 
 function asMedia(logo?: SiteSetting["logo"]) {
   return logo && typeof logo === "object" && logo.url ? logo : null;
@@ -45,7 +45,7 @@ export function Logo({
            * can swap the asset without code changes.
            */}
           <Image
-            src={media.url ?? ""}
+            src={toRelativeIfSameOrigin(media.url) ?? ""}
             alt="Sustech Technology Ltd"
             width={media.width ?? 508}
             height={media.height ?? 268}

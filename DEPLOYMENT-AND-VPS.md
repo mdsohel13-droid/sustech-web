@@ -102,8 +102,8 @@ Do this as a deliberate, reversible event.
 **Cutover:**
 1. Point apex `@` and `www` A-records to the new VPS IP (or to Vercel if hosting the front end there).
 2. Update Caddy to serve `sustechltd.com` + `www.sustechltd.com` (auto-TLS); 301 `www → apex` (or your canonical choice).
-3. Flip `SITE_INDEXABLE=true` → remove noindex, allow crawlers.
-4. Update **all canonical URLs, `sitemap.xml`, `llms.txt`, and JSON-LD URLs** from the beta host to the apex.
+3. Set `SITE_INDEXABLE=true` in the production env **and rebuild/redeploy** — the `noindex` (robots.txt, per-page `<meta robots>`, and the `X-Robots-Tag` header) is **baked at build time** for the statically-prerendered pages, so a runtime-only flip is not enough. After the rebuild: `robots.txt` returns `Allow: /` (welcoming GPTBot/ClaudeBot/PerplexityBot/Google-Extended/Bingbot/Googlebot, disallowing `/admin` `/api` `/preview`), no `X-Robots-Tag`, and pages carry no `noindex` meta. (Verified locally both ways.)
+4. Set `NEXT_PUBLIC_SERVER_URL` (and `SITE_URL`) to the apex and rebuild so **all canonical URLs, `sitemap.xml`, `llms.txt`, and JSON-LD URLs** point at the apex rather than the beta host.
 5. 301 `beta.sustechltd.com → https://sustechltd.com` to retire the beta cleanly.
 
 **Post-cutover (48–72h watch):**

@@ -16,14 +16,19 @@
   --color-text-soft: #5b6675;
   --color-text-invert: #e9eff7;
   --color-text-invert-soft: #a7b4c6;
-  --color-brand: #0e5fd8;
-  --color-brand-600: #0b4fb5;
-  --color-brand-300: #6ea4f2;
-  --color-energy: #16a34a;
-  --color-energy-300: #4ade80;
-  --color-solar: #f59e0b;
-  --color-solar-600: #d97706;
-  --color-solar-text: #1a1206;
+  /* ── Brand palette (logo-accurate, 2026-06-07) ──────────────────────────
+     True Blue    #0073CF  · trust · authority · engineering
+     Lime Green   #32CD32  · sustainability · energy · growth
+     Golden Poppy #FCC200  · primary CTA only — reserve for ONE action/screen
+  ─────────────────────────────────────────────────────────────────────── */
+  --color-brand: #0073cf; /* True Blue */
+  --color-brand-600: #005ba3; /* darker — hover / active */
+  --color-brand-300: #60b4f5; /* lighter — on ink/dark bands */
+  --color-energy: #32cd32; /* Lime Green */
+  --color-energy-300: #7ee87e; /* lighter — on ink/dark bands */
+  --color-solar: #fcc200; /* Golden Poppy — PRIMARY CTA ONLY */
+  --color-solar-600: #d9a500; /* darker — button hover */
+  --color-solar-text: #1a1206; /* near-black — text on golden buttons */
 
   /* radius */
   --radius-sm: 6px;

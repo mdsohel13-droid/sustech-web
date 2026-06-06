@@ -99,6 +99,16 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
 
       <section className="bg-ink-900 text-text-invert relative isolate overflow-hidden">
         <GridMotif tone="dark" />
+        {service.heroImage && typeof service.heroImage === "object" && service.heroImage.url ? (
+          // CMS-driven hero image (CLAUDE.md §1). Sits behind the dark band at 25% opacity so the
+          // copy stays readable, matching the home hero treatment.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={service.heroImage.url}
+            alt={service.heroImage.alt ?? ""}
+            className="absolute inset-0 -z-10 h-full w-full object-cover opacity-25"
+          />
+        ) : null}
         <Container className="relative py-20 md:py-28">
           <span className="bg-brand/15 text-brand-300 mb-6 inline-flex h-12 w-12 items-center justify-center rounded-md">
             <Icon className="h-6 w-6" aria-hidden />

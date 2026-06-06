@@ -9,6 +9,7 @@ import { Articles } from "./cms/collections/articles";
 import { Clients } from "./cms/collections/clients";
 import { Media } from "./cms/collections/media";
 import { Pages } from "./cms/collections/pages";
+import { Products } from "./cms/collections/products";
 import { Projects } from "./cms/collections/projects";
 import { RfqRequests } from "./cms/collections/rfq-requests";
 import { Sectors } from "./cms/collections/sectors";
@@ -33,6 +34,7 @@ export default buildConfig({
   collections: [
     Pages,
     Projects,
+    Products,
     Services,
     Sectors,
     Team,

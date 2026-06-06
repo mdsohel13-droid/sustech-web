@@ -1034,6 +1034,180 @@ async function main(): Promise<void> {
       })
     ).id;
 
+  // --- Asset upload helper -------------------------------------------------
+  // Find-or-create a media doc by its alt text (idempotent for CI/local re-runs).
+  const uploadMedia = async (alt: string, file: string): Promise<number> => {
+    const found = await payload.find({
+      collection: "media",
+      where: { alt: { equals: alt } },
+      limit: 1,
+    });
+    if (found.docs[0]) return found.docs[0].id as number;
+    const created = await payload.create({
+      collection: "media",
+      data: { alt },
+      filePath: path.resolve(file),
+    });
+    return created.id as number;
+  };
+
+  // --- Service hero images (Brief Part 10) ---------------------------------
+  // One AI-generated hero per service line, owned by the CMS so an admin can swap any time.
+  const SERVICE_HEROES: Record<string, { alt: string; file: string }> = {
+    "solar-renewable": {
+      alt: "Bangladeshi solar engineers installing monocrystalline PV panels on a factory rooftop in Chittagong",
+      file: "cms/seed-assets/service-solar-renewable.webp",
+    },
+    "bess-storage": {
+      alt: "Rows of lithium iron phosphate battery storage cabinets in a modern industrial BESS room",
+      file: "cms/seed-assets/service-bess-storage.webp",
+    },
+    "lps-earthing": {
+      alt: "Dramatic night lightning strikes connecting to a factory's air terminals and travelling safely to ground",
+      file: "cms/seed-assets/service-lps-earthing.webp",
+    },
+    "electrical-epc": {
+      alt: "Bangladeshi electrical engineer working on a high-voltage switchgear panel inside a modern substation",
+      file: "cms/seed-assets/service-electrical-epc.webp",
+    },
+    "inspection-testing": {
+      alt: "Engineer using a FLIR thermal imaging camera scanning an electrical panel, thermal heatmap overlay visible",
+      file: "cms/seed-assets/service-inspection-testing.webp",
+    },
+    "substation-hv": {
+      alt: "Modern industrial substation interior with power transformer, oil-filled HV equipment and control panels",
+      file: "cms/seed-assets/service-substation-hv.webp",
+    },
+    "fire-safety": {
+      alt: "Fire detection and alarm system panel being commissioned by an engineer in an industrial factory",
+      file: "cms/seed-assets/service-fire-safety.webp",
+    },
+    "training-safety": {
+      alt: "Bangladeshi industrial workers in a Bureau Veritas safety training session led by a trainer at a whiteboard",
+      file: "cms/seed-assets/service-training-safety.webp",
+    },
+    "lighting-distribution": {
+      alt: "Interior of the Sustech Technology Ltd retail showroom in Chittagong showcasing BESS cabinets, fans and lighting products",
+      file: "cms/seed-assets/products-showroom.webp",
+    },
+  };
+  for (const [slug, asset] of Object.entries(SERVICE_HEROES)) {
+    const mediaId = await uploadMedia(asset.alt, asset.file);
+    const found = await payload.find({
+      collection: "services",
+      where: { slug: { equals: slug } },
+      limit: 1,
+    });
+    if (found.docs[0]) {
+      await payload.update({
+        collection: "services",
+        id: found.docs[0].id,
+        data: { heroImage: mediaId },
+      });
+    }
+  }
+
+  // --- Home hero background video (autoplay-muted-loop) --------------------
+  const heroVideoId = await uploadMedia(
+    "Sustech brand intro time-lapse — solar installation at sunrise to sunset on a Bangladeshi factory roof",
+    "cms/seed-assets/hero-home-loop.mp4",
+  );
+
+  // --- Team photos (3 confident matches; the rest are admin-owned uploads) -
+  const TEAM_PHOTOS: Record<string, string> = {
+    "Md. Sohel Sikder": "cms/seed-assets/team-sohel.webp",
+    "Md. Kaium Sikdar": "cms/seed-assets/team-kaium.webp",
+    "Asib Ahmed": "cms/seed-assets/team-asib.webp",
+  };
+
+  // --- Products & distribution (Brief Part 12 §6) --------------------------
+  // Featured product cards rendered by the Product Showcase block. Admin-editable.
+  const PRODUCTS: Array<{
+    title: string;
+    slug: string;
+    brand?: string;
+    category: "energy" | "solar" | "lighting" | "safety" | "power";
+    summary: string;
+    imageAlt: string;
+    imageFile: string;
+    externalUrl?: string;
+    featured: boolean;
+    order: number;
+  }> = [
+    {
+      title: "Atomberg Gorilla BLDC Ceiling Fan",
+      slug: "atomberg-gorilla-bldc-fan",
+      brand: "Atomberg",
+      category: "energy",
+      summary:
+        "65% energy savings vs conventional fans, BLDC motor, 5-star BEE-rated. Sustech is sole distributor for Bangladesh.",
+      imageAlt:
+        "Atomberg Gorilla BLDC ceiling fan installed in a bright modern Bangladeshi industrial workspace",
+      imageFile: "cms/seed-assets/product-atomberg-fan.webp",
+      featured: true,
+      order: 1,
+    },
+    {
+      title: "UFO High-Bay LED Luminaire",
+      slug: "ufo-highbay-led",
+      category: "lighting",
+      summary:
+        "Industrial-grade UFO high-bay LED for warehouses and production halls — high lumen output, low maintenance.",
+      imageAlt: "Row of UFO high-bay LED lights illuminating a large warehouse interior",
+      imageFile: "cms/seed-assets/product-led-highbay.webp",
+      featured: true,
+      order: 2,
+    },
+    {
+      title: "Sustech Solar Street Light",
+      slug: "solar-street-light",
+      category: "solar",
+      summary:
+        "All-in-one solar street light with integrated PV, LiFePO4 battery and LED — dusk-to-dawn, no grid connection.",
+      imageAlt:
+        "Sustech solar street light at dusk, solar panel glowing with reflected sky, LED lamp beginning to illuminate",
+      imageFile: "cms/seed-assets/product-solar-streetlight.webp",
+      featured: true,
+      order: 3,
+    },
+    {
+      title: "Lightning Air Terminal & Down-Conductor",
+      slug: "lps-air-terminal-system",
+      category: "safety",
+      summary:
+        "IEC 62305-compliant air terminals and down-conductor systems — designed, installed and tested by Sustech.",
+      imageAlt:
+        "Sustech engineers installing a lightning air terminal on a factory roof in Bangladesh",
+      imageFile: "cms/seed-assets/product-lps-airterminal.webp",
+      featured: true,
+      order: 4,
+    },
+  ];
+  for (const p of PRODUCTS) {
+    const imageId = await uploadMedia(p.imageAlt, p.imageFile);
+    const data = {
+      title: p.title,
+      slug: p.slug,
+      brand: p.brand,
+      category: p.category,
+      summary: p.summary,
+      image: imageId,
+      externalUrl: p.externalUrl,
+      featured: p.featured,
+      order: p.order,
+    };
+    const found = await payload.find({
+      collection: "products",
+      where: { slug: { equals: p.slug } },
+      limit: 1,
+    });
+    if (found.docs[0]) {
+      await payload.update({ collection: "products", id: found.docs[0].id, data });
+    } else {
+      await payload.create({ collection: "products", data });
+    }
+  }
+
   // --- Home page (from content/homepage-copy.md) ---------------------------
   const homeLayout = [
     {
@@ -1046,6 +1220,7 @@ async function main(): Promise<void> {
         "BNBC and NFPA standards, and delivered by one accountable team.",
       tone: "dark",
       backgroundImage: heroMediaId,
+      backgroundVideo: heroVideoId,
       ctas: [
         customLink("Request a Consultation", "/request-quote", { style: "primary" }),
         customLink("See Our Projects", "/projects", { style: "secondary" }),
@@ -1170,6 +1345,14 @@ async function main(): Promise<void> {
       heading: "In our clients' words.",
     },
     {
+      blockType: "productShowcase",
+      source: "featured",
+      heading: "Products & distribution.",
+      lede:
+        "Selected products and brands Sustech distributes, installs and supports across Bangladesh — " +
+        "from energy-efficient fans to industrial lighting, solar street lights and lightning protection.",
+    },
+    {
       blockType: "articlesList",
       heading: "From our knowledge hub.",
       lede: "Practical engineering guidance for industrial Bangladesh — solar, safety, testing and compliance.",
@@ -1214,13 +1397,21 @@ async function main(): Promise<void> {
   // real story, leadership photos/bios and any certifications are filled in the CMS.
   // --- Team (Brief Part 3) -------------------------------------------------
   for (const m of TEAM) {
+    // Attach a real photo when we have a confident filename match. Other team members
+    // upload their own photo via /admin → Team — we don't auto-assign faces.
+    const photoFile = TEAM_PHOTOS[m.name];
+    let photoId: number | undefined;
+    if (photoFile) {
+      photoId = await uploadMedia(`${m.name} — Sustech ${m.role}`, photoFile);
+    }
+    const data = photoId ? { ...m, photo: photoId } : m;
     const found = await payload.find({
       collection: "team",
       where: { name: { equals: m.name } },
       limit: 1,
     });
-    if (found.docs.length === 0) await payload.create({ collection: "team", data: m });
-    else await payload.update({ collection: "team", id: found.docs[0]!.id, data: m });
+    if (found.docs.length === 0) await payload.create({ collection: "team", data });
+    else await payload.update({ collection: "team", id: found.docs[0]!.id, data });
   }
 
   const aboutLayout = [

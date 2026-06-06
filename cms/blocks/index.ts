@@ -50,11 +50,57 @@ const Hero: Block = {
           name: "backgroundImage",
           type: "upload",
           relationTo: "media",
-          admin: { width: "50%", description: "Optional background image." },
+          admin: {
+            width: "50%",
+            description: "Optional background image (also used as the video poster).",
+          },
         },
       ],
     },
+    {
+      name: "backgroundVideo",
+      type: "upload",
+      relationTo: "media",
+      admin: {
+        description:
+          "Optional MP4 (autoplay, muted, looping, ≤ 10s). Falls back to the image when motion is reduced, on small screens, or when missing.",
+      },
+    },
     ctaArray,
+  ],
+};
+
+const ProductShowcase: Block = {
+  slug: "productShowcase",
+  interfaceName: "ProductShowcaseBlock",
+  labels: { singular: "Product showcase", plural: "Product showcases" },
+  fields: [
+    { name: "heading", type: "text" },
+    { name: "lede", type: "textarea" },
+    {
+      type: "row",
+      fields: [
+        {
+          name: "source",
+          type: "radio",
+          defaultValue: "featured",
+          options: [
+            { label: "Featured products (automatic)", value: "featured" },
+            { label: "Choose manually", value: "selected" },
+          ],
+          admin: { layout: "horizontal" },
+        },
+        appearance,
+      ],
+    },
+    {
+      name: "products",
+      type: "relationship",
+      relationTo: "products",
+      hasMany: true,
+      admin: { condition: (_d, s) => s?.source === "selected" },
+    },
+    { name: "viewAllLabel", type: "text", defaultValue: "View all products" },
   ],
 };
 
@@ -402,6 +448,7 @@ export const layoutBlocks: Block[] = [
   ImageGallery,
   LogoWall,
   PartnerBar,
+  ProductShowcase,
   ArticlesList,
   TestimonialsBlock,
   TeamGrid,

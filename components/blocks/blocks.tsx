@@ -16,6 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   getArticles,
   getClients,
+  getFeaturedProducts,
   getFeaturedProjects,
   getSectors,
   getServices,
@@ -35,6 +36,8 @@ import type {
   LogoWallBlock,
   Media,
   PartnerBarBlock,
+  Product,
+  ProductShowcaseBlock,
   Project,
   Sector,
   Service,
@@ -65,6 +68,7 @@ function mediaUrl(m?: number | Media | null): { url: string; alt: string } | nul
 export function HeroView({ block, isFirst }: { block: HeroBlock; isFirst: boolean }) {
   const dark = block.tone !== "light";
   const bg = mediaUrl(block.backgroundImage);
+  const video = mediaUrl(block.backgroundVideo);
   const Heading = isFirst ? "h1" : "h2";
   return (
     <section
@@ -83,12 +87,29 @@ export function HeroView({ block, isFirst }: { block: HeroBlock; isFirst: boolea
           <GridMotif tone="dark" />
         </>
       )}
+      {video ? (
+        // Autoplay-muted-loop video. The image is the poster — it paints instantly (LCP-safe)
+        // and stays visible if the video is blocked, slow, or motion is reduced. `motion-reduce`
+        // hides the <video> entirely under prefers-reduced-motion (poster remains visible).
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          poster={bg?.url}
+          aria-hidden
+          className="absolute inset-0 -z-10 h-full w-full object-cover opacity-30 motion-reduce:hidden"
+        >
+          <source src={video.url} type="video/mp4" />
+        </video>
+      ) : null}
       {bg && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={bg.url}
           alt={bg.alt}
-          className="absolute inset-0 -z-10 h-full w-full object-cover opacity-25"
+          className={`absolute inset-0 -z-20 h-full w-full object-cover opacity-25 ${video ? "motion-reduce:opacity-30" : ""}`}
         />
       )}
       <Container className="relative py-24 md:py-32 lg:py-40">
@@ -449,6 +470,78 @@ export async function ArticlesListView({ block }: { block: ArticlesListBlock }) 
           <ArrowRight className="h-4 w-4" aria-hidden />
         </Link>
       </div>
+    </Section>
+  );
+}
+
+// --- ProductShowcase --------------------------------------------------------
+
+export async function ProductShowcaseView({ block }: { block: ProductShowcaseBlock }) {
+  const products =
+    block.source === "selected" ? objs<Product>(block.products) : await getFeaturedProducts();
+  if (products.length === 0) return null;
+  return (
+    <Section
+      id="products"
+      tone={toneOf(block.appearance as never)}
+      eyebrow="Products & distribution"
+      title={block.heading ?? undefined}
+      lede={block.lede ?? undefined}
+    >
+      <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {products.map((p, i) => {
+          const img = mediaUrl(p.image);
+          const isExternal = Boolean(p.externalUrl);
+          const href = p.externalUrl || `#`;
+          return (
+            <li key={p.id}>
+              <Reveal delay={Math.min(i, 6) * 0.06} className="h-full">
+                <Card interactive className="relative flex h-full flex-col overflow-hidden">
+                  <div className="bg-surface-2 aspect-[3/2] w-full">
+                    {img ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={img.url}
+                        alt={img.alt || p.title}
+                        loading="lazy"
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <Skeleton className="h-full w-full rounded-none" />
+                    )}
+                  </div>
+                  <div className="flex flex-1 flex-col p-5">
+                    {p.brand && (
+                      <p className="text-text-soft font-mono text-xs tracking-[0.08em] uppercase">
+                        {p.brand}
+                      </p>
+                    )}
+                    <h3 className="text-h3 text-ink-900 mt-1 font-semibold">{p.title}</h3>
+                    {p.summary && (
+                      <p className="text-text-soft mt-3 flex-1 text-[0.9375rem]">{p.summary}</p>
+                    )}
+                    {p.externalUrl && (
+                      <span className="text-brand mt-4 inline-flex items-center gap-1.5 text-sm font-medium">
+                        Learn more <ArrowRight className="h-4 w-4" aria-hidden />
+                      </span>
+                    )}
+                  </div>
+                  {p.externalUrl && (
+                    <Link
+                      href={href}
+                      target={isExternal ? "_blank" : undefined}
+                      rel={isExternal ? "noopener noreferrer" : undefined}
+                      prefetch={false}
+                      aria-label={`${p.title} — open product page`}
+                      className="focus-visible:outline-brand absolute inset-0 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2"
+                    />
+                  )}
+                </Card>
+              </Reveal>
+            </li>
+          );
+        })}
+      </ul>
     </Section>
   );
 }

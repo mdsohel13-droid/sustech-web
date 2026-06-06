@@ -16,9 +16,9 @@ export const Media: CollectionConfig = {
   },
   upload: {
     staticDir: path.resolve(dirname, "../../media"),
-    mimeTypes: ["image/*"],
-    // Generate resized, optimized WebP variants. Next.js then serves AVIF/WebP on delivery
-    // (next.config images.formats), so the pipeline is modern end-to-end.
+    // Images for everything visual; mp4 for short hero/explainer loops (autoplay-muted, ≤10s).
+    mimeTypes: ["image/*", "video/mp4"],
+    // Generate resized, optimized WebP variants for images only (videos pass through unchanged).
     formatOptions: { format: "webp", options: { quality: 78 } },
     imageSizes: [
       {

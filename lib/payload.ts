@@ -6,6 +6,7 @@ import type {
   Client,
   Navigation,
   Page,
+  Product,
   Project,
   Sector,
   Service,
@@ -206,6 +207,37 @@ export const getProjects = cache(async (): Promise<Project[]> => {
     return res.docs;
   } catch {
     return []; // DB unavailable at build → render the empty state
+  }
+});
+
+export const getProducts = cache(async (): Promise<Product[]> => {
+  const payload = await getPayloadClient();
+  try {
+    const res = await payload.find({
+      collection: "products",
+      depth: 1,
+      limit: 50,
+      sort: "order",
+    });
+    return res.docs;
+  } catch {
+    return [];
+  }
+});
+
+export const getFeaturedProducts = cache(async (limit = 6): Promise<Product[]> => {
+  const payload = await getPayloadClient();
+  try {
+    const res = await payload.find({
+      collection: "products",
+      depth: 1,
+      limit,
+      where: { featured: { equals: true } },
+      sort: "order",
+    });
+    return res.docs;
+  } catch {
+    return [];
   }
 });
 

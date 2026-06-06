@@ -1,0 +1,102 @@
+/* ============================================================================
+   MOTION — single source of truth for the site's animation "feel".
+
+   Imported once by globals.css (right after Tailwind). Every transition and
+   animation across the site references these tokens, so the motion language
+   stays consistent and is tuned from one place.
+
+   Principles (CLAUDE.md §4 / DESIGN-SYSTEM.md):
+   - GPU-only: animate transform + opacity, never layout props (top/left/width).
+   - Content is SSR-visible at rest; motion is layered on under no-preference.
+   - prefers-reduced-motion is honoured globally at the bottom of this file.
+   ============================================================================ */
+
+@theme {
+  /* durations */
+  --duration-fast: 150ms; /* hovers, micro-interactions in/out */
+  --duration-base: 250ms; /* default UI transition */
+  --duration-slow: 450ms; /* entrances / reveals */
+
+  /* hover-reveal anti-flicker delay — see the nav dropdown description reveal */
+  --delay-reveal: 150ms;
+
+  /* easings (these `--ease-*` keys also generate `ease-*` Tailwind utilities) */
+  --ease-brand: cubic-bezier(0.22, 1, 0.36, 1); /* confident entrances/exits — the house curve */
+  --ease-standard: cubic-bezier(
+    0.4,
+    0,
+    0.2,
+    1
+  ); /* micro-interactions: buttons, cards, hover lifts */
+  --ease-emphasis: cubic-bezier(0.83, 0, 0.17, 1); /* large, deliberate moves */
+}
+
+/* Hero load reveal — CSS only so content is SSR-visible and LCP-safe. The resting
+   state is visible; the entrance is added solely under `no-preference`. */
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hero-rise {
+    animation: hero-rise var(--duration-slow) var(--ease-brand) both;
+  }
+}
+
+/* Scroll fade-rise (once). Primary path: CSS scroll-driven animations — no JS, runs on
+   the compositor at 60fps. Resting state is visible (crawlable, and safe where scroll
+   timelines are unsupported or motion is reduced); the entrance is layered on only where
+   supported. Browsers without `animation-timeline: view()` (Firefox/Safari today) get an
+   equivalent reveal from the IntersectionObserver fallback below. */
+@keyframes reveal-rise {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    [data-reveal] {
+      animation: reveal-rise both;
+      animation-timeline: view();
+      animation-range: entry 5% cover 22%;
+    }
+  }
+
+  /* IntersectionObserver fallback (components/ui/reveal-fallback.tsx). The component
+     only arms these classes when scroll-timeline is unsupported AND motion is allowed,
+     so Chromium pays zero JS and no-JS users keep the visible resting state. */
+  .reveal-js {
+    opacity: 0;
+    transform: translateY(20px);
+    will-change: opacity, transform;
+  }
+  .reveal-js-in {
+    animation: reveal-rise var(--duration-slow) var(--ease-brand) both;
+  }
+}
+
+/* Global reduced-motion kill-switch — neutralises every animation/transition/smooth-scroll. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

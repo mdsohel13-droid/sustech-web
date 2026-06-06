@@ -155,13 +155,24 @@ function DesktopDropdown({
                   href={leaf.href}
                   prefetch={false}
                   onClick={onClose}
-                  className="hover:bg-surface-2 focus-visible:outline-brand block rounded-md p-3 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
+                  className="group hover:bg-surface-2 focus-visible:outline-brand block rounded-md p-3 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
                 >
                   <span className="text-ink-900 block text-[0.9375rem] font-medium">
                     {leaf.label}
                   </span>
                   {leaf.description && (
-                    <span className="text-text-soft mt-0.5 block text-sm">{leaf.description}</span>
+                    // Hidden by default; the row collapses via grid-rows (reflow stays inside
+                    // this absolutely-positioned panel, so the page never reflows). Reveals on
+                    // hover AND keyboard focus of the item. The 150ms delay only applies on the
+                    // way *in* (delay-0 at rest) so a fast mouse-sweep doesn't flicker, while
+                    // leaving feels instant. Under reduced motion the description stays visible.
+                    <span className="ease-standard grid grid-rows-[0fr] transition-[grid-template-rows] delay-0 duration-[var(--duration-base)] group-focus-within:grid-rows-[1fr] group-focus-within:delay-[var(--delay-reveal)] group-hover:grid-rows-[1fr] group-hover:delay-[var(--delay-reveal)] motion-reduce:grid-rows-[1fr]">
+                      <span className="overflow-hidden">
+                        <span className="text-text-soft ease-standard mt-0.5 block -translate-y-1 text-sm opacity-0 transition-[opacity,transform] duration-[var(--duration-base)] group-focus-within:translate-y-0 group-focus-within:opacity-100 group-focus-within:delay-[var(--delay-reveal)] group-hover:translate-y-0 group-hover:opacity-100 group-hover:delay-[var(--delay-reveal)] motion-reduce:translate-y-0 motion-reduce:opacity-100">
+                          {leaf.description}
+                        </span>
+                      </span>
+                    </span>
                   )}
                 </Link>
               </li>

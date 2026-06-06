@@ -4,6 +4,7 @@ import { MessageSquare, X } from "lucide-react";
 import Link from "next/link";
 import { useId, useState, useTransition } from "react";
 import { submitChat } from "@/lib/actions/chat";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Stage = "home" | "quote" | "info" | "done";
 const SCALES = ["< 10 Lakh", "10–50 Lakh", "50 Lakh – 1 Crore", "1 Crore+", "Not sure"];
@@ -184,10 +185,20 @@ export function ChatWidget({ services, phone }: { services: string[]; phone?: st
                   type="button"
                   onClick={send}
                   disabled={pending || (!service && !contactPhone)}
-                  className="bg-solar text-solar-text hover:bg-solar-600 w-full rounded-md px-4 py-2 text-sm font-semibold disabled:opacity-60"
+                  className="bg-solar text-solar-text hover:bg-solar-600 ease-standard w-full rounded-md px-4 py-2 text-sm font-semibold transition-[background-color,opacity] duration-[var(--duration-base)] disabled:opacity-60"
                 >
                   {pending ? "Sending…" : "Send to an engineer"}
                 </button>
+
+                {/* Real async area: skeleton placeholder while the lead is forwarded to n8n. */}
+                {pending && (
+                  <div aria-live="polite" className="space-y-2 pt-1">
+                    <p className="text-text-soft text-xs">Connecting you to an engineer…</p>
+                    <Skeleton className="h-3 w-3/4" />
+                    <Skeleton className="h-3 w-full" />
+                    <Skeleton className="h-3 w-2/3" />
+                  </div>
+                )}
               </div>
             )}
 
@@ -215,7 +226,7 @@ export function ChatWidget({ services, phone }: { services: string[]; phone?: st
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? "Close chat" : "Open chat assistant"}
         aria-expanded={open}
-        className="ease-brand bg-brand fixed right-5 bottom-5 z-50 inline-flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lg transition-transform duration-200 hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        className="ease-standard bg-brand fixed right-5 bottom-5 z-50 inline-flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lg transition-transform duration-[var(--duration-base)] hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white active:scale-95"
       >
         {open ? (
           <X className="h-7 w-7" aria-hidden />

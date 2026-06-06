@@ -7,6 +7,7 @@ import { Header } from "@/components/layout/header";
 import { WhatsAppFab } from "@/components/layout/whatsapp-fab";
 import { ChatWidget } from "@/components/chat/chat-widget";
 import { JsonLd } from "@/components/seo/json-ld";
+import { RevealFallback } from "@/components/ui/reveal-fallback";
 import { buildFooterColumns, buildHeaderNav } from "@/lib/nav";
 import { getNavigation, getServices, getSiteSettings } from "@/lib/payload";
 import { serverUrl, siteJsonLd } from "@/lib/seo";
@@ -46,6 +47,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
         <WhatsAppFab phone={settings.phones?.[0]?.number} />
         <ChatWidget services={services.map((s) => s.title)} phone={settings.phones?.[0]?.number} />
         <Footer columns={columns} settings={settings} />
+        <RevealFallback />
         <noscript>
           <style>{`[data-reveal]{opacity:1 !important;transform:none !important;}`}</style>
         </noscript>

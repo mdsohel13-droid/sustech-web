@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
  * `onDark` adapts outline/ghost styles for dark anchor bands. Min 44px touch target.
  */
 const buttonVariants = cva(
-  "inline-flex min-h-11 items-center justify-center gap-2 rounded-md px-5 text-[0.9375rem] font-medium whitespace-nowrap transition-[transform,box-shadow,background-color,border-color,color] duration-200 ease-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-md px-5 text-[0.9375rem] font-medium whitespace-nowrap transition-[transform,box-shadow,background-color,border-color,color] duration-[var(--duration-base)] ease-standard focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:pointer-events-none disabled:opacity-50 active:scale-[0.99]",
   {
     variants: {
       variant: {

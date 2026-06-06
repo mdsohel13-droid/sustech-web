@@ -1039,7 +1039,7 @@ export interface RfqRequest {
   id: number;
   name: string;
   company?: string | null;
-  email: string;
+  email?: string | null;
   phone?: string | null;
   serviceInterest?: string | null;
   location?: string | null;

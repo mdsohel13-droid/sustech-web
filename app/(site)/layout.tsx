@@ -5,9 +5,10 @@ import { cabinet, jetbrains, switzer } from "@/app/fonts";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { WhatsAppFab } from "@/components/layout/whatsapp-fab";
+import { ChatWidget } from "@/components/chat/chat-widget";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildFooterColumns, buildHeaderNav } from "@/lib/nav";
-import { getNavigation, getSiteSettings } from "@/lib/payload";
+import { getNavigation, getServices, getSiteSettings } from "@/lib/payload";
 import { serverUrl, siteJsonLd } from "@/lib/seo";
 
 export const metadata: Metadata = {
@@ -22,7 +23,11 @@ export const metadata: Metadata = {
 };
 
 export default async function SiteLayout({ children }: { children: ReactNode }) {
-  const [nav, settings] = await Promise.all([getNavigation(), getSiteSettings()]);
+  const [nav, settings, services] = await Promise.all([
+    getNavigation(),
+    getSiteSettings(),
+    getServices(),
+  ]);
   const { items, cta } = buildHeaderNav(nav);
   const columns = buildFooterColumns(nav);
 
@@ -39,6 +44,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
         <Header items={items} cta={cta} />
         <main id="main">{children}</main>
         <WhatsAppFab phone={settings.phones?.[0]?.number} />
+        <ChatWidget services={services.map((s) => s.title)} phone={settings.phones?.[0]?.number} />
         <Footer columns={columns} settings={settings} />
         <noscript>
           <style>{`[data-reveal]{opacity:1 !important;transform:none !important;}`}</style>

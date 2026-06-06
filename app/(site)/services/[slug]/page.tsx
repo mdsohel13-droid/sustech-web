@@ -127,6 +127,54 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         </Container>
       </section>
 
+      {service.explainerVideo &&
+      typeof service.explainerVideo === "object" &&
+      service.explainerVideo.url ? (
+        // CMS-driven autoplay-muted-loop explainer (8–15s). The poster paints instantly (LCP-safe)
+        // and is the entire experience under prefers-reduced-motion (the <video> is hidden).
+        // GPU-accelerated rendering — no layout cost — and `preload="metadata"` keeps the page
+        // fast on first paint.
+        <Section eyebrow="See it in action" srTitle={`${service.title} explainer video`}>
+          <div className="mx-auto max-w-3xl">
+            <div className="border-border bg-ink-900 relative aspect-video overflow-hidden rounded-xl border shadow-lg">
+              <video
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                poster={
+                  service.explainerPoster &&
+                  typeof service.explainerPoster === "object" &&
+                  service.explainerPoster.url
+                    ? service.explainerPoster.url
+                    : undefined
+                }
+                aria-label={`${service.title} — short explainer animation`}
+                className="absolute inset-0 h-full w-full object-cover motion-reduce:hidden"
+              >
+                <source src={service.explainerVideo.url} type="video/mp4" />
+              </video>
+              {/* Reduced-motion fallback — show the poster as a still image. */}
+              {service.explainerPoster &&
+              typeof service.explainerPoster === "object" &&
+              service.explainerPoster.url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={service.explainerPoster.url}
+                  alt={service.explainerPoster.alt ?? `${service.title} explainer`}
+                  className="absolute inset-0 hidden h-full w-full object-cover motion-reduce:block"
+                />
+              ) : null}
+            </div>
+            <p className="text-text-soft mt-3 text-center text-xs">
+              Animation for illustration. Real installations are engineered to your site and
+              standards.
+            </p>
+          </div>
+        </Section>
+      ) : null}
+
       {service.scope ? (
         <Section title="What's included" srTitle="Scope of work">
           <div className="richtext max-w-prose">

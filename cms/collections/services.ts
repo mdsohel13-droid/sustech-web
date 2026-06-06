@@ -62,6 +62,31 @@ export const Services: CollectionConfig = {
           "Hero image used at the top of the service page. Wide 3:2 or 16:9 ratio works best.",
       },
     },
+    {
+      type: "row",
+      fields: [
+        {
+          name: "explainerVideo",
+          type: "upload",
+          relationTo: "media",
+          admin: {
+            width: "50%",
+            description:
+              "Optional 8–15s MP4 — autoplays muted in a loop on the service page. Use a poster image (below) for the still frame.",
+          },
+        },
+        {
+          name: "explainerPoster",
+          type: "upload",
+          relationTo: "media",
+          admin: {
+            width: "50%",
+            description:
+              "Poster frame for the explainer video (still image shown before/while it loads, and to reduced-motion users).",
+          },
+        },
+      ],
+    },
     { name: "scope", type: "richText", admin: { description: "Scope of work — what's included." } },
     {
       name: "standards",

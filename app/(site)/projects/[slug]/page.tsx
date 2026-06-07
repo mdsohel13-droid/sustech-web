@@ -9,7 +9,7 @@ import { Eyebrow } from "@/components/ui/eyebrow";
 import { GridMotif } from "@/components/ui/grid-motif";
 import { Section } from "@/components/ui/section";
 import { getProjectBySlug } from "@/lib/payload";
-import { serverUrl } from "@/lib/seo";
+import { breadcrumbJsonLd, serverUrl } from "@/lib/seo";
 
 type RichData = ComponentProps<typeof RichText>["data"];
 
@@ -26,11 +26,20 @@ export async function generateMetadata({
   const p = await getProjectBySlug(slug);
   if (!p) return {};
   const noindex = process.env.SITE_INDEXABLE !== "true";
+  const ogUrl = `/api/og?title=${encodeURIComponent(p.name)}&section=Case+Study${p.summary ? `&description=${encodeURIComponent(p.summary.slice(0, 120))}` : ""}`;
   return {
     title: { absolute: `${p.name} · Sustech Technology Ltd` },
     description: p.summary,
     alternates: { canonical: `/projects/${p.slug}` },
     robots: noindex ? { index: false, follow: false } : undefined,
+    openGraph: {
+      type: "article",
+      title: p.name,
+      description: p.summary ?? undefined,
+      url: `/projects/${p.slug}`,
+      images: [{ url: ogUrl, width: 1200, height: 630, alt: p.name }],
+    },
+    twitter: { card: "summary_large_image" },
   };
 }
 
@@ -48,15 +57,40 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
     p.year && { label: "Year", value: String(p.year) },
   ].filter(Boolean) as { label: string; value: string }[];
 
+  const projectUrl = `${serverUrl}/projects/${p.slug}`;
+  const sectorObj = p.sector && typeof p.sector === "object" ? p.sector : null;
+
   return (
     <>
+      {/* BreadcrumbList: Home › Projects › {project name} */}
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Home", url: serverUrl },
+          { name: "Projects", url: `${serverUrl}/projects` },
+          { name: p.name },
+        ])}
+      />
+      {/* CreativeWork / engineering project */}
       <JsonLd
         data={{
           "@context": "https://schema.org",
           "@type": "CreativeWork",
+          "@id": projectUrl,
           name: p.name,
           abstract: p.summary,
-          url: `${serverUrl}/projects/${p.slug}`,
+          url: projectUrl,
+          ...(p.year ? { dateCreated: String(p.year) } : {}),
+          ...(p.location ? { locationCreated: { "@type": "Place", name: p.location } } : {}),
+          ...(sectorObj
+            ? {
+                about: {
+                  "@type": "Thing",
+                  name: sectorObj.title,
+                  url: `${serverUrl}/solutions/${sectorObj.slug}`,
+                },
+              }
+            : {}),
+          creator: { "@type": "Organization", name: "Sustech Technology Ltd", url: serverUrl },
         }}
       />
       <section className="bg-ink-900 text-text-invert relative isolate overflow-hidden">

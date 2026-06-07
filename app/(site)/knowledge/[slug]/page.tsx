@@ -7,7 +7,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { Section } from "@/components/ui/section";
 import { getArticleBySlug } from "@/lib/payload";
-import { serverUrl } from "@/lib/seo";
+import { breadcrumbJsonLd, serverUrl } from "@/lib/seo";
 
 type RichData = ComponentProps<typeof RichText>["data"];
 
@@ -24,11 +24,20 @@ export async function generateMetadata({
   const a = await getArticleBySlug(slug);
   if (!a) return {};
   const noindex = process.env.SITE_INDEXABLE !== "true";
+  const ogUrl = `/api/og?title=${encodeURIComponent(a.title)}&section=Knowledge${a.excerpt ? `&description=${encodeURIComponent(a.excerpt.slice(0, 120))}` : ""}`;
   return {
     title: { absolute: `${a.title} · Sustech Technology Ltd` },
     description: a.excerpt ?? undefined,
     alternates: { canonical: `/knowledge/${a.slug}` },
     robots: noindex ? { index: false, follow: false } : undefined,
+    openGraph: {
+      type: "article",
+      title: a.title,
+      description: a.excerpt ?? undefined,
+      url: `/knowledge/${a.slug}`,
+      images: [{ url: ogUrl, width: 1200, height: 630, alt: a.title }],
+    },
+    twitter: { card: "summary_large_image" },
   };
 }
 
@@ -40,17 +49,38 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
   const faq = a.faq ?? [];
 
+  const articleUrl = `${serverUrl}/knowledge/${a.slug}`;
+
   return (
     <>
+      {/* BreadcrumbList: Home › Knowledge › {article title} */}
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Home", url: serverUrl },
+          { name: "Knowledge", url: `${serverUrl}/knowledge` },
+          { name: a.title },
+        ])}
+      />
+      {/* Article schema — enriched */}
       <JsonLd
         data={{
           "@context": "https://schema.org",
           "@type": "Article",
+          "@id": articleUrl,
           headline: a.title,
           description: a.excerpt ?? undefined,
-          author: a.author ? { "@type": "Person", name: a.author } : undefined,
+          author: a.author
+            ? { "@type": "Person", name: a.author }
+            : { "@type": "Organization", name: "Sustech Technology Ltd", url: serverUrl },
+          publisher: {
+            "@type": "Organization",
+            name: "Sustech Technology Ltd",
+            url: serverUrl,
+          },
           datePublished: a.publishedDate ?? undefined,
-          url: `${serverUrl}/knowledge/${a.slug}`,
+          url: articleUrl,
+          inLanguage: "en",
+          isPartOf: { "@type": "WebSite", url: serverUrl },
         }}
       />
       <Section containerSize="default">

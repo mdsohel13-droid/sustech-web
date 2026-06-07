@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { draftMode } from "next/headers";
 import { notFound } from "next/navigation";
 import { RenderBlocks } from "@/components/blocks/render-blocks";
+import { JsonLd } from "@/components/seo/json-ld";
 import { getPageBySlug, getPublishedPageSlugs, getSiteSettings } from "@/lib/payload";
-import { pageMetadata } from "@/lib/seo";
+import { breadcrumbJsonLd, pageMetadata, serverUrl } from "@/lib/seo";
 
 export const revalidate = 3600;
 export const dynamicParams = true;
@@ -27,5 +28,36 @@ export default async function CatchAllPage({ params }: { params: Promise<Params>
   const { isEnabled } = await draftMode();
   const page = await getPageBySlug(slug.join("/"), isEnabled);
   if (!page) notFound();
-  return <RenderBlocks blocks={page.layout} />;
+
+  const pageUrl = `${serverUrl}/${slug.join("/")}`;
+  // Top-level pages get Home › Page breadcrumb; nested paths get each segment.
+  const crumbs = [
+    { name: "Home", url: serverUrl },
+    ...slug.map((segment, i) => ({
+      name:
+        i === slug.length - 1 && page.title
+          ? page.title
+          : segment.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+      url: i < slug.length - 1 ? `${serverUrl}/${slug.slice(0, i + 1).join("/")}` : undefined,
+    })),
+  ];
+
+  return (
+    <>
+      <JsonLd data={breadcrumbJsonLd(crumbs)} />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": pageUrl,
+          url: pageUrl,
+          name: page.title,
+          description: page.seo?.description || undefined,
+          inLanguage: "en",
+          isPartOf: { "@type": "WebSite", url: serverUrl },
+        }}
+      />
+      <RenderBlocks blocks={page.layout} />
+    </>
+  );
 }

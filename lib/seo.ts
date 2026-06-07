@@ -37,6 +37,28 @@ export function pageMetadata(page: Page | null, settings: SiteSetting, path: str
   };
 }
 
+// ── Structured data helpers ──────────────────────────────────────────────────
+
+/**
+ * BreadcrumbList JSON-LD helper.
+ * Pass an ordered array of { name, url? } items — the last item typically
+ * has no `url` (it's the current page). Returns a ready-to-embed schema object.
+ */
+export function breadcrumbJsonLd(
+  crumbs: { name: string; url?: string }[],
+): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: crumbs.map((c, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: c.name,
+      ...(c.url ? { item: c.url } : {}),
+    })),
+  };
+}
+
 /** Organization + LocalBusiness + WebSite, from confirmed SiteSettings only. */
 export function siteJsonLd(settings: SiteSetting): Record<string, unknown> {
   const orgId = `${serverUrl}/#organization`;

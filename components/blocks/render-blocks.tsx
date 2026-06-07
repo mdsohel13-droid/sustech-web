@@ -1,4 +1,6 @@
+import { Fragment } from "react";
 import type { Page } from "@/payload-types";
+import { gapBelowClass, type GapBelow } from "@/lib/block-styles";
 import {
   ArticlesListView,
   CalculatorEmbedView,
@@ -20,6 +22,7 @@ import {
   StepsView,
   TeamGridView,
   TestimonialsView,
+  VideoShowcaseView,
 } from "./blocks";
 
 type Block = NonNullable<Page["layout"]>[number];
@@ -44,6 +47,8 @@ function BlockSwitch({ block, index }: { block: AnyBlock; index: number }) {
       return <ImageGalleryView block={block} />;
     case "photoStrip":
       return <PhotoStripView block={block as Parameters<typeof PhotoStripView>[0]["block"]} />;
+    case "videoShowcase":
+      return <VideoShowcaseView block={block} />;
     case "logoWall":
       return <LogoWallView block={block} />;
     case "partnerBar":
@@ -73,13 +78,33 @@ function BlockSwitch({ block, index }: { block: AnyBlock; index: number }) {
   }
 }
 
+const GAP_KEYS: readonly GapBelow[] = ["none", "small", "default", "large"];
+
+/** Resolve the admin-set gap-below class for a block without re-resolving full style. */
+function gapClassFor(block: AnyBlock): string {
+  const g = (block as { style?: { gapBelow?: string | null } }).style?.gapBelow;
+  const key = GAP_KEYS.includes(g as GapBelow) ? (g as GapBelow) : "default";
+  return gapBelowClass[key];
+}
+
 export function RenderBlocks({ blocks }: { blocks?: Page["layout"] | null }) {
   if (!blocks?.length) return null;
   return (
     <>
-      {(blocks as AnyBlock[]).map((block, i) => (
-        <BlockSwitch key={(block as { id?: string }).id ?? i} block={block} index={i} />
-      ))}
+      {(blocks as AnyBlock[]).map((block, i) => {
+        const gap = gapClassFor(block);
+        const key = (block as { id?: string }).id ?? i;
+        const view = <BlockSwitch block={block} index={i} />;
+        // Only introduce a wrapper when a non-default gap is requested, to avoid
+        // changing the layout of existing content.
+        return gap ? (
+          <div key={key} className={gap}>
+            {view}
+          </div>
+        ) : (
+          <Fragment key={key}>{view}</Fragment>
+        );
+      })}
     </>
   );
 }

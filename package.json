@@ -80,6 +80,9 @@
       "sharp",
       "unrs-resolver",
       "esbuild"
-    ]
+    ],
+    "overrides": {
+      "tmp@<0.2.6": ">=0.2.6"
+    }
   }
 }

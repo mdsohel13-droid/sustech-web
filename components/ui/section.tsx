@@ -124,9 +124,15 @@ const headingFontClass: Record<HeadingFont, string> = {
  * both light and dark backgrounds without hardcoding a colour.
  */
 const borderClass =
-  "rounded-2xl border border-ink-200/40 dark:border-ink-700/40 " +
-  "shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_24px_rgba(0,0,0,0.07)] " +
-  "mx-4 md:mx-6 lg:mx-8 overflow-hidden";
+  "group/card rounded-2xl border border-border " +
+  // Inner top highlight (bevel) + soft layered depth shadow = a fine 3-D card.
+  "ring-1 ring-white/50 ring-inset " +
+  "shadow-[0_1px_2px_rgba(11,18,32,0.05),0_10px_34px_-14px_rgba(11,18,32,0.16)] " +
+  // Subtle, GPU-only lift on hover for a tactile 3-D feel (honours reduced-motion).
+  "ease-standard transition-[transform,box-shadow] duration-[var(--duration-base)] " +
+  "hover:-translate-y-0.5 hover:shadow-[0_2px_4px_rgba(11,18,32,0.06),0_22px_56px_-16px_rgba(11,18,32,0.22)] " +
+  "motion-reduce:transition-none motion-reduce:hover:translate-y-0 " +
+  "mx-3 overflow-hidden md:mx-5 lg:mx-6";
 
 /* ── Component ───────────────────────────────────────────────────────────── */
 

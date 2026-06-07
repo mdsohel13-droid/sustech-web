@@ -1,12 +1,14 @@
 import type { MetadataRoute } from "next";
 import {
   getArticles,
+  getKnowledgeResources,
   getNewsItems,
   getProjects,
   getPublishedPageSlugs,
   getSectors,
   getServices,
 } from "@/lib/payload";
+import { CALCULATOR_REGISTRY } from "@/components/calculators/calculator-registry";
 import { serverUrl } from "@/lib/seo";
 
 export const revalidate = 3600;
@@ -18,14 +20,16 @@ const lastMod = (v: unknown): Date | undefined => {
 };
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [pageSlugs, services, sectors, projects, articles, newsItems] = await Promise.all([
-    getPublishedPageSlugs(),
-    getServices(),
-    getSectors(),
-    getProjects(),
-    getArticles(),
-    getNewsItems(),
-  ]);
+  const [pageSlugs, services, sectors, projects, articles, newsItems, knowledgeResources] =
+    await Promise.all([
+      getPublishedPageSlugs(),
+      getServices(),
+      getSectors(),
+      getProjects(),
+      getArticles(),
+      getNewsItems(),
+      getKnowledgeResources(),
+    ]);
 
   const url = (path: string) => `${serverUrl}${path}`;
 
@@ -76,6 +80,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
+  // Calculator pages (static, one per built-in calc type)
+  const calcTypes = Object.keys(CALCULATOR_REGISTRY);
+  const enabledCalcTypes = new Set(
+    knowledgeResources
+      .filter((r) => r.type === "calculator" && r.calcType)
+      .map((r) => r.calcType as string),
+  );
+  const calcUrls: MetadataRoute.Sitemap = calcTypes
+    .filter((t) => enabledCalcTypes.has(t))
+    .map((t) => ({
+      url: url(`/knowledge/calculators/${t}`),
+      changeFrequency: "yearly",
+      priority: 0.5,
+    }));
+
   return [
     ...fixed,
     ...pages,
@@ -84,5 +103,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...projectUrls,
     ...articleUrls,
     ...newsUrls,
+    ...calcUrls,
   ];
 }

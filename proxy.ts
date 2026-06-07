@@ -30,9 +30,23 @@ export function proxy(_request: NextRequest) {
     }
   })();
 
-  const imgSrc = ["'self'", "data:", "blob:", mediaHost && `https://${mediaHost}`]
+  // i.ytimg.com = YouTube poster thumbnails used by the Video Showcase block
+  // when an editor links a YouTube video without uploading a custom poster.
+  const imgSrc = [
+    "'self'",
+    "data:",
+    "blob:",
+    "https://i.ytimg.com",
+    mediaHost && `https://${mediaHost}`,
+  ]
     .filter(Boolean)
     .join(" ");
+
+  // frame-src = the only third-party domains we ever iframe: privacy-enhanced
+  // YouTube and Vimeo players, mounted lazily by the Video Showcase block ONLY
+  // after the visitor clicks play (so no third-party cookie is set up-front).
+  const frameSrc =
+    "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com";
 
   const csp = [
     `default-src 'self'`,
@@ -51,6 +65,7 @@ export function proxy(_request: NextRequest) {
       ? `connect-src 'self' ws://localhost:* wss://localhost:*`
       : `connect-src 'self'`,
     `media-src 'self' blob: ${mediaHost && `https://${mediaHost}`}`,
+    frameSrc,
     `object-src 'none'`,
     `base-uri 'self'`,
     `form-action 'self'`,

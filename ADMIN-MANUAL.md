@@ -2,6 +2,8 @@
 
 > **Who this is for:** Super Admins and Admins managing the Sustech Technology Ltd website through the CMS admin panel at `/admin`.
 > This document is your complete reference. No coding or technical knowledge required for the tasks described here.
+>
+> **Developer reference:** See the project [`README.md`](README.md) for technical architecture, local setup, and deployment instructions.
 
 ---
 
@@ -21,6 +23,9 @@
 12. [Navigation & Menus](#12-navigation--menus)
 13. [Deploying Updates (Super Admin)](#13-deploying-updates-super-admin)
 14. [Troubleshooting](#14-troubleshooting)
+15. [GEO / AEO — Getting Cited by AI Engines](#15-geo--aeo--getting-cited-by-ai-engines)
+16. [Knowledge Hub — Calculators & Sample Documents](#16-knowledge-hub--calculators--sample-documents)
+17. [News & Updates — Hermes AI Agent](#17-news--updates--hermes-ai-agent)
 
 ---
 
@@ -121,6 +126,7 @@ Every page is built by stacking **blocks** — like LEGO bricks. Each block is a
 | **Projects List** | Showcases featured/selected projects |
 | **Image Gallery** | Grid of images from media |
 | **Photo Strip** | Infinite-scroll marquee or one-by-one carousel of photos |
+| **Video Showcase** | A cinematic video band — poster cards with a play button; loads the video only on click. Supports uploaded MP4s and YouTube/Vimeo links. |
 | **Logo Wall** | Client logos in a grid |
 | **Partner Bar** | Partner/certification logos in a row |
 | **Product Showcase** | Featured products with specs |
@@ -146,6 +152,58 @@ Drag the ⠿ handle on the left of each block up or down.
 
 ### Removing a block
 Click the **⋮** menu on the block → **Remove**.
+
+### Hero side-media panel (auto-scrolling images/videos)
+
+The **Hero** block can show an auto-scrolling (crossfade) panel of images and videos in the space beside the hero text — great for filling the empty area on the right.
+
+1. Open a page and edit its **Hero** block.
+2. Open **Side media panel** and tick **Show side media panel**.
+3. Choose the **Media source**:
+   - **Auto — featured project photos + explainer videos**: pulls from your featured projects' galleries plus any uploaded videos. (Make sure those projects have gallery photos.)
+   - **Auto — recent media library**: cycles through your most recent uploads (images and videos).
+   - **Manual — pick items below**: you choose the exact images/videos, in order. Best for a curated look.
+4. Set **Seconds per slide** (default 5).
+5. Save.
+
+The panel auto-advances, pauses on hover of its pause button, stops for visitors who prefer reduced motion, and videos play muted only while on screen. It's per-hero, so you decide which pages show it.
+
+> **Tip:** For the most premium look, use **Manual** and pick a few strong landscape photos and one short video. Media is shown **fully contained** (never cropped) over a soft blurred backdrop, so portrait and landscape items both fit.
+
+### Hero band height
+
+On the **Hero** block, **Band height** sets how tall the hero is: **Compact**, **Standard**, **Tall**, or **Full screen** (fills the first view on load). Use Full screen for a bold landing hero.
+
+### Gap between blocks
+
+Every block's **Style & Animation** panel has **Gap below this block** (None / Small / Default / Large) — tighten or loosen the space between stacked sections without touching anything else. Tick **Card border + 3D shadow** for a fine, lifted card that gently raises on hover.
+
+### Team groups (Leadership, Engineering, Advisors…)
+
+1. On each **Team member**, set the **Group** (sidebar): Leadership, Management, Engineering, Consultant, Advisor, or Other.
+2. On a page, add a **Team** block and set **Show which group** to one group, with its own heading (e.g. "Leadership Team").
+3. Add several Team blocks — one per group — to show Leadership, then Engineering, then Advisors, each as its own section. The card design and animation stay the same.
+
+---
+
+### Using the Video Showcase block
+
+The **Video Showcase** block displays one or more videos as a band (section). Each video appears as a poster image with a play button; the video only loads when a visitor clicks it — so the page stays fast and no third-party (YouTube) cookies are set until the visitor chooses to play.
+
+1. Add a **Video Showcase** block to the page Layout.
+2. Set the **Layout**:
+   - **Spotlight** — one large feature video with a supporting grid beneath. (Tick **Feature large** on the video you want enlarged; otherwise the first is used.)
+   - **Grid** — all videos shown at equal size.
+3. Set the **Band background** — **Dark cinematic** is recommended (it looks best for video); Light, Muted grey, and Brand blue are also available.
+4. Add a **heading**, **lede**, and optional **eyebrow** label.
+5. For each video, click **Add Video** and fill in:
+   - **Title** (required) and a short **Description** (shown under the video and given to search/AI engines).
+   - **Source**: *Uploaded MP4* (then choose the **video file** from media) **or** *YouTube / Vimeo link* (then paste the **URL**).
+   - **Duration** — a small badge shown on the poster, e.g. `1:24`.
+   - **Poster** — the thumbnail image (16:9). For YouTube links this is optional; the YouTube thumbnail is used automatically if you leave it blank.
+   - **Publish date** — optional; improves the video's search listing.
+
+> **Tip:** For uploaded videos, always set a **Poster** image — it's what visitors see before they press play, and it makes the page load fast.
 
 ---
 
@@ -603,4 +661,181 @@ This feeds both the meta description (Google) and provides clean context for AI 
 
 ---
 
+---
+
+## 16. Knowledge Hub — Calculators & Sample Documents
+
+The Knowledge Hub at `/knowledge` has three tabs:
+
+1. **Articles & Guides** — rich-text articles authored in the CMS
+2. **Calculators** — interactive engineering tools (built-in to the site)
+3. **Downloads** — sample documents and templates
+
+Both Calculators and Downloads are managed entirely from the CMS, with no code deployment needed to toggle them on/off or reorder them.
+
+---
+
+### 16.1 Managing Calculators
+
+**Path:** Content → Knowledge Resources
+
+The site ships with 5 built-in calculators. Admins control which ones appear on the website and in what order:
+
+| Calculator | What it does |
+|---|---|
+| ☀️ **Solar ROI / Payback Period** | Calculates payback years, 25-yr savings, and CO₂ avoided for a solar installation |
+| ⚡ **Earthing Resistance** | Single rod resistance using Dwight's formula + IEC 60364/62305 compliance check |
+| 🔌 **Cable Sizing** | Minimum cable cross-section by voltage drop method (IEC 60228 / IEC 60364) |
+| 🌩️ **Lightning Protection Zone** | Rolling sphere radius and protected area per IEC 62305 for all four LPLs |
+| 📊 **Solar Energy Yield** | Annual kWh generation for 6 Bangladesh cities using NASA POWER irradiance data |
+
+#### To enable or disable a calculator:
+
+1. Go to **Content → Knowledge Resources**
+2. Find the calculator you want to manage (e.g. "Solar ROI / Payback Period")
+3. Open it
+4. Tick or untick the **Enabled** checkbox
+5. Click **Save**
+
+The calculator will appear or disappear from the Knowledge Hub **Calculators** tab immediately.
+
+#### To change the display order:
+
+1. Open the Knowledge Resource record
+2. Change the **Order** number (lower = appears first; e.g. 1, 2, 3...)
+3. Click Save
+
+#### To add a new calculator (admin guide for the dev):
+
+> ⚠️ Adding a brand-new calculator type requires a code change. Ask your developer. Once deployed, the developer will add a new option to the **Calculator type** dropdown, and you can create a new Knowledge Resource record to activate it.
+
+---
+
+### 16.2 Managing Sample Documents (Downloads)
+
+**Path:** Content → Knowledge Resources → Create new
+
+Sample documents are files (PDFs, Word docs, Excel templates) that visitors can download.
+
+#### Adding a new sample document:
+
+1. Go to **Content → Knowledge Resources → Create new**
+2. Set **Type** → **Sample Document**
+3. Fill in:
+   - **Title** — the document name shown on the card (e.g. "RFQ Template — Solar EPC")
+   - **Description** — 1–2 sentences describing what the document contains
+   - **Order** — display order (lower = first)
+   - **Enabled** — tick to show it
+4. **Document source** — choose one:
+   - **Upload document** — drag and drop a PDF, DOCX, or XLSX file directly into the CMS media library
+   - **External document URL** — paste a Google Drive link, SharePoint URL, or other hosted file URL
+5. Fill in **File size** (e.g. "420 KB") and **File format** (PDF / DOCX / XLSX / ZIP)
+6. Optionally set a **Download button label** (default: "Download")
+7. Click **Save**
+
+The document will appear on the Knowledge Hub **Downloads** tab.
+
+#### Tips for sample documents:
+
+- Use **External URL** for large files (> 10 MB) to avoid slowing the CMS
+- For Google Drive: set sharing to "Anyone with the link → Viewer" before adding the URL
+- If a document has no URL yet, leave the URL blank — the card will show "Contact us to request this document"
+
+#### Document ideas for Sustech:
+
+| Document | Format | Purpose |
+|---|---|---|
+| RFQ Template — Solar EPC | DOCX | Helps clients send complete project enquiries |
+| Earthing Test Report Template | XLSX | Standard format for site test records |
+| LPS Design Checklist | PDF | Pre-installation checklist per IEC 62305 |
+| Solar Commissioning Checklist | PDF | Site acceptance testing steps |
+| Cable Schedule Template | XLSX | Standard format for electrical design packages |
+| Project Handover Report Sample | PDF | Example format for client delivery |
+
+---
+
+### 16.3 What appears on the Knowledge Hub page
+
+| Tab | Shows | When |
+|---|---|---|
+| Articles & Guides | All published Articles | Always |
+| Calculators | All enabled Knowledge Resources of type "calculator" | When at least 1 is enabled |
+| Downloads | All enabled Knowledge Resources of type "sample" | When at least 1 is enabled |
+
+If no calculators are enabled, the Calculators tab still appears but shows "Calculators coming soon." Same for Downloads.
+
+---
+
+## 17. News & Updates — Hermes AI Agent
+
+The daily news feed at `/news` is maintained by the **Hermes AI content agent**. This section explains what admins need to know.
+
+---
+
+### 17.1 What Hermes does
+
+Every day at 5:00 AM (Bangladesh time), the Hermes agent:
+
+1. Fetches a **content brief** from the site (gaps, suggested topics, GEO writing instructions)
+2. Generates 3 news articles using the Claude AI API
+3. Posts them to the CMS as **drafts**
+4. Sends a notification ("3 new drafts ready for review") to the team
+
+The full architecture and setup guide is in [`HERMES-AGENT-SETUP.md`](HERMES-AGENT-SETUP.md).
+
+---
+
+### 17.2 Reviewing and publishing Hermes drafts
+
+**Path:** Content → News & Updates → filter by Status: Draft
+
+1. Log into the admin panel
+2. Go to **Content → News & Updates**
+3. Filter by **Status = Draft**
+4. Open each draft and check:
+   - Is the summary accurate and specific?
+   - Are the FAQ answers factually correct?
+   - Does the source link work?
+   - Does it represent Sustech's voice?
+5. Make any edits needed
+6. Click **Publish**
+
+**Total time:** ~5 minutes per day for all three drafts.
+
+---
+
+### 17.3 Categories and who can publish them
+
+| Category | Can Hermes auto-publish? | Why |
+|---|---|---|
+| **Industry News** | Yes (opt-in) | External facts about the sector — low risk |
+| **AI & Technology** | Yes (opt-in) | Tech coverage unrelated to Sustech claims |
+| **Market Insight** | Yes (opt-in) | Market analysis from public sources |
+| **Company Update** | ❌ Never | Contains Sustech-specific claims — must be human-verified |
+| **Product Update** | ❌ Never | Contains product specs — must be human-verified |
+
+Company Update and Product Update are **always saved as drafts** regardless of any server settings. A human must always review and publish these.
+
+---
+
+### 17.4 Writing your own news items
+
+You don't have to wait for Hermes. Admins and Editors can write news items manually:
+
+1. Go to **Content → News & Updates → Create new**
+2. Fill in:
+   - **Title** — the headline
+   - **Category** — pick the appropriate category
+   - **Published date** — defaults to today
+   - **Summary (TL;DR)** — 1–2 sentence direct answer (used in AI citations)
+   - **Body** — full article
+   - **FAQ** — 2–5 question-answer pairs (highly recommended — these become FAQPage schema)
+   - **Source** and **Source URL** — for curated/aggregated news
+3. Set Status to **Published** and click **Save**
+
+The article appears on `/news` immediately.
+
+---
+
 *This manual covers all CMS functionality. For developer-level changes (new block types, code changes, server configuration), contact the development team.*
+*For the technical project reference, see [`README.md`](README.md).*

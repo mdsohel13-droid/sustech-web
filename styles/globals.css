@@ -21,13 +21,35 @@
      Lime Green   #32CD32  · sustainability · energy · growth
      Golden Poppy #FCC200  · primary CTA only — reserve for ONE action/screen
   ─────────────────────────────────────────────────────────────────────── */
-  --color-brand: #0073cf; /* True Blue */
-  --color-brand-600: #005ba3; /* darker — hover / active */
-  --color-brand-300: #60b4f5; /* lighter — on ink/dark bands */
-  --color-energy: #32cd32; /* Lime Green */
-  --color-energy-300: #7ee87e; /* lighter — on ink/dark bands */
-  --color-solar: #fcc200; /* Golden Poppy — PRIMARY CTA ONLY */
-  --color-solar-600: #d9a500; /* darker — button hover */
+  /* ── Base brand colours — the ONLY three raw values ────────────────────
+     Change just these and every derived shade below re-tunes automatically
+     (each is mixed from its base via color-mix in the OKLab space, so tints
+     and shades stay perceptually even). This is the single source of truth. */
+  --color-brand: #0073cf; /* True Blue   */
+  --color-energy: #32cd32; /* Lime Green  */
+  --color-solar: #fcc200; /* Golden Poppy — PRIMARY CTA only */
+
+  /* Derived True Blue scale */
+  --color-brand-50: color-mix(in oklab, var(--color-brand), white 90%);
+  --color-brand-100: color-mix(in oklab, var(--color-brand), white 80%);
+  --color-brand-200: color-mix(in oklab, var(--color-brand), white 64%);
+  --color-brand-300: color-mix(in oklab, var(--color-brand), white 44%);
+  --color-brand-400: color-mix(in oklab, var(--color-brand), white 22%);
+  --color-brand-500: var(--color-brand);
+  --color-brand-600: color-mix(in oklab, var(--color-brand), black 18%);
+  --color-brand-700: color-mix(in oklab, var(--color-brand), black 34%);
+  --color-brand-800: color-mix(in oklab, var(--color-brand), black 50%);
+
+  /* Derived Lime Green scale */
+  --color-energy-100: color-mix(in oklab, var(--color-energy), white 80%);
+  --color-energy-300: color-mix(in oklab, var(--color-energy), white 40%);
+  --color-energy-600: color-mix(in oklab, var(--color-energy), black 20%);
+  --color-energy-700: color-mix(in oklab, var(--color-energy), black 36%);
+
+  /* Derived Golden Poppy scale */
+  --color-solar-100: color-mix(in oklab, var(--color-solar), white 80%);
+  --color-solar-300: color-mix(in oklab, var(--color-solar), white 40%);
+  --color-solar-600: color-mix(in oklab, var(--color-solar), black 14%);
   --color-solar-text: #1a1206; /* near-black — text on golden buttons */
 
   /* radius */

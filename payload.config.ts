@@ -6,6 +6,7 @@ import { buildConfig } from "payload";
 import sharp from "sharp";
 
 import { Articles } from "./cms/collections/articles";
+import { KnowledgeResources } from "./cms/collections/knowledge-resources";
 import { NewsItems } from "./cms/collections/news-items";
 import { Clients } from "./cms/collections/clients";
 import { Icons } from "./cms/collections/icons";
@@ -43,6 +44,7 @@ export default buildConfig({
     Testimonials,
     Clients,
     Articles,
+    KnowledgeResources,
     NewsItems,
     Media,
     Icons,

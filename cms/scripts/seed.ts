@@ -1260,6 +1260,10 @@ async function main(): Promise<void> {
       tone: "dark",
       backgroundImage: heroMediaId,
       backgroundVideo: heroVideoId,
+      // Auto-scrolling media panel beside the hero text (fills the right-hand space).
+      // "library" works out of the box; switch to "projects" once project galleries
+      // have photos, or "manual" to curate the exact images/videos.
+      sideMedia: { enabled: true, source: "library", interval: 5 },
       ctas: [
         customLink("Request a Consultation", "/request-quote", { style: "primary" }),
         customLink("See Our Projects", "/projects", { style: "secondary" }),

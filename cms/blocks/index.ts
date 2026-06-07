@@ -52,6 +52,21 @@ const Hero: Block = {
     { name: "heading", type: "text", required: true },
     { name: "subhead", type: "textarea" },
     {
+      name: "height",
+      type: "select",
+      defaultValue: "standard",
+      label: "Band height",
+      options: [
+        { label: "Compact", value: "compact" },
+        { label: "Standard (default)", value: "standard" },
+        { label: "Tall", value: "tall" },
+        { label: "Full screen", value: "screen" },
+      ],
+      admin: {
+        description: "How tall the hero band is. 'Full screen' fills the first view on load.",
+      },
+    },
+    {
       type: "row",
       fields: [
         {
@@ -136,6 +151,72 @@ const Hero: Block = {
         description: "How long each slide shows before advancing. Default: 5 s.",
         condition: (_data, siblingData) => siblingData?.heroMode === "carousel",
       },
+    },
+    /* ── Side media panel ───────────────────────────────────────────────
+     * An auto-scrolling (crossfade) panel of images/videos shown BESIDE the
+     * hero text — fills the empty space on the right. Fully CMS-controlled:
+     * toggle per hero, and choose where the media comes from.
+     */
+    {
+      name: "sideMedia",
+      type: "group",
+      label: "Side media panel",
+      admin: {
+        description:
+          "Auto-scrolling images/videos shown beside the hero text (fills the empty space on the right).",
+      },
+      fields: [
+        {
+          name: "enabled",
+          type: "checkbox",
+          label: "Show side media panel",
+          defaultValue: false,
+        },
+        {
+          type: "row",
+          fields: [
+            {
+              name: "source",
+              type: "select",
+              defaultValue: "projects",
+              label: "Media source",
+              options: [
+                { label: "Auto — featured project photos + explainer videos", value: "projects" },
+                { label: "Auto — recent media library", value: "library" },
+                { label: "Manual — pick items below", value: "manual" },
+              ],
+              admin: {
+                width: "60%",
+                condition: (_d, s) => Boolean(s?.enabled),
+              },
+            },
+            {
+              name: "interval",
+              type: "number",
+              label: "Seconds per slide",
+              defaultValue: 5,
+              min: 2,
+              max: 20,
+              admin: { width: "40%", condition: (_d, s) => Boolean(s?.enabled) },
+            },
+          ],
+        },
+        {
+          name: "items",
+          type: "array",
+          labels: { singular: "Item", plural: "Items" },
+          minRows: 1,
+          maxRows: 12,
+          admin: {
+            description: "Images (AVIF/WebP/JPG) or MP4 videos to cycle through.",
+            condition: (_d, s) => Boolean(s?.enabled) && s?.source === "manual",
+          },
+          fields: [
+            { name: "media", type: "upload", relationTo: "media", required: true },
+            { name: "caption", type: "text", admin: { description: "Optional caption overlay." } },
+          ],
+        },
+      ],
     },
     ctaArray,
     blockStyleGroup,
@@ -477,6 +558,26 @@ const TeamGrid: Block = {
     { name: "lede", type: "textarea" },
     { type: "row", fields: [sourceSelect("team members"), appearance] },
     {
+      name: "group",
+      type: "select",
+      label: "Show which group",
+      defaultValue: "all",
+      options: [
+        { label: "All team members", value: "all" },
+        { label: "Leadership", value: "leadership" },
+        { label: "Management", value: "management" },
+        { label: "Engineering", value: "engineering" },
+        { label: "Consultants", value: "consultant" },
+        { label: "Advisors", value: "advisor" },
+        { label: "Other", value: "other" },
+      ],
+      admin: {
+        description:
+          "Automatic mode only: show just one group. Add several Team blocks — one per group (Leadership, Engineering, Advisors…) — each with its own heading.",
+        condition: (_d, s) => s?.source !== "selected",
+      },
+    },
+    {
       name: "members",
       type: "relationship",
       relationTo: "team",
@@ -523,6 +624,148 @@ const ArticlesList: Block = {
     { name: "lede", type: "textarea" },
     { type: "row", fields: [appearance] },
     { name: "viewAllLabel", type: "text", defaultValue: "Read the knowledge hub" },
+    blockStyleGroup,
+  ],
+};
+
+/**
+ * Video Showcase — a cinematic video band (section). Displays one or more
+ * videos as poster cards with a play button; the video loads only when the
+ * visitor clicks (facade pattern → fast, privacy-friendly). Supports uploaded
+ * MP4s and YouTube/Vimeo URLs. Two layouts: spotlight (one large + supporting
+ * grid) or grid (equal cards). Defaults to a dark cinematic band.
+ */
+const VideoShowcase: Block = {
+  slug: "videoShowcase",
+  interfaceName: "VideoShowcaseBlock",
+  labels: { singular: "Video showcase", plural: "Video showcases" },
+  fields: [
+    { name: "eyebrow", type: "text", admin: { description: "Small label above the heading." } },
+    { name: "heading", type: "text" },
+    { name: "lede", type: "textarea" },
+    {
+      type: "row",
+      fields: [
+        {
+          name: "layout",
+          type: "select",
+          defaultValue: "spotlight",
+          options: [
+            { label: "Spotlight — one large feature + supporting grid", value: "spotlight" },
+            { label: "Grid — equal-sized video cards", value: "grid" },
+          ],
+          admin: {
+            width: "50%",
+            description:
+              "Spotlight highlights the first (or 'Feature large') video full-width. Grid shows all videos equally.",
+          },
+        },
+        {
+          // Dedicated band treatment — owns the background of the whole section.
+          // (The 'Style & Animation' panel still controls width, padding, heading
+          // and animation.) Defaults to a dark cinematic band — best for video.
+          name: "tone",
+          type: "select",
+          defaultValue: "dark",
+          label: "Band background",
+          options: [
+            { label: "Dark cinematic (recommended)", value: "dark" },
+            { label: "Light", value: "light" },
+            { label: "Muted grey", value: "muted" },
+            { label: "Brand blue", value: "brand" },
+          ],
+          admin: { width: "50%", description: "Dark looks best for video." },
+        },
+      ],
+    },
+    {
+      name: "videos",
+      type: "array",
+      minRows: 1,
+      maxRows: 12,
+      labels: { singular: "Video", plural: "Videos" },
+      admin: {
+        description:
+          "Each video shows a poster image with a play button; the video only loads when a visitor clicks it (fast page loads, no third-party cookies until play).",
+      },
+      fields: [
+        { name: "title", type: "text", required: true },
+        {
+          name: "description",
+          type: "textarea",
+          admin: {
+            description:
+              "1–2 sentences. Shown under the video and given to AI/search engines as the video's description (VideoObject schema).",
+          },
+        },
+        {
+          type: "row",
+          fields: [
+            {
+              name: "source",
+              type: "radio",
+              defaultValue: "upload",
+              options: [
+                { label: "Uploaded MP4", value: "upload" },
+                { label: "YouTube / Vimeo link", value: "url" },
+              ],
+              admin: { layout: "horizontal", width: "60%" },
+            },
+            {
+              name: "duration",
+              type: "text",
+              admin: { width: "40%", description: 'Badge shown on the poster, e.g. "1:24".' },
+            },
+          ],
+        },
+        {
+          name: "videoFile",
+          type: "upload",
+          relationTo: "media",
+          admin: {
+            description: "The MP4 video file.",
+            condition: (_data, siblingData) => siblingData?.source !== "url",
+          },
+        },
+        {
+          name: "videoUrl",
+          type: "text",
+          label: "YouTube / Vimeo URL",
+          admin: {
+            description: "Paste the full video link (youtube.com, youtu.be, or vimeo.com).",
+            condition: (_data, siblingData) => siblingData?.source === "url",
+          },
+        },
+        {
+          name: "poster",
+          type: "upload",
+          relationTo: "media",
+          admin: {
+            description:
+              "Poster / thumbnail image (16:9 recommended). Shown before play. For YouTube links this is optional — the YouTube thumbnail is used if left blank.",
+          },
+        },
+        {
+          type: "row",
+          fields: [
+            {
+              name: "featured",
+              type: "checkbox",
+              label: "Feature large (spotlight layout)",
+              admin: { width: "50%" },
+            },
+            {
+              name: "uploadDate",
+              type: "date",
+              admin: {
+                width: "50%",
+                description: "Publish date — used in the video's search schema.",
+              },
+            },
+          ],
+        },
+      ],
+    },
     blockStyleGroup,
   ],
 };
@@ -596,6 +839,7 @@ export const layoutBlocks: Block[] = [
   ProjectsList,
   ImageGallery,
   PhotoStrip,
+  VideoShowcase,
   LogoWall,
   PartnerBar,
   ProductShowcase,

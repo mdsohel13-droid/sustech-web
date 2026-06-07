@@ -1,65 +1,45 @@
 /**
- * Root 404 page — rendered when Next.js cannot match a route or when a Server
- * Component calls notFound(). Styled with the Sustech brand so the experience
- * is consistent whether a visitor hits a missing slug or a stale link.
+ * Global root 404 — the fallback for routes that fall outside every route
+ * group's root layout. Because there is no shared `app/layout.tsx` (the (site)
+ * and (payload) groups are independent roots), this file must render its OWN
+ * <html>/<body> to be a valid document.
+ *
+ * The richer, chrome-wrapped 404 lives at app/(site)/not-found.tsx and handles
+ * the common case (a missing slug inside the public site).
  */
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Container } from "@/components/ui/container";
+import "@/styles/globals.css";
+import { cabinet, jetbrains, switzer } from "@/app/fonts";
 
 export const metadata = {
   title: "Page Not Found · Sustech Technology Ltd",
-  description: "The page you were looking for doesn't exist or has been moved.",
   robots: { index: false },
 };
 
-export default function NotFound() {
+export default function GlobalNotFound() {
   return (
-    <main id="main" className="bg-surface flex min-h-[70vh] flex-col items-center justify-center">
-      <Container className="py-24 text-center">
-        {/* Large decorative 404 */}
-        <p
-          className="text-brand/10 font-bold select-none"
-          style={{ fontSize: "clamp(6rem, 20vw, 14rem)", lineHeight: 1 }}
-          aria-hidden
-        >
-          404
-        </p>
-        <h1 className="text-h1 -mt-4 font-bold">Page not found</h1>
-        <p className="text-text-soft mx-auto mt-4 max-w-md text-lg">
-          The page you&apos;re looking for doesn&apos;t exist or has been moved. Let&apos;s get you
-          back on track.
-        </p>
-        <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-          <Button asChild variant="primary" size="lg">
-            <Link href="/">Return to homepage</Link>
-          </Button>
-          <Button asChild variant="secondary" size="lg">
-            <Link href="/contact">Contact us</Link>
-          </Button>
-        </div>
-
-        {/* Quick-links to key sections */}
-        <nav aria-label="Key pages" className="mt-12">
-          <p className="text-text-soft mb-4 text-sm font-medium tracking-wider uppercase">
-            Explore
+    <html lang="en" className={`${cabinet.variable} ${switzer.variable} ${jetbrains.variable}`}>
+      <body>
+        <main className="bg-surface flex min-h-screen flex-col items-center justify-center px-6 text-center">
+          <p
+            className="text-brand/10 font-bold select-none"
+            style={{ fontSize: "clamp(6rem, 20vw, 14rem)", lineHeight: 1 }}
+            aria-hidden
+          >
+            404
           </p>
-          <ul className="flex flex-wrap justify-center gap-x-6 gap-y-2">
-            {[
-              { href: "/services", label: "Services" },
-              { href: "/projects", label: "Projects" },
-              { href: "/about", label: "About" },
-              { href: "/knowledge", label: "Knowledge" },
-            ].map(({ href, label }) => (
-              <li key={href}>
-                <Link href={href} className="text-brand hover:text-brand-600 text-sm font-medium">
-                  {label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </Container>
-    </main>
+          <h1 className="text-h1 -mt-4 font-bold">Page not found</h1>
+          <p className="text-text-soft mx-auto mt-4 max-w-md text-lg">
+            The page you&apos;re looking for doesn&apos;t exist or has been moved.
+          </p>
+          <Link
+            href="/"
+            className="bg-solar text-solar-text hover:bg-solar-600 mt-10 inline-flex rounded-lg px-5 py-2.5 font-semibold transition-colors"
+          >
+            Return to homepage
+          </Link>
+        </main>
+      </body>
+    </html>
   );
 }

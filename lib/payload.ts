@@ -6,6 +6,8 @@ import { cache } from "react";
 import type {
   Article,
   Client,
+  KnowledgeResource,
+  Media,
   Navigation,
   NewsItem,
   Page,
@@ -307,6 +309,53 @@ export const getFeaturedProjects = cache(async (limit = 3): Promise<Project[]> =
     return [];
   }
 });
+
+// Knowledge resources --------------------------------------------------------
+
+export const getKnowledgeResources = cache(
+  async (type?: "calculator" | "sample"): Promise<KnowledgeResource[]> => {
+    try {
+      const payload = await getPayloadClient();
+      const where: Where = type
+        ? { and: [{ enabled: { equals: true } }, { type: { equals: type } }] }
+        : { enabled: { equals: true } };
+      const res = await payload.find({
+        collection: "knowledge-resources",
+        depth: 1,
+        limit: 100,
+        sort: "order",
+        where,
+      });
+      return res.docs;
+    } catch {
+      return [];
+    }
+  },
+);
+
+// Media ----------------------------------------------------------------------
+
+/**
+ * Recent media for the hero side-media panel.
+ * `videoOnly` restricts to MP4 video uploads (used to mix in explainer clips).
+ */
+export const getRecentMedia = cache(
+  async (opts?: { limit?: number; videoOnly?: boolean }): Promise<Media[]> => {
+    try {
+      const payload = await getPayloadClient();
+      const res = await payload.find({
+        collection: "media",
+        depth: 0,
+        limit: opts?.limit ?? 12,
+        sort: "-createdAt",
+        ...(opts?.videoOnly ? { where: { mimeType: { contains: "video" } } } : {}),
+      });
+      return res.docs;
+    } catch {
+      return [];
+    }
+  },
+);
 
 // News items -----------------------------------------------------------------
 

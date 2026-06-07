@@ -32,6 +32,7 @@ export type AnimationStyle =
   | "none";
 export type AnimationDelay = "none" | "short" | "medium" | "long";
 export type AccentColour = "brand" | "energy" | "solar";
+export type GapBelow = "none" | "small" | "default" | "large";
 
 /** Section tone values — extends the base light/muted/dark with brand colours */
 export type SectionTone = "light" | "muted" | "dark" | "brand" | "energy" | "solar";
@@ -53,6 +54,8 @@ export interface BlockStyleInput {
   bodyFont?: string | null;
   /** Body text size override. */
   bodySize?: string | null;
+  /** Vertical gap rendered after this block. */
+  gapBelow?: string | null;
 }
 
 /* ── Value sets (used for safe coercion) ─────────────────────────────── */
@@ -75,6 +78,15 @@ const ANIMATION_STYLES: AnimationStyle[] = [
 ];
 const ANIMATION_DELAYS: AnimationDelay[] = ["none", "short", "medium", "long"];
 const ACCENT_COLOURS: AccentColour[] = ["brand", "energy", "solar"];
+const GAP_BELOWS: GapBelow[] = ["none", "small", "default", "large"];
+
+/** Margin applied to the bottom of a section to control the gap to the next block. */
+export const gapBelowClass: Record<GapBelow, string> = {
+  none: "mb-0",
+  small: "mb-4 md:mb-6",
+  default: "", // no extra margin — sections already carry their own padding
+  large: "mb-12 md:mb-20",
+};
 
 const DELAY_MS: Record<AnimationDelay, number> = {
   none: 0,
@@ -181,6 +193,8 @@ export interface ResolvedBlockStyle {
   headingFontClass: string;
   bodyFontClass: string;
   bodySizeClass: string;
+  /** Margin-bottom class controlling the gap to the next block. */
+  gapBelowClass: string;
 }
 
 /**
@@ -215,6 +229,7 @@ export function resolveBlockStyle(
   const accent = safe(style?.accentColour, ACCENT_COLOURS, "brand");
   const bFont = safe(style?.bodyFont, BODY_FONTS, "sans");
   const bSize = safe(style?.bodySize, BODY_SIZES, "base");
+  const gap = safe(style?.gapBelow, GAP_BELOWS, "default");
 
   // Map colourScheme → SectionTone (default → light for Section's existing API)
   const tone: SectionTone = colourScheme === "default" ? "light" : colourScheme;
@@ -240,6 +255,7 @@ export function resolveBlockStyle(
     headingFontClass: headingFontClass[hFont],
     bodyFontClass: bodyFontClass[bFont],
     bodySizeClass: bodySizeClass[bSize],
+    gapBelowClass: gapBelowClass[gap],
   };
 }
 

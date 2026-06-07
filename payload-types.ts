@@ -76,6 +76,7 @@ export interface Config {
     testimonials: Testimonial;
     clients: Client;
     articles: Article;
+    'knowledge-resources': KnowledgeResource;
     'news-items': NewsItem;
     media: Media;
     icons: Icon;
@@ -98,6 +99,7 @@ export interface Config {
     testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
     clients: ClientsSelect<false> | ClientsSelect<true>;
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
+    'knowledge-resources': KnowledgeResourcesSelect<false> | KnowledgeResourcesSelect<true>;
     'news-items': NewsItemsSelect<false> | NewsItemsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     icons: IconsSelect<false> | IconsSelect<true>;
@@ -178,6 +180,7 @@ export interface Page {
         | ProjectsListBlock
         | ImageGalleryBlock
         | PhotoStripBlock
+        | VideoShowcaseBlock
         | LogoWallBlock
         | PartnerBarBlock
         | ProductShowcaseBlock
@@ -233,6 +236,10 @@ export interface HeroBlock {
   eyebrow?: string | null;
   heading: string;
   subhead?: string | null;
+  /**
+   * How tall the hero band is. 'Full screen' fills the first view on load.
+   */
+  height?: ('compact' | 'standard' | 'tall' | 'screen') | null;
   tone?: ('dark' | 'light') | null;
   /**
    * Optional background image (also used as the video poster).
@@ -266,6 +273,27 @@ export interface HeroBlock {
    * How long each slide shows before advancing. Default: 5 s.
    */
   carouselInterval?: number | null;
+  /**
+   * Auto-scrolling images/videos shown beside the hero text (fills the empty space on the right).
+   */
+  sideMedia?: {
+    enabled?: boolean | null;
+    source?: ('projects' | 'library' | 'manual') | null;
+    interval?: number | null;
+    /**
+     * Images (AVIF/WebP/JPG) or MP4 videos to cycle through.
+     */
+    items?:
+      | {
+          media: number | Media;
+          /**
+           * Optional caption overlay.
+           */
+          caption?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
   ctas?:
     | {
         label: string;
@@ -332,9 +360,13 @@ export interface HeroBlock {
      */
     animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
     /**
-     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
      */
     withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -470,9 +502,13 @@ export interface RichTextBlock {
      */
     animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
     /**
-     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
      */
     withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -551,9 +587,13 @@ export interface StatsCountersBlock {
      */
     animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
     /**
-     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
      */
     withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -621,9 +661,13 @@ export interface ServicesGridBlock {
      */
     animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
     /**
-     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
      */
     withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -798,9 +842,13 @@ export interface SectorTilesBlock {
      */
     animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
     /**
-     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
      */
     withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -940,9 +988,13 @@ export interface ProjectsListBlock {
      */
     animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
     /**
-     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
      */
     withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -1167,9 +1219,13 @@ export interface ImageGalleryBlock {
      */
     animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
     /**
-     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
      */
     withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -1243,13 +1299,132 @@ export interface PhotoStripBlock {
      */
     animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
     /**
-     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
      */
     withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
   };
   id?: string | null;
   blockName?: string | null;
   blockType: 'photoStrip';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "VideoShowcaseBlock".
+ */
+export interface VideoShowcaseBlock {
+  /**
+   * Small label above the heading.
+   */
+  eyebrow?: string | null;
+  heading?: string | null;
+  lede?: string | null;
+  /**
+   * Spotlight highlights the first (or 'Feature large') video full-width. Grid shows all videos equally.
+   */
+  layout?: ('spotlight' | 'grid') | null;
+  /**
+   * Dark looks best for video.
+   */
+  tone?: ('dark' | 'light' | 'muted' | 'brand') | null;
+  /**
+   * Each video shows a poster image with a play button; the video only loads when a visitor clicks it (fast page loads, no third-party cookies until play).
+   */
+  videos?:
+    | {
+        title: string;
+        /**
+         * 1–2 sentences. Shown under the video and given to AI/search engines as the video's description (VideoObject schema).
+         */
+        description?: string | null;
+        source?: ('upload' | 'url') | null;
+        /**
+         * Badge shown on the poster, e.g. "1:24".
+         */
+        duration?: string | null;
+        /**
+         * The MP4 video file.
+         */
+        videoFile?: (number | null) | Media;
+        /**
+         * Paste the full video link (youtube.com, youtu.be, or vimeo.com).
+         */
+        videoUrl?: string | null;
+        /**
+         * Poster / thumbnail image (16:9 recommended). Shown before play. For YouTube links this is optional — the YouTube thumbnail is used if left blank.
+         */
+        poster?: (number | null) | Media;
+        featured?: boolean | null;
+        /**
+         * Publish date — used in the video's search schema.
+         */
+        uploadDate?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
+     */
+    withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'videoShowcase';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1312,9 +1487,13 @@ export interface LogoWallBlock {
      */
     animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
     /**
-     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
      */
     withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -1389,9 +1568,13 @@ export interface PartnerBarBlock {
      */
     animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
     /**
-     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
      */
     withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -1460,9 +1643,13 @@ export interface ProductShowcaseBlock {
      */
     animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
     /**
-     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
      */
     withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -1604,9 +1791,13 @@ export interface ArticlesListBlock {
      */
     animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
     /**
-     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
      */
     withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -1673,9 +1864,13 @@ export interface TestimonialsBlock {
      */
     animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
     /**
-     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
      */
     withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -1710,6 +1905,10 @@ export interface TeamGridBlock {
    * Quick colour override. Use 'Style & Animation' below for full control.
    */
   appearance?: ('default' | 'muted' | 'dark') | null;
+  /**
+   * Automatic mode only: show just one group. Add several Team blocks — one per group (Leadership, Engineering, Advisors…) — each with its own heading.
+   */
+  group?: ('all' | 'leadership' | 'management' | 'engineering' | 'consultant' | 'advisor' | 'other') | null;
   /**
    * Pick and order the people to show.
    */
@@ -1763,9 +1962,13 @@ export interface TeamGridBlock {
      */
     animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
     /**
-     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
      */
     withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -1784,6 +1987,10 @@ export interface Team {
    * e.g. Managing Director, Head of Engineering.
    */
   role: string;
+  /**
+   * Which group this person belongs to. The Team block can show one group at a time.
+   */
+  category?: ('leadership' | 'management' | 'engineering' | 'consultant' | 'advisor' | 'other') | null;
   /**
    * Headshot. Square images look best.
    */
@@ -1866,9 +2073,13 @@ export interface StepsBlock {
      */
     animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
     /**
-     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
      */
     withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -1947,9 +2158,13 @@ export interface CTABandBlock {
      */
     animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
     /**
-     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
      */
     withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -2021,9 +2236,13 @@ export interface FAQBlock {
      */
     animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
     /**
-     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
      */
     withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -2091,9 +2310,13 @@ export interface CalculatorEmbedBlock {
      */
     animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
     /**
-     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
      */
     withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -2159,9 +2382,13 @@ export interface ContactRFQBlock {
      */
     animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
     /**
-     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
      */
     withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -2244,6 +2471,59 @@ export interface Article {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * Calculators and sample documents shown in the Knowledge Hub. Toggle enabled/disabled without a code deploy.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "knowledge-resources".
+ */
+export interface KnowledgeResource {
+  id: number;
+  title: string;
+  /**
+   * The URL path segment. Auto-filled from the title — edit only if you must.
+   */
+  slug: string;
+  /**
+   * Calculator = built-in interactive tool. Sample = downloadable document or link.
+   */
+  type: 'calculator' | 'sample';
+  /**
+   * Short description shown on the resource card (1–2 sentences).
+   */
+  description?: string | null;
+  /**
+   * Display order within the tab. Lower numbers appear first.
+   */
+  order?: number | null;
+  /**
+   * Tick to show in the Knowledge Hub. Untick to hide without deleting.
+   */
+  enabled?: boolean | null;
+  /**
+   * Which built-in calculator to render. New calc types require a developer deploy.
+   */
+  calcType?: ('solar-roi' | 'earthing-resistance' | 'cable-sizing' | 'lightning-zone' | 'solar-yield') | null;
+  /**
+   * Upload PDF, DOCX, or XLSX directly. If the file is large or already hosted elsewhere, use the External URL field below instead.
+   */
+  fileUpload?: (number | null) | Media;
+  /**
+   * Google Drive link, SharePoint URL, or any direct download link. Leave blank if you uploaded the file above.
+   */
+  fileUrl?: string | null;
+  /**
+   * Human-readable size, e.g. "420 KB" or "1.2 MB".
+   */
+  fileSize?: string | null;
+  fileFormat?: ('pdf' | 'docx' | 'xlsx' | 'zip' | 'other') | null;
+  /**
+   * Text on the download/open button. Default: "Download".
+   */
+  downloadLabel?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * Daily news feed — updated by the Hermes AI agent and/or editorial team. Lives at /news/[slug].
@@ -2595,6 +2875,10 @@ export interface PayloadLockedDocument {
         value: number | Article;
       } | null)
     | ({
+        relationTo: 'knowledge-resources';
+        value: number | KnowledgeResource;
+      } | null)
+    | ({
         relationTo: 'news-items';
         value: number | NewsItem;
       } | null)
@@ -2674,6 +2958,7 @@ export interface PagesSelect<T extends boolean = true> {
         projectsList?: T | ProjectsListBlockSelect<T>;
         imageGallery?: T | ImageGalleryBlockSelect<T>;
         photoStrip?: T | PhotoStripBlockSelect<T>;
+        videoShowcase?: T | VideoShowcaseBlockSelect<T>;
         logoWall?: T | LogoWallBlockSelect<T>;
         partnerBar?: T | PartnerBarBlockSelect<T>;
         productShowcase?: T | ProductShowcaseBlockSelect<T>;
@@ -2709,6 +2994,7 @@ export interface HeroBlockSelect<T extends boolean = true> {
   eyebrow?: T;
   heading?: T;
   subhead?: T;
+  height?: T;
   tone?: T;
   backgroundImage?: T;
   backgroundVideo?: T;
@@ -2721,6 +3007,20 @@ export interface HeroBlockSelect<T extends boolean = true> {
         id?: T;
       };
   carouselInterval?: T;
+  sideMedia?:
+    | T
+    | {
+        enabled?: T;
+        source?: T;
+        interval?: T;
+        items?:
+          | T
+          | {
+              media?: T;
+              caption?: T;
+              id?: T;
+            };
+      };
   ctas?:
     | T
     | {
@@ -2747,6 +3047,7 @@ export interface HeroBlockSelect<T extends boolean = true> {
         animationStyle?: T;
         animationDelay?: T;
         withBorder?: T;
+        gapBelow?: T;
       };
   id?: T;
   blockName?: T;
@@ -2773,6 +3074,7 @@ export interface RichTextBlockSelect<T extends boolean = true> {
         animationStyle?: T;
         animationDelay?: T;
         withBorder?: T;
+        gapBelow?: T;
       };
   id?: T;
   blockName?: T;
@@ -2807,6 +3109,7 @@ export interface StatsCountersBlockSelect<T extends boolean = true> {
         animationStyle?: T;
         animationDelay?: T;
         withBorder?: T;
+        gapBelow?: T;
       };
   id?: T;
   blockName?: T;
@@ -2836,6 +3139,7 @@ export interface ServicesGridBlockSelect<T extends boolean = true> {
         animationStyle?: T;
         animationDelay?: T;
         withBorder?: T;
+        gapBelow?: T;
       };
   id?: T;
   blockName?: T;
@@ -2865,6 +3169,7 @@ export interface SectorTilesBlockSelect<T extends boolean = true> {
         animationStyle?: T;
         animationDelay?: T;
         withBorder?: T;
+        gapBelow?: T;
       };
   id?: T;
   blockName?: T;
@@ -2895,6 +3200,7 @@ export interface ProjectsListBlockSelect<T extends boolean = true> {
         animationStyle?: T;
         animationDelay?: T;
         withBorder?: T;
+        gapBelow?: T;
       };
   id?: T;
   blockName?: T;
@@ -2927,6 +3233,7 @@ export interface ImageGalleryBlockSelect<T extends boolean = true> {
         animationStyle?: T;
         animationDelay?: T;
         withBorder?: T;
+        gapBelow?: T;
       };
   id?: T;
   blockName?: T;
@@ -2962,6 +3269,51 @@ export interface PhotoStripBlockSelect<T extends boolean = true> {
         animationStyle?: T;
         animationDelay?: T;
         withBorder?: T;
+        gapBelow?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "VideoShowcaseBlock_select".
+ */
+export interface VideoShowcaseBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  heading?: T;
+  lede?: T;
+  layout?: T;
+  tone?: T;
+  videos?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        source?: T;
+        duration?: T;
+        videoFile?: T;
+        videoUrl?: T;
+        poster?: T;
+        featured?: T;
+        uploadDate?: T;
+        id?: T;
+      };
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+        gapBelow?: T;
       };
   id?: T;
   blockName?: T;
@@ -2990,6 +3342,7 @@ export interface LogoWallBlockSelect<T extends boolean = true> {
         animationStyle?: T;
         animationDelay?: T;
         withBorder?: T;
+        gapBelow?: T;
       };
   id?: T;
   blockName?: T;
@@ -3023,6 +3376,7 @@ export interface PartnerBarBlockSelect<T extends boolean = true> {
         animationStyle?: T;
         animationDelay?: T;
         withBorder?: T;
+        gapBelow?: T;
       };
   id?: T;
   blockName?: T;
@@ -3053,6 +3407,7 @@ export interface ProductShowcaseBlockSelect<T extends boolean = true> {
         animationStyle?: T;
         animationDelay?: T;
         withBorder?: T;
+        gapBelow?: T;
       };
   id?: T;
   blockName?: T;
@@ -3081,6 +3436,7 @@ export interface ArticlesListBlockSelect<T extends boolean = true> {
         animationStyle?: T;
         animationDelay?: T;
         withBorder?: T;
+        gapBelow?: T;
       };
   id?: T;
   blockName?: T;
@@ -3109,6 +3465,7 @@ export interface TestimonialsBlockSelect<T extends boolean = true> {
         animationStyle?: T;
         animationDelay?: T;
         withBorder?: T;
+        gapBelow?: T;
       };
   id?: T;
   blockName?: T;
@@ -3122,6 +3479,7 @@ export interface TeamGridBlockSelect<T extends boolean = true> {
   lede?: T;
   source?: T;
   appearance?: T;
+  group?: T;
   members?: T;
   style?:
     | T
@@ -3138,6 +3496,7 @@ export interface TeamGridBlockSelect<T extends boolean = true> {
         animationStyle?: T;
         animationDelay?: T;
         withBorder?: T;
+        gapBelow?: T;
       };
   id?: T;
   blockName?: T;
@@ -3172,6 +3531,7 @@ export interface StepsBlockSelect<T extends boolean = true> {
         animationStyle?: T;
         animationDelay?: T;
         withBorder?: T;
+        gapBelow?: T;
       };
   id?: T;
   blockName?: T;
@@ -3209,6 +3569,7 @@ export interface CTABandBlockSelect<T extends boolean = true> {
         animationStyle?: T;
         animationDelay?: T;
         withBorder?: T;
+        gapBelow?: T;
       };
   id?: T;
   blockName?: T;
@@ -3242,6 +3603,7 @@ export interface FAQBlockSelect<T extends boolean = true> {
         animationStyle?: T;
         animationDelay?: T;
         withBorder?: T;
+        gapBelow?: T;
       };
   id?: T;
   blockName?: T;
@@ -3271,6 +3633,7 @@ export interface CalculatorEmbedBlockSelect<T extends boolean = true> {
         animationStyle?: T;
         animationDelay?: T;
         withBorder?: T;
+        gapBelow?: T;
       };
   id?: T;
   blockName?: T;
@@ -3298,6 +3661,7 @@ export interface ContactRFQBlockSelect<T extends boolean = true> {
         animationStyle?: T;
         animationDelay?: T;
         withBorder?: T;
+        gapBelow?: T;
       };
   id?: T;
   blockName?: T;
@@ -3447,6 +3811,7 @@ export interface SectorsSelect<T extends boolean = true> {
 export interface TeamSelect<T extends boolean = true> {
   name?: T;
   role?: T;
+  category?: T;
   photo?: T;
   bio?: T;
   order?: T;
@@ -3509,6 +3874,26 @@ export interface ArticlesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "knowledge-resources_select".
+ */
+export interface KnowledgeResourcesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  type?: T;
+  description?: T;
+  order?: T;
+  enabled?: T;
+  calcType?: T;
+  fileUpload?: T;
+  fileUrl?: T;
+  fileSize?: T;
+  fileFormat?: T;
+  downloadLabel?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

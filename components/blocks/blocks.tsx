@@ -15,11 +15,15 @@ import { Section } from "@/components/ui/section";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { getBlockStyle, itemRevealProps, resolveBlockStyle } from "@/lib/block-styles";
+import type { SectionTone } from "@/lib/block-styles";
+import { fallbackPoster, parseVideoEmbed, toIso8601Duration, type VideoItem } from "@/lib/video";
+import { serverUrl } from "@/lib/seo";
 import {
   getArticles,
   getClients,
   getFeaturedProducts,
   getFeaturedProjects,
+  getRecentMedia,
   getSectors,
   getServices,
   getTeam,
@@ -48,10 +52,13 @@ import type {
   StepsBlock,
   Team,
   Testimonial,
+  VideoShowcaseBlock,
 } from "@/payload-types";
 import { HeroCarousel } from "./hero-carousel";
+import { HeroMediaPanel, type HeroPanelItem } from "./hero-media-panel";
 import { PhotoStripClient } from "./photo-strip";
 import { CtaButtons, type Cta } from "./shared";
+import { VideoShowcaseClient } from "./video-showcase";
 
 type RichData = ComponentProps<typeof RichText>["data"];
 function Rich({ data, className }: { data: unknown; className?: string }) {
@@ -97,11 +104,100 @@ function HoverRevealText({ children, className }: { children: ReactNode; classNa
 
 // --- Hero -------------------------------------------------------------------
 
-export function HeroView({ block, isFirst }: { block: HeroBlock; isFirst: boolean }) {
+/** Map a (possibly unpopulated) media relation to a hero panel item. */
+function panelItemFromMedia(
+  m: number | Media | null | undefined,
+  caption?: string | null,
+): HeroPanelItem | null {
+  if (!m || typeof m !== "object" || !m.url) return null;
+  return { url: m.url, mimeType: m.mimeType ?? null, alt: m.alt ?? "", caption: caption ?? null };
+}
+
+/**
+ * Resolve the hero side-media panel items from the CMS `sideMedia` group.
+ * Source is admin-selectable:
+ *   manual   → the exact items chosen on the block
+ *   library  → most recent media uploads (images + videos)
+ *   projects → featured project gallery photos, with a few explainer videos mixed in
+ */
+async function resolveHeroPanelItems(sideMedia: HeroBlock["sideMedia"]): Promise<HeroPanelItem[]> {
+  if (!sideMedia?.enabled) return [];
+  const source = sideMedia.source ?? "projects";
+
+  if (source === "manual") {
+    return (sideMedia.items ?? [])
+      .map((it) => panelItemFromMedia(it.media, it.caption))
+      .filter((x): x is HeroPanelItem => x !== null)
+      .slice(0, 12);
+  }
+
+  if (source === "library") {
+    const media = await getRecentMedia({ limit: 12 });
+    return media
+      .filter(
+        (m) => m.url && (m.mimeType?.startsWith("image/") || m.mimeType?.startsWith("video/")),
+      )
+      .map((m) => panelItemFromMedia(m))
+      .filter((x): x is HeroPanelItem => x !== null);
+  }
+
+  // "projects" — featured project gallery photos + a few explainer videos.
+  const [projects, videos] = await Promise.all([
+    getFeaturedProjects(6),
+    getRecentMedia({ videoOnly: true, limit: 4 }),
+  ]);
+  const images = projects
+    .flatMap((p) => p.gallery ?? [])
+    .map((g) => panelItemFromMedia(g.image))
+    .filter((x): x is HeroPanelItem => x !== null);
+  const clips = videos
+    .map((m) => panelItemFromMedia(m))
+    .filter((x): x is HeroPanelItem => x !== null);
+
+  if (clips.length === 0) return images.slice(0, 10);
+
+  // Interleave one clip every few images so the mix feels natural.
+  const merged: HeroPanelItem[] = [];
+  const step = Math.max(2, Math.ceil(images.length / (clips.length + 1)));
+  let ci = 0;
+  images.forEach((img, i) => {
+    merged.push(img);
+    if ((i + 1) % step === 0) {
+      const clip = clips[ci];
+      if (clip) {
+        merged.push(clip);
+        ci += 1;
+      }
+    }
+  });
+  for (; ci < clips.length; ci += 1) {
+    const clip = clips[ci];
+    if (clip) merged.push(clip);
+  }
+  return merged.slice(0, 10);
+}
+
+export async function HeroView({ block, isFirst }: { block: HeroBlock; isFirst: boolean }) {
   const dark = block.tone !== "light";
   const bg = mediaUrl(block.backgroundImage);
   const video = mediaUrl(block.backgroundVideo);
   const Heading = isFirst ? "h1" : "h2";
+
+  // ── Side media panel (fills the empty space beside the hero text) ─────────
+  const panelItems = await resolveHeroPanelItems(block.sideMedia);
+  const showPanel = Boolean(block.sideMedia?.enabled) && panelItems.length > 0;
+  const panelInterval = block.sideMedia?.interval ?? 5;
+
+  // ── Band height (admin-adjustable) ────────────────────────────────────────
+  const heroHeight = block.height ?? "standard";
+  const isScreen = heroHeight === "screen";
+  const heroPadding: Record<string, string> = {
+    compact: showPanel ? "py-12 md:py-16" : "py-14 md:py-20",
+    standard: showPanel ? "py-16 md:py-24 lg:py-28" : "py-24 md:py-32 lg:py-40",
+    tall: showPanel ? "py-24 md:py-36 lg:py-44" : "py-32 md:py-44 lg:py-56",
+    screen: showPanel ? "py-16 md:py-20" : "py-20 md:py-28",
+  };
+  const heroPad = heroPadding[heroHeight] ?? heroPadding.standard;
 
   // Carousel mode: use client-side HeroCarousel component
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -131,19 +227,30 @@ export function HeroView({ block, isFirst }: { block: HeroBlock; isFirst: boolea
 
   return (
     <section
-      className={
-        dark
-          ? "bg-ink-900 text-text-invert relative isolate overflow-hidden"
-          : "bg-surface text-text relative isolate overflow-hidden"
-      }
+      className={cn(
+        "relative isolate overflow-hidden",
+        dark ? "bg-ink-900 text-text-invert" : "bg-surface text-text",
+        isScreen && "flex min-h-[100svh] flex-col justify-center",
+      )}
     >
       {dark && (
         <>
+          {/* Vertical depth gradient — softens the band instead of a flat fill. */}
+          <div
+            aria-hidden
+            className="from-ink-950 via-ink-900 to-ink-950 absolute inset-0 bg-gradient-to-b"
+          />
           <div
             aria-hidden
             className="absolute inset-0 bg-[radial-gradient(60%_55%_at_18%_-5%,rgba(14,95,216,0.28),transparent_60%),radial-gradient(45%_40%_at_92%_8%,rgba(245,158,11,0.12),transparent_55%)]"
           />
           <GridMotif tone="dark" />
+          {/* Smooth gradient hand-off into the (usually light) section below —
+              removes the hard dark→white edge. */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-20 bg-gradient-to-b from-transparent to-[var(--color-surface)] md:h-28"
+          />
         </>
       )}
 
@@ -180,26 +287,34 @@ export function HeroView({ block, isFirst }: { block: HeroBlock; isFirst: boolea
         </>
       )}
 
-      <Container className="relative py-24 md:py-32 lg:py-40">
-        <div className="max-w-3xl">
-          {block.eyebrow && (
-            <Eyebrow onDark={dark} className="hero-rise [animation-delay:0ms]">
-              {block.eyebrow}
-            </Eyebrow>
-          )}
-          <Heading className="text-display hero-rise mt-4 font-bold text-balance [animation-delay:70ms]">
-            {block.heading}
-          </Heading>
-          {block.subhead && (
-            <p
-              className={`text-lede hero-rise mt-6 max-w-2xl [animation-delay:140ms] ${dark ? "text-text-invert-soft" : "text-text-soft"}`}
-            >
-              {block.subhead}
-            </p>
-          )}
-          <div className="hero-rise [animation-delay:210ms]">
-            <CtaButtons ctas={block.ctas as Cta[] | null} onDark={dark} />
+      <Container className={cn("relative w-full", heroPad)}>
+        <div className={cn(showPanel && "grid items-center gap-10 lg:grid-cols-2 lg:gap-14")}>
+          <div className={showPanel ? "max-w-2xl" : "max-w-3xl"}>
+            {block.eyebrow && (
+              <Eyebrow onDark={dark} className="hero-rise [animation-delay:0ms]">
+                {block.eyebrow}
+              </Eyebrow>
+            )}
+            <Heading className="text-display hero-rise mt-4 font-bold text-balance [animation-delay:70ms]">
+              {block.heading}
+            </Heading>
+            {block.subhead && (
+              <p
+                className={`text-lede hero-rise mt-6 max-w-2xl [animation-delay:140ms] ${dark ? "text-text-invert-soft" : "text-text-soft"}`}
+              >
+                {block.subhead}
+              </p>
+            )}
+            <div className="hero-rise [animation-delay:210ms]">
+              <CtaButtons ctas={block.ctas as Cta[] | null} onDark={dark} />
+            </div>
           </div>
+
+          {showPanel && (
+            <div className="hero-rise [animation-delay:240ms]">
+              <HeroMediaPanel items={panelItems} interval={panelInterval} dark={dark} />
+            </div>
+          )}
         </div>
       </Container>
     </section>
@@ -248,6 +363,152 @@ export function PhotoStripView({
         speed={block.speed}
       />
     </Section>
+  );
+}
+
+// --- VideoShowcase ----------------------------------------------------------
+
+/** Make a media URL absolute for schema.org (poster/contentUrl must be absolute). */
+function absUrl(u?: string | null): string | undefined {
+  if (!u) return undefined;
+  return u.startsWith("http") ? u : `${serverUrl}${u}`;
+}
+
+export function VideoShowcaseView({ block }: { block: VideoShowcaseBlock }) {
+  const styleInput = getBlockStyle(block);
+  // The style panel still drives width / padding / heading / animation, but the
+  // band background is owned by the dedicated `tone` field (defaults to dark —
+  // the cinematic look that reads best for video).
+  const bs = resolveBlockStyle(styleInput);
+  const tone: SectionTone = (block.tone as SectionTone | null | undefined) ?? "dark";
+  const isDark = tone === "dark" || tone === "brand" || tone === "energy";
+  const layout = block.layout === "grid" ? "grid" : "spotlight";
+
+  const rawVideos = block.videos ?? [];
+
+  // Normalise each CMS row into a render-ready VideoItem for the client player.
+  const videos: VideoItem[] = rawVideos
+    .map((v): VideoItem | null => {
+      const source: VideoItem["source"] = v.source === "url" ? "url" : "upload";
+      const embed = source === "url" ? parseVideoEmbed(v.videoUrl) : null;
+      const poster = mediaUrl(v.poster);
+      const file = mediaUrl(v.videoFile);
+      const posterUrl = poster?.url ?? fallbackPoster(embed);
+      const playable = source === "upload" ? Boolean(file?.url) : Boolean(embed);
+      if (!playable) return null;
+      return {
+        title: v.title,
+        description: v.description ?? null,
+        posterUrl,
+        posterAlt: poster?.alt ?? v.title,
+        duration: v.duration ?? null,
+        source,
+        mp4Url: file?.url ?? null,
+        embed,
+        featured: Boolean(v.featured),
+      };
+    })
+    .filter((v): v is VideoItem => v !== null);
+
+  if (videos.length === 0) return null;
+
+  // VideoObject schema per video — mirrors visible content (no invented data),
+  // so AI engines and Google Video can surface and cite these clips.
+  const videoSchemas = rawVideos
+    .map((v, i) => {
+      const item = videos.find((x) => x.title === v.title);
+      if (!item) return null;
+      const thumb = absUrl(item.posterUrl);
+      const duration = toIso8601Duration(v.duration);
+      const schema: Record<string, unknown> = {
+        "@context": "https://schema.org",
+        "@type": "VideoObject",
+        name: v.title,
+        description: v.description || v.title,
+      };
+      if (thumb) schema.thumbnailUrl = thumb;
+      if (v.uploadDate) schema.uploadDate = v.uploadDate;
+      if (duration) schema.duration = duration;
+      if (item.source === "upload" && item.mp4Url) schema.contentUrl = absUrl(item.mp4Url);
+      if (item.embed) schema.embedUrl = item.embed.embedUrl;
+      // Google requires a thumbnail; skip emitting an incomplete object.
+      return thumb ? { key: v.id ?? i, schema } : null;
+    })
+    .filter((x): x is { key: string | number; schema: Record<string, unknown> } => x !== null);
+
+  const bgClass =
+    tone === "brand"
+      ? "bg-brand text-white"
+      : tone === "energy"
+        ? "bg-energy text-white"
+        : tone === "dark"
+          ? "bg-ink-900 text-text-invert"
+          : tone === "muted"
+            ? "bg-surface-2 text-text"
+            : tone === "solar"
+              ? "bg-solar text-solar-text"
+              : "bg-surface text-text";
+
+  const hasHeader = Boolean(block.eyebrow || block.heading || block.lede);
+
+  return (
+    <section className={cn(bgClass, "relative isolate overflow-hidden")}>
+      {videoSchemas.map(({ key, schema }) => (
+        <JsonLd key={key} data={schema} />
+      ))}
+
+      {isDark && (
+        <>
+          {/* Brand-correct ambient glow — True Blue + Lime Green (never purple). */}
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-[radial-gradient(55%_50%_at_15%_-5%,rgba(0,115,207,0.25),transparent_60%),radial-gradient(45%_45%_at_90%_8%,rgba(50,205,50,0.12),transparent_55%)]"
+          />
+          <GridMotif tone="dark" />
+        </>
+      )}
+
+      <Container width={bs.width} className={cn("relative", bs.paddingClass)}>
+        {hasHeader && (
+          <Reveal
+            animation={bs.animationStyle}
+            delay={bs.delayMs}
+            className={cn(
+              "mb-10 max-w-2xl md:mb-14",
+              bs.textAlign === "center" && "mx-auto text-center",
+            )}
+          >
+            {block.eyebrow && <Eyebrow onDark={isDark}>{block.eyebrow}</Eyebrow>}
+            {block.heading && (
+              <h2
+                className={cn(
+                  bs.headingSizeClass,
+                  bs.headingFontClass,
+                  "mt-3 font-semibold text-balance",
+                  isDark ? "text-text-invert" : "text-ink-900",
+                )}
+              >
+                {block.heading}
+              </h2>
+            )}
+            {block.lede && (
+              <p
+                className={cn(
+                  "text-lede mt-4",
+                  isDark ? "text-text-invert-soft" : "text-text-soft",
+                )}
+              >
+                {block.lede}
+              </p>
+            )}
+          </Reveal>
+        )}
+
+        <Reveal animation={bs.animationStyle} delay={bs.delayMs + 80}>
+          <VideoShowcaseClient videos={videos} layout={layout} />
+        </Reveal>
+      </Container>
+    </section>
   );
 }
 
@@ -554,11 +815,19 @@ export async function TeamGridView({
     lede?: string | null;
     appearance?: string | null;
     source?: string | null;
+    group?: string | null;
     members?: (number | Team)[] | null;
   };
 }) {
   const bs = resolveBlockStyle(getBlockStyle(block), block.appearance);
-  const members = block.source === "selected" ? objs<Team>(block.members) : await getTeam();
+  const all = block.source === "selected" ? objs<Team>(block.members) : await getTeam();
+  // Automatic mode can scope to a single group (Leadership, Engineering, …) so an
+  // admin can stack one Team block per group, each with its own heading.
+  const group = block.group ?? "all";
+  const members =
+    block.source === "selected" || group === "all"
+      ? all
+      : all.filter((m) => (m.category ?? "leadership") === group);
   if (members.length === 0) return null;
   return (
     <Section

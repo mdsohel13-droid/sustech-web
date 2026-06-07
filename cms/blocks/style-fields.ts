@@ -245,8 +245,24 @@ export const blockStyleGroup: Field = {
           admin: {
             width: "50%",
             description:
-              "Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.",
+              "Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.",
           },
+        },
+        {
+          name: "gapBelow",
+          type: "select",
+          label: "Gap below this block",
+          defaultValue: "default",
+          admin: {
+            width: "50%",
+            description: "Vertical space after this block, before the next one.",
+          },
+          options: [
+            { label: "None", value: "none" },
+            { label: "Small", value: "small" },
+            { label: "Default", value: "default" },
+            { label: "Large", value: "large" },
+          ],
         },
       ],
     },

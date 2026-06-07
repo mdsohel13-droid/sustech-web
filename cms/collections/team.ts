@@ -36,6 +36,25 @@ export const Team: CollectionConfig = {
       ],
     },
     {
+      name: "category",
+      type: "select",
+      label: "Group",
+      defaultValue: "leadership",
+      options: [
+        { label: "Leadership", value: "leadership" },
+        { label: "Management", value: "management" },
+        { label: "Engineering", value: "engineering" },
+        { label: "Consultant", value: "consultant" },
+        { label: "Advisor", value: "advisor" },
+        { label: "Other", value: "other" },
+      ],
+      admin: {
+        position: "sidebar",
+        description:
+          "Which group this person belongs to. The Team block can show one group at a time.",
+      },
+    },
+    {
       name: "photo",
       type: "upload",
       relationTo: "media",

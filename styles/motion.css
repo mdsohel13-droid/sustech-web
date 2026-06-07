@@ -121,11 +121,29 @@
   }
 }
 
+/* Page transition — the new page fades in on every navigation. Opacity only
+   (no transform) so it never creates a containing block that would break
+   sticky/fixed descendants (e.g. the Knowledge tab bar). */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* ── Hero load animations (CSS-only, LCP-safe) ───────────────────────────── */
 
 @media (prefers-reduced-motion: no-preference) {
   .hero-rise {
     animation: hero-rise var(--duration-epic) var(--ease-brand) both;
+  }
+  /* Each navigation fades the incoming page in — a deliberate, premium feel
+     that masks the brief route-change delay. Reduced-motion users skip it
+     (this rule is inside the no-preference query) and see content instantly. */
+  .page-enter {
+    animation: page-enter var(--duration-base) var(--ease-brand) both;
   }
   /* Gradient overlay breathes very subtly — depth without distraction */
   .hero-gradient {

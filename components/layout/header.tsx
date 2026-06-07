@@ -90,7 +90,7 @@ export function Header({ items, cta, logo }: HeaderProps) {
               <Link
                 key={item.label}
                 href={item.href ?? "#"}
-                prefetch={false}
+                prefetch={true}
                 className="text-text-soft hover:text-ink-900 focus-visible:outline-brand rounded-md px-3 py-2 text-[0.9375rem] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
               >
                 {item.label}
@@ -102,7 +102,7 @@ export function Header({ items, cta, logo }: HeaderProps) {
         <div className="flex items-center gap-2">
           {cta && (
             <Button asChild className="hidden sm:inline-flex">
-              <Link href={cta.href} prefetch={false}>
+              <Link href={cta.href} prefetch={true}>
                 {cta.label}
               </Link>
             </Button>
@@ -166,7 +166,7 @@ function DesktopDropdown({
               <li key={leaf.href + leaf.label}>
                 <Link
                   href={leaf.href}
-                  prefetch={false}
+                  prefetch={true}
                   onClick={onClose}
                   className="group hover:bg-surface-2 focus-visible:outline-brand block rounded-md p-3 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
                 >
@@ -212,7 +212,7 @@ function MobileMenu({
       <Container className="py-4">
         {cta && (
           <Button asChild className="mb-4 w-full">
-            <Link href={cta.href} prefetch={false} onClick={onNavigate}>
+            <Link href={cta.href} prefetch={true} onClick={onNavigate}>
               {cta.label}
             </Link>
           </Button>
@@ -245,7 +245,7 @@ function MobileMenu({
                         <li key={leaf.href + leaf.label}>
                           <Link
                             href={leaf.href}
-                            prefetch={false}
+                            prefetch={true}
                             onClick={onNavigate}
                             className="text-text-soft hover:text-ink-900 focus-visible:outline-brand block rounded-md px-3 py-2.5 text-[0.9375rem] focus-visible:outline-2 focus-visible:outline-offset-2"
                           >
@@ -260,7 +260,7 @@ function MobileMenu({
                 <li key={item.label}>
                   <Link
                     href={item.href ?? "#"}
-                    prefetch={false}
+                    prefetch={true}
                     onClick={onNavigate}
                     className="text-ink-900 hover:bg-surface-2 focus-visible:outline-brand block rounded-md px-3 py-3 text-base font-medium focus-visible:outline-2 focus-visible:outline-offset-2"
                   >

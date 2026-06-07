@@ -76,6 +76,7 @@ export interface Config {
     testimonials: Testimonial;
     clients: Client;
     articles: Article;
+    'news-items': NewsItem;
     media: Media;
     icons: Icon;
     'rfq-requests': RfqRequest;
@@ -97,6 +98,7 @@ export interface Config {
     testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
     clients: ClientsSelect<false> | ClientsSelect<true>;
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
+    'news-items': NewsItemsSelect<false> | NewsItemsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     icons: IconsSelect<false> | IconsSelect<true>;
     'rfq-requests': RfqRequestsSelect<false> | RfqRequestsSelect<true>;
@@ -2244,6 +2246,112 @@ export interface Article {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Daily news feed — updated by the Hermes AI agent and/or editorial team. Lives at /news/[slug].
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "news-items".
+ */
+export interface NewsItem {
+  id: number;
+  title: string;
+  /**
+   * The URL path segment. Auto-filled from the title — edit only if you must.
+   */
+  slug: string;
+  category: 'company-update' | 'industry-news' | 'product-update' | 'ai-tech' | 'market-insight';
+  /**
+   * Defaults to today. Used for ordering in the news feed.
+   */
+  publishedDate?: string | null;
+  /**
+   * TL;DR — the direct answer in 1–2 sentences. AI engines pull this as the short answer citation. Make it specific and factual.
+   */
+  summary: string;
+  /**
+   * Full article. Lead with the most important fact, then explain.
+   */
+  body: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Optional featured image (16:9 recommended).
+   */
+  heroImage?: (number | null) | Media;
+  /**
+   * e.g. "The Daily Star", "Solar Power World". Leave blank for original content.
+   */
+  source?: string | null;
+  /**
+   * Original article URL (if curated).
+   */
+  sourceUrl?: string | null;
+  /**
+   * Keywords: solar, earthing, BESS, Bangladesh, etc.
+   */
+  tags?:
+    | {
+        tag: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Questions & answers related to this news. Each Q&A becomes FAQPage schema — the single highest-citability signal for AI engines. Add 2–5 per article.
+   */
+  faq?:
+    | {
+        question: string;
+        answer: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Search & social. Leave blank to use the site defaults.
+   */
+  seo?: {
+    /**
+     * Overrides the page/site title.
+     */
+    title?: string | null;
+    /**
+     * Canonical URL (advanced; usually leave blank).
+     */
+    canonical?: string | null;
+    /**
+     * ~150–160 characters. Shown in search results and link previews.
+     */
+    description?: string | null;
+    /**
+     * Social share image (Open Graph), 1200×630.
+     */
+    image?: (number | null) | Media;
+    noindex?: boolean | null;
+  };
+  /**
+   * Set automatically by Hermes. Do not edit manually.
+   */
+  agentMeta?: {
+    generatedBy?: string | null;
+    model?: string | null;
+    sourceUrls?: string | null;
+    generatedAt?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
  * 3-D renders, AI-generated icons, SVG symbols and brand marks. Upload here to keep icons separate from general media.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2485,6 +2593,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'articles';
         value: number | Article;
+      } | null)
+    | ({
+        relationTo: 'news-items';
+        value: number | NewsItem;
       } | null)
     | ({
         relationTo: 'media';
@@ -3393,6 +3505,54 @@ export interface ArticlesSelect<T extends boolean = true> {
         description?: T;
         image?: T;
         noindex?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "news-items_select".
+ */
+export interface NewsItemsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  category?: T;
+  publishedDate?: T;
+  summary?: T;
+  body?: T;
+  heroImage?: T;
+  source?: T;
+  sourceUrl?: T;
+  tags?:
+    | T
+    | {
+        tag?: T;
+        id?: T;
+      };
+  faq?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  seo?:
+    | T
+    | {
+        title?: T;
+        canonical?: T;
+        description?: T;
+        image?: T;
+        noindex?: T;
+      };
+  agentMeta?:
+    | T
+    | {
+        generatedBy?: T;
+        model?: T;
+        sourceUrls?: T;
+        generatedAt?: T;
       };
   updatedAt?: T;
   createdAt?: T;

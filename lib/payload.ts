@@ -1,11 +1,13 @@
 import config from "@payload-config";
 import { unstable_cache } from "next/cache";
 import { getPayload } from "payload";
+import type { Where } from "payload";
 import { cache } from "react";
 import type {
   Article,
   Client,
   Navigation,
+  NewsItem,
   Page,
   Product,
   Project,
@@ -305,6 +307,52 @@ export const getFeaturedProjects = cache(async (limit = 3): Promise<Project[]> =
     return [];
   }
 });
+
+// News items -----------------------------------------------------------------
+
+export const getNewsItems = cache(
+  async (opts?: { limit?: number; category?: string }): Promise<NewsItem[]> => {
+    try {
+      const payload = await getPayloadClient();
+      const where: Where =
+        opts?.category && opts.category !== "all"
+          ? {
+              and: [{ _status: { equals: "published" } }, { category: { equals: opts.category } }],
+            }
+          : { _status: { equals: "published" } };
+      const res = await payload.find({
+        collection: "news-items",
+        depth: 1,
+        limit: opts?.limit ?? 50,
+        sort: "-publishedDate",
+        where,
+      });
+      return res.docs;
+    } catch {
+      return [];
+    }
+  },
+);
+
+export const getNewsItemBySlug = cache(
+  async (slug: string, draft = false): Promise<NewsItem | null> => {
+    try {
+      const payload = await getPayloadClient();
+      const res = await payload.find({
+        collection: "news-items",
+        depth: 1,
+        limit: 1,
+        ...(draft ? { overrideAccess: true } : {}),
+        where: draft
+          ? { slug: { equals: slug } }
+          : { and: [{ slug: { equals: slug } }, { _status: { equals: "published" } }] },
+      });
+      return res.docs[0] ?? null;
+    } catch {
+      return null;
+    }
+  },
+);
 
 // Globals --------------------------------------------------------------------
 

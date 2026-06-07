@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import {
   getArticles,
+  getNewsItems,
   getProjects,
   getPublishedPageSlugs,
   getSectors,
@@ -17,12 +18,13 @@ const lastMod = (v: unknown): Date | undefined => {
 };
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [pageSlugs, services, sectors, projects, articles] = await Promise.all([
+  const [pageSlugs, services, sectors, projects, articles, newsItems] = await Promise.all([
     getPublishedPageSlugs(),
     getServices(),
     getSectors(),
     getProjects(),
     getArticles(),
+    getNewsItems(),
   ]);
 
   const url = (path: string) => `${serverUrl}${path}`;
@@ -31,6 +33,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: url("/"), changeFrequency: "weekly", priority: 1 },
     { url: url("/projects"), changeFrequency: "weekly", priority: 0.8 },
     { url: url("/knowledge"), changeFrequency: "weekly", priority: 0.6 },
+    { url: url("/news"), changeFrequency: "daily", priority: 0.7 },
     { url: url("/request-quote"), changeFrequency: "yearly", priority: 0.9 },
     { url: url("/contact"), changeFrequency: "yearly", priority: 0.5 },
   ];
@@ -66,5 +69,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.5,
   }));
 
-  return [...fixed, ...pages, ...serviceUrls, ...sectorUrls, ...projectUrls, ...articleUrls];
+  const newsUrls: MetadataRoute.Sitemap = newsItems.map((n) => ({
+    url: url(`/news/${n.slug}`),
+    lastModified: lastMod(n.updatedAt),
+    changeFrequency: "weekly",
+    priority: 0.6,
+  }));
+
+  return [
+    ...fixed,
+    ...pages,
+    ...serviceUrls,
+    ...sectorUrls,
+    ...projectUrls,
+    ...articleUrls,
+    ...newsUrls,
+  ];
 }

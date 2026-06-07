@@ -18,7 +18,14 @@
  *   - Revalidated on the same ISR cadence as the sitemap (every hour).
  *   - Beta env: file is still served but prefixed with a staging notice.
  */
-import { getArticles, getProjects, getSectors, getServices, getSiteSettings } from "@/lib/payload";
+import {
+  getArticles,
+  getNewsItems,
+  getProjects,
+  getSectors,
+  getServices,
+  getSiteSettings,
+} from "@/lib/payload";
 import { serverUrl } from "@/lib/seo";
 
 export const revalidate = 3600;
@@ -27,12 +34,13 @@ const mdLink = (title: string, path: string, desc?: string | null) =>
   `- [${title}](${serverUrl}${path})${desc ? `: ${desc.replace(/\n/g, " ").trim()}` : ""}`;
 
 export async function GET() {
-  const [settings, services, sectors, projects, articles] = await Promise.all([
+  const [settings, services, sectors, projects, articles, newsItems] = await Promise.all([
     getSiteSettings(),
     getServices(),
     getSectors(),
     getProjects(),
     getArticles(),
+    getNewsItems({ limit: 30 }),
   ]);
 
   const isBeta = process.env.SITE_INDEXABLE !== "true";
@@ -115,6 +123,18 @@ export async function GET() {
     lines.push(``);
     for (const a of articles) {
       lines.push(mdLink(a.title, `/knowledge/${a.slug}`, a.excerpt));
+    }
+    lines.push(``);
+  }
+
+  // ── Recent news ───────────────────────────────────────────────────────────
+  if (newsItems.length > 0) {
+    lines.push(`## Recent News & Updates`);
+    lines.push(``);
+    lines.push(`> Updated daily by the Hermes AI content agent. Published articles only.`);
+    lines.push(``);
+    for (const n of newsItems) {
+      lines.push(mdLink(n.title, `/news/${n.slug}`, n.summary));
     }
     lines.push(``);
   }

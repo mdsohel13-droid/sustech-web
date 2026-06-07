@@ -1,7 +1,20 @@
+/**
+ * CMS block definitions — every block an editor can stack inside a Page layout.
+ *
+ * Each block ends with `blockStyleGroup` — a collapsible "Style & Animation"
+ * panel that lets admins control colour scheme, width, padding, heading size,
+ * entrance animation and more without touching code or deploying. Defaults are
+ * all set, so editors can ignore the panel entirely for the standard look.
+ *
+ * The legacy `appearance` field (default/muted/dark) is kept alongside the
+ * new style group for backward compatibility — existing content continues to
+ * render correctly while editors migrate to the richer controls.
+ */
 import type { Block, Field } from "payload";
 import { ctaArray } from "../fields/link";
+import { blockStyleGroup } from "./style-fields";
 
-/** Optional band background so editors control the light/dark rhythm of a page. */
+/** Legacy 3-option appearance select — kept for backward compat. */
 const appearance: Field = {
   name: "appearance",
   type: "select",
@@ -11,7 +24,10 @@ const appearance: Field = {
     { label: "Muted (light grey)", value: "muted" },
     { label: "Dark (ink)", value: "dark" },
   ],
-  admin: { width: "50%" },
+  admin: {
+    width: "50%",
+    description: "Quick colour override. Use 'Style & Animation' below for full control.",
+  },
 };
 
 const sourceSelect = (entity: string): Field => ({
@@ -24,6 +40,8 @@ const sourceSelect = (entity: string): Field => ({
   ],
   admin: { layout: "horizontal" },
 });
+
+/* ── Blocks ──────────────────────────────────────────────────────────────── */
 
 const Hero: Block = {
   slug: "hero",
@@ -63,10 +81,11 @@ const Hero: Block = {
       relationTo: "media",
       admin: {
         description:
-          "Optional MP4 (autoplay, muted, looping, ≤ 10s). Falls back to the image when motion is reduced, on small screens, or when missing.",
+          "Optional MP4 (autoplay, muted, looping, ≤ 10s). Falls back to the image when motion is reduced.",
       },
     },
     ctaArray,
+    blockStyleGroup,
   ],
 };
 
@@ -101,6 +120,7 @@ const ProductShowcase: Block = {
       admin: { condition: (_d, s) => s?.source === "selected" },
     },
     { name: "viewAllLabel", type: "text", defaultValue: "View all products" },
+    blockStyleGroup,
   ],
 };
 
@@ -111,6 +131,7 @@ const RichText: Block = {
   fields: [
     { type: "row", fields: [appearance] },
     { name: "content", type: "richText", required: true },
+    blockStyleGroup,
   ],
 };
 
@@ -148,6 +169,7 @@ const StatsCounters: Block = {
         { name: "label", type: "text", required: true },
       ],
     },
+    blockStyleGroup,
   ],
 };
 
@@ -166,6 +188,7 @@ const ServicesGrid: Block = {
       hasMany: true,
       admin: { condition: (_d, s) => s?.source === "selected" },
     },
+    blockStyleGroup,
   ],
 };
 
@@ -184,6 +207,7 @@ const SectorTiles: Block = {
       hasMany: true,
       admin: { condition: (_d, s) => s?.source === "selected" },
     },
+    blockStyleGroup,
   ],
 };
 
@@ -218,6 +242,7 @@ const ProjectsList: Block = {
       admin: { condition: (_d, s) => s?.source === "selected" },
     },
     { name: "viewAllLabel", type: "text", defaultValue: "View all projects" },
+    blockStyleGroup,
   ],
 };
 
@@ -234,6 +259,7 @@ const ImageGallery: Block = {
       labels: { singular: "Image", plural: "Images" },
       fields: [{ name: "image", type: "upload", relationTo: "media", required: true }],
     },
+    blockStyleGroup,
   ],
 };
 
@@ -251,6 +277,7 @@ const LogoWall: Block = {
       hasMany: true,
       admin: { condition: (_d, s) => s?.source === "selected" },
     },
+    blockStyleGroup,
   ],
 };
 
@@ -268,6 +295,7 @@ const TestimonialsBlock: Block = {
       hasMany: true,
       admin: { condition: (_d, s) => s?.source === "selected" },
     },
+    blockStyleGroup,
   ],
 };
 
@@ -288,6 +316,7 @@ const Steps: Block = {
         { name: "body", type: "textarea", required: true },
       ],
     },
+    blockStyleGroup,
   ],
 };
 
@@ -299,6 +328,7 @@ const CTABand: Block = {
     { name: "heading", type: "text", required: true },
     { name: "subhead", type: "textarea" },
     ctaArray,
+    blockStyleGroup,
   ],
 };
 
@@ -318,6 +348,7 @@ const FAQ: Block = {
         { name: "answer", type: "textarea", required: true },
       ],
     },
+    blockStyleGroup,
   ],
 };
 
@@ -338,6 +369,7 @@ const CalculatorEmbed: Block = {
       ],
     },
     { name: "ctaLabel", type: "text", defaultValue: "Try the calculator" },
+    blockStyleGroup,
   ],
 };
 
@@ -348,6 +380,7 @@ const ContactRFQ: Block = {
   fields: [
     { type: "row", fields: [{ name: "heading", type: "text" }, appearance] },
     { name: "subhead", type: "textarea" },
+    blockStyleGroup,
   ],
 };
 
@@ -378,6 +411,7 @@ const Spacer: Block = {
         },
       ],
     },
+    // No blockStyleGroup for Spacer — it has no visual content to style.
   ],
 };
 
@@ -399,6 +433,7 @@ const TeamGrid: Block = {
         description: "Pick and order the people to show.",
       },
     },
+    blockStyleGroup,
   ],
 };
 
@@ -422,6 +457,7 @@ const PartnerBar: Block = {
         },
       ],
     },
+    blockStyleGroup,
   ],
 };
 
@@ -434,6 +470,7 @@ const ArticlesList: Block = {
     { name: "lede", type: "textarea" },
     { type: "row", fields: [appearance] },
     { name: "viewAllLabel", type: "text", defaultValue: "Read the knowledge hub" },
+    blockStyleGroup,
   ],
 };
 

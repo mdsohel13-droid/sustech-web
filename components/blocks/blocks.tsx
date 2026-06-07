@@ -14,6 +14,7 @@ import { Reveal } from "@/components/ui/reveal";
 import { Section } from "@/components/ui/section";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { getBlockStyle, itemRevealProps, resolveBlockStyle } from "@/lib/block-styles";
 import {
   getArticles,
   getClients,
@@ -48,7 +49,7 @@ import type {
   Team,
   Testimonial,
 } from "@/payload-types";
-import { CtaButtons, toneOf, type Cta } from "./shared";
+import { CtaButtons, type Cta } from "./shared";
 
 type RichData = ComponentProps<typeof RichText>["data"];
 function Rich({ data, className }: { data: unknown; className?: string }) {
@@ -172,8 +173,17 @@ export function RichTextView({
 }: {
   block: { content?: unknown; appearance?: string | null };
 }) {
+  const bs = resolveBlockStyle(getBlockStyle(block), block.appearance);
   return (
-    <Section tone={toneOf(block.appearance as never)}>
+    <Section
+      tone={bs.tone}
+      width={bs.width}
+      paddingSize={bs.paddingSize}
+      align={bs.textAlign}
+      headingSize={bs.headingSize}
+      headingFont={bs.headingFont}
+      eyebrowAccent={bs.accentColour}
+    >
       <Rich data={block.content} className="richtext max-w-prose" />
     </Section>
   );
@@ -182,8 +192,18 @@ export function RichTextView({
 // --- StatsCounters ----------------------------------------------------------
 
 export function StatsCountersView({ block }: { block: StatsCountersBlock }) {
+  const bs = resolveBlockStyle(getBlockStyle(block), block.appearance);
   return (
-    <Section tone={toneOf(block.appearance)} srTitle="Key figures">
+    <Section
+      tone={bs.tone}
+      width={bs.width}
+      paddingSize={bs.paddingSize}
+      align={bs.textAlign}
+      headingSize={bs.headingSize}
+      headingFont={bs.headingFont}
+      eyebrowAccent={bs.accentColour}
+      srTitle="Key figures"
+    >
       {block.intro && (
         <p className="text-text-soft mb-10 text-center font-mono text-xs font-medium tracking-[0.08em] uppercase">
           {block.intro}
@@ -191,7 +211,7 @@ export function StatsCountersView({ block }: { block: StatsCountersBlock }) {
       )}
       <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-4">
         {(block.stats ?? []).map((s, i) => (
-          <Reveal key={s.id ?? i} delay={i * 0.06}>
+          <Reveal key={s.id ?? i} {...itemRevealProps(bs, i)}>
             <ProofCounter value={s.value ?? null} label={s.label} suffix={s.suffix ?? undefined} />
           </Reveal>
         ))}
@@ -213,12 +233,19 @@ export async function ServicesGridView({
     services?: (number | Service)[] | null;
   };
 }) {
+  const bs = resolveBlockStyle(getBlockStyle(block), block.appearance as string | null);
   const services =
     block.source === "selected" ? objs<Service>(block.services) : await getServices();
   return (
     <Section
       id="services"
-      tone={toneOf(block.appearance as never)}
+      tone={bs.tone}
+      width={bs.width}
+      paddingSize={bs.paddingSize}
+      align={bs.textAlign}
+      headingSize={bs.headingSize}
+      headingFont={bs.headingFont}
+      eyebrowAccent={bs.accentColour}
       eyebrow="What we do"
       title={block.heading ?? undefined}
       lede={block.lede ?? undefined}
@@ -228,7 +255,7 @@ export async function ServicesGridView({
           const Icon = serviceIcons[svc.icon] ?? serviceIcons.solar;
           return (
             <li key={svc.id}>
-              <Reveal delay={i * 0.06} className="h-full">
+              <Reveal {...itemRevealProps(bs, i)} className="h-full">
                 <Card interactive className="relative flex h-full flex-col p-6">
                   <span className="bg-brand/10 text-brand inline-flex h-11 w-11 items-center justify-center rounded-md">
                     <Icon className="h-6 w-6" aria-hidden />
@@ -267,11 +294,18 @@ export async function SectorTilesView({
     sectors?: (number | Sector)[] | null;
   };
 }) {
+  const bs = resolveBlockStyle(getBlockStyle(block), block.appearance);
   const sectors = block.source === "selected" ? objs<Sector>(block.sectors) : await getSectors();
   return (
     <Section
       id="solutions"
-      tone={toneOf(block.appearance as never)}
+      tone={bs.tone}
+      width={bs.width}
+      paddingSize={bs.paddingSize}
+      align={bs.textAlign}
+      headingSize={bs.headingSize}
+      headingFont={bs.headingFont}
+      eyebrowAccent={bs.accentColour}
       eyebrow="Solutions by sector"
       title={block.heading ?? undefined}
       lede={block.lede ?? undefined}
@@ -281,7 +315,7 @@ export async function SectorTilesView({
           const Icon = sectorIcons[sec.icon] ?? sectorIcons.industrial;
           return (
             <li key={sec.id}>
-              <Reveal delay={i * 0.06} className="h-full">
+              <Reveal {...itemRevealProps(bs, i)} className="h-full">
                 <Card interactive className="relative flex h-full flex-col p-6">
                   <span className="bg-ink-900/[0.06] text-ink-900 inline-flex h-11 w-11 items-center justify-center rounded-md">
                     <Icon className="h-6 w-6" aria-hidden />
@@ -318,11 +352,18 @@ export async function ProjectsListView({
     viewAllLabel?: string | null;
   };
 }) {
+  const bs = resolveBlockStyle(getBlockStyle(block), block.appearance);
   const projects =
     block.source === "selected" ? objs<Project>(block.projects) : await getFeaturedProjects(3);
   return (
     <Section
-      tone={toneOf(block.appearance as never)}
+      tone={bs.tone}
+      width={bs.width}
+      paddingSize={bs.paddingSize}
+      align={bs.textAlign}
+      headingSize={bs.headingSize}
+      headingFont={bs.headingFont}
+      eyebrowAccent={bs.accentColour}
       eyebrow="Featured projects"
       title={block.heading ?? undefined}
       lede={block.lede ?? undefined}
@@ -353,7 +394,7 @@ export async function ProjectsListView({
             const sectorName = p.sector && typeof p.sector === "object" ? p.sector.title : null;
             return (
               <li key={p.id}>
-                <Reveal delay={i * 0.06}>
+                <Reveal {...itemRevealProps(bs, i)}>
                   {/*
                    * `group` enables the hover/focus-within reveal of the summary below the
                    * meta line. The image + sector + name stay always visible so the card is
@@ -421,11 +462,18 @@ export async function TeamGridView({
     members?: (number | Team)[] | null;
   };
 }) {
+  const bs = resolveBlockStyle(getBlockStyle(block), block.appearance);
   const members = block.source === "selected" ? objs<Team>(block.members) : await getTeam();
   if (members.length === 0) return null;
   return (
     <Section
-      tone={toneOf(block.appearance as never)}
+      tone={bs.tone}
+      width={bs.width}
+      paddingSize={bs.paddingSize}
+      align={bs.textAlign}
+      headingSize={bs.headingSize}
+      headingFont={bs.headingFont}
+      eyebrowAccent={bs.accentColour}
       eyebrow="Our team"
       title={block.heading ?? undefined}
       lede={block.lede ?? undefined}
@@ -436,7 +484,7 @@ export async function TeamGridView({
           const hasBio = Boolean(m.bio);
           return (
             <li key={m.id}>
-              <Reveal delay={Math.min(i, 6) * 0.05} className="h-full">
+              <Reveal {...itemRevealProps(bs, i)} className="h-full">
                 {/*
                  * The whole card is the disclosure target. Image + name + role are always
                  * visible. The bio expands BELOW the role on hover (desktop), focus (keyboard)
@@ -491,11 +539,18 @@ export async function TeamGridView({
 // --- ArticlesList -----------------------------------------------------------
 
 export async function ArticlesListView({ block }: { block: ArticlesListBlock }) {
+  const bs = resolveBlockStyle(getBlockStyle(block), block.appearance);
   const articles = (await getArticles()).slice(0, 3);
   if (articles.length === 0) return null;
   return (
     <Section
-      tone={toneOf(block.appearance)}
+      tone={bs.tone}
+      width={bs.width}
+      paddingSize={bs.paddingSize}
+      align={bs.textAlign}
+      headingSize={bs.headingSize}
+      headingFont={bs.headingFont}
+      eyebrowAccent={bs.accentColour}
       eyebrow="Knowledge"
       title={block.heading ?? undefined}
       lede={block.lede ?? undefined}
@@ -503,7 +558,7 @@ export async function ArticlesListView({ block }: { block: ArticlesListBlock }) 
       <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {articles.map((a, i) => (
           <li key={a.id}>
-            <Reveal delay={i * 0.06} className="h-full">
+            <Reveal {...itemRevealProps(bs, i)} className="h-full">
               <Card interactive className="relative flex h-full flex-col p-6">
                 <h3 className="text-h3 text-ink-900 font-semibold">{a.title}</h3>
                 {a.excerpt && (
@@ -540,13 +595,20 @@ export async function ArticlesListView({ block }: { block: ArticlesListBlock }) 
 // --- ProductShowcase --------------------------------------------------------
 
 export async function ProductShowcaseView({ block }: { block: ProductShowcaseBlock }) {
+  const bs = resolveBlockStyle(getBlockStyle(block), block.appearance as string | null);
   const products =
     block.source === "selected" ? objs<Product>(block.products) : await getFeaturedProducts();
   if (products.length === 0) return null;
   return (
     <Section
       id="products"
-      tone={toneOf(block.appearance as never)}
+      tone={bs.tone}
+      width={bs.width}
+      paddingSize={bs.paddingSize}
+      align={bs.textAlign}
+      headingSize={bs.headingSize}
+      headingFont={bs.headingFont}
+      eyebrowAccent={bs.accentColour}
       eyebrow="Products & distribution"
       title={block.heading ?? undefined}
       lede={block.lede ?? undefined}
@@ -558,7 +620,7 @@ export async function ProductShowcaseView({ block }: { block: ProductShowcaseBlo
           const href = p.externalUrl || `#`;
           return (
             <li key={p.id}>
-              <Reveal delay={Math.min(i, 6) * 0.06} className="h-full">
+              <Reveal {...itemRevealProps(bs, i)} className="h-full">
                 {/* `group` enables the hover/focus reveal of the summary below brand + title. */}
                 <Card
                   interactive
@@ -614,10 +676,20 @@ export async function ProductShowcaseView({ block }: { block: ProductShowcaseBlo
 // --- PartnerBar -------------------------------------------------------------
 
 export function PartnerBarView({ block }: { block: PartnerBarBlock }) {
+  const bs = resolveBlockStyle(getBlockStyle(block), block.appearance);
   const partners = block.partners ?? [];
   if (partners.length === 0) return null;
   return (
-    <Section tone={toneOf(block.appearance)} srTitle="Technology partners">
+    <Section
+      tone={bs.tone}
+      width={bs.width}
+      paddingSize={bs.paddingSize}
+      align={bs.textAlign}
+      headingSize={bs.headingSize}
+      headingFont={bs.headingFont}
+      eyebrowAccent={bs.accentColour}
+      srTitle="Technology partners"
+    >
       {block.heading && (
         <p className="text-text-soft mb-6 text-center font-mono text-xs font-medium tracking-[0.08em] uppercase">
           {block.heading}
@@ -649,11 +721,21 @@ export function PartnerBarView({ block }: { block: PartnerBarBlock }) {
 // --- ImageGallery -----------------------------------------------------------
 
 export function ImageGalleryView({ block }: { block: ImageGalleryBlock }) {
+  const bs = resolveBlockStyle(getBlockStyle(block), block.appearance);
   const images = (block.images ?? [])
     .map((row) => mediaUrl(row.image))
     .filter((x): x is { url: string; alt: string } => Boolean(x));
   return (
-    <Section tone={toneOf(block.appearance)} title={block.heading ?? undefined}>
+    <Section
+      tone={bs.tone}
+      width={bs.width}
+      paddingSize={bs.paddingSize}
+      align={bs.textAlign}
+      headingSize={bs.headingSize}
+      headingFont={bs.headingFont}
+      eyebrowAccent={bs.accentColour}
+      title={block.heading ?? undefined}
+    >
       <ul className="grid grid-cols-2 gap-4 md:grid-cols-3">
         {images.map((img, i) => (
           <li key={i} className="border-border overflow-hidden rounded-lg border">
@@ -674,13 +756,22 @@ export function ImageGalleryView({ block }: { block: ImageGalleryBlock }) {
 // --- LogoWall ---------------------------------------------------------------
 
 export async function LogoWallView({ block }: { block: LogoWallBlock }) {
+  const bs = resolveBlockStyle(getBlockStyle(block), block.appearance);
   const clients = block.source === "selected" ? objs<Client>(block.clients) : await getClients();
   return (
-    <Section tone={toneOf(block.appearance)}>
+    <Section
+      tone={bs.tone}
+      width={bs.width}
+      paddingSize={bs.paddingSize}
+      align={bs.textAlign}
+      headingSize={bs.headingSize}
+      headingFont={bs.headingFont}
+      eyebrowAccent={bs.accentColour}
+    >
       {block.heading && (
         <h2 className="text-text-soft text-center text-base font-medium">{block.heading}</h2>
       )}
-      <Reveal className="mt-10">
+      <Reveal animation={bs.animationStyle} delay={bs.delayMs} className="mt-10">
         <ul className="grid grid-cols-2 items-center gap-x-8 gap-y-6 sm:grid-cols-3 lg:grid-cols-6">
           {clients.length === 0
             ? Array.from({ length: 6 }, (_, i) => (
@@ -724,11 +815,18 @@ export async function TestimonialsView({
     testimonials?: (number | Testimonial)[] | null;
   };
 }) {
+  const bs = resolveBlockStyle(getBlockStyle(block), block.appearance);
   const items =
     block.source === "selected" ? objs<Testimonial>(block.testimonials) : await getTestimonials();
   return (
     <Section
-      tone={toneOf(block.appearance as never)}
+      tone={bs.tone}
+      width={bs.width}
+      paddingSize={bs.paddingSize}
+      align={bs.textAlign}
+      headingSize={bs.headingSize}
+      headingFont={bs.headingFont}
+      eyebrowAccent={bs.accentColour}
       eyebrow="Testimonials"
       title={block.heading ?? undefined}
     >
@@ -754,7 +852,7 @@ export async function TestimonialsView({
         <ul className="grid gap-6 md:grid-cols-2">
           {items.map((t, i) => (
             <li key={t.id}>
-              <Reveal delay={i * 0.06}>
+              <Reveal {...itemRevealProps(bs, i)}>
                 <Card className="flex h-full flex-col gap-5 p-8">
                   <Quote className="text-brand/30 h-7 w-7" aria-hidden />
                   <blockquote className="text-ink-900 text-lg">“{t.quote}”</blockquote>
@@ -777,16 +875,23 @@ export async function TestimonialsView({
 // --- Steps ------------------------------------------------------------------
 
 export function StepsView({ block }: { block: StepsBlock }) {
+  const bs = resolveBlockStyle(getBlockStyle(block), block.appearance);
   return (
     <Section
-      tone={toneOf(block.appearance)}
+      tone={bs.tone}
+      width={bs.width}
+      paddingSize={bs.paddingSize}
+      align={bs.textAlign}
+      headingSize={bs.headingSize}
+      headingFont={bs.headingFont}
+      eyebrowAccent={bs.accentColour}
       eyebrow={block.eyebrow ?? "How we work"}
       title={block.heading ?? undefined}
     >
       <ol className="grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
         {(block.steps ?? []).map((step, i) => (
           <li key={step.id ?? i}>
-            <Reveal delay={i * 0.06}>
+            <Reveal {...itemRevealProps(bs, i)}>
               <div className="border-border border-t pt-5">
                 <span className="text-brand font-mono text-sm font-medium tabular-nums">
                   {String(i + 1).padStart(2, "0")}
@@ -805,6 +910,8 @@ export function StepsView({ block }: { block: StepsBlock }) {
 // --- CTABand ----------------------------------------------------------------
 
 export function CTABandView({ block }: { block: CTABandBlock }) {
+  // CTABand has no legacy `appearance` field — style group only.
+  const bs = resolveBlockStyle(getBlockStyle(block));
   return (
     <section className="bg-ink-900 text-text-invert relative isolate overflow-hidden">
       <div
@@ -813,13 +920,21 @@ export function CTABandView({ block }: { block: CTABandBlock }) {
       />
       <GridMotif tone="dark" />
       <Container className="relative py-20 md:py-28">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-h1 font-bold text-balance">{block.heading}</h2>
-          {block.subhead && <p className="text-lede text-text-invert-soft mt-4">{block.subhead}</p>}
-          <div className="flex justify-center">
-            <CtaButtons ctas={block.ctas as Cta[] | null} onDark className="mt-9 justify-center" />
+        <Reveal animation={bs.animationStyle} delay={bs.delayMs}>
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="text-h1 font-bold text-balance">{block.heading}</h2>
+            {block.subhead && (
+              <p className="text-lede text-text-invert-soft mt-4">{block.subhead}</p>
+            )}
+            <div className="flex justify-center">
+              <CtaButtons
+                ctas={block.ctas as Cta[] | null}
+                onDark
+                className="mt-9 justify-center"
+              />
+            </div>
           </div>
-        </div>
+        </Reveal>
       </Container>
     </section>
   );
@@ -828,6 +943,7 @@ export function CTABandView({ block }: { block: CTABandBlock }) {
 // --- FAQ --------------------------------------------------------------------
 
 export function FAQView({ block }: { block: FAQBlock }) {
+  const bs = resolveBlockStyle(getBlockStyle(block), block.appearance);
   const items = block.items ?? [];
   const schema = {
     "@context": "https://schema.org",
@@ -839,7 +955,16 @@ export function FAQView({ block }: { block: FAQBlock }) {
     })),
   };
   return (
-    <Section tone={toneOf(block.appearance)} title={block.heading ?? "Frequently asked questions"}>
+    <Section
+      tone={bs.tone}
+      width={bs.width}
+      paddingSize={bs.paddingSize}
+      align={bs.textAlign}
+      headingSize={bs.headingSize}
+      headingFont={bs.headingFont}
+      eyebrowAccent={bs.accentColour}
+      title={block.heading ?? "Frequently asked questions"}
+    >
       {items.length > 0 && <JsonLd data={schema} />}
       <dl className="divide-border mx-auto max-w-3xl divide-y">
         {items.map((it, i) => (
@@ -856,9 +981,18 @@ export function FAQView({ block }: { block: FAQBlock }) {
 // --- CalculatorEmbed (placeholder) ------------------------------------------
 
 export function CalculatorEmbedView({ block }: { block: CalculatorEmbedBlock }) {
+  const bs = resolveBlockStyle(getBlockStyle(block), block.appearance);
   return (
-    <Section tone={toneOf(block.appearance)}>
-      <Reveal>
+    <Section
+      tone={bs.tone}
+      width={bs.width}
+      paddingSize={bs.paddingSize}
+      align={bs.textAlign}
+      headingSize={bs.headingSize}
+      headingFont={bs.headingFont}
+      eyebrowAccent={bs.accentColour}
+    >
+      <Reveal animation={bs.animationStyle} delay={bs.delayMs}>
         <div className="border-border bg-surface-2 relative overflow-hidden rounded-xl border p-8 md:p-12">
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div className="max-w-2xl">
@@ -886,9 +1020,16 @@ export function CalculatorEmbedView({ block }: { block: CalculatorEmbedBlock }) 
 // --- ContactRFQ (placeholder CTA; full server-action form lands in a later phase) ----
 
 export function ContactRFQView({ block }: { block: ContactRFQBlock }) {
+  const bs = resolveBlockStyle(getBlockStyle(block), block.appearance);
   return (
     <Section
-      tone={toneOf(block.appearance)}
+      tone={bs.tone}
+      width={bs.width}
+      paddingSize={bs.paddingSize}
+      align={bs.textAlign}
+      headingSize={bs.headingSize}
+      headingFont={bs.headingFont}
+      eyebrowAccent={bs.accentColour}
       title={block.heading ?? "Request a consultation"}
       lede={block.subhead ?? undefined}
     >

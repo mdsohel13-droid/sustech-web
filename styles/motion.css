@@ -1,59 +1,57 @@
 /* ============================================================================
    MOTION — single source of truth for the site's animation "feel".
 
-   Imported once by globals.css (right after Tailwind). Every transition and
-   animation across the site references these tokens, so the motion language
-   stays consistent and is tuned from one place.
+   Imported once by globals.css. Every transition and animation across the
+   site references these tokens and data-attributes, keeping the motion
+   language consistent and tunable from one place.
 
-   Principles (CLAUDE.md §4 / DESIGN-SYSTEM.md):
-   - GPU-only: animate transform + opacity, never layout props (top/left/width).
-   - Content is SSR-visible at rest; motion is layered on under no-preference.
-   - prefers-reduced-motion is honoured globally at the bottom of this file.
+   Principles (CLAUDE.md §4 / DESIGN-SYSTEM.md §5):
+   · GPU-only: animate transform + opacity. Never layout props.
+   · Content is SSR-visible at rest; motion is layered on under no-preference.
+   · prefers-reduced-motion is honoured globally via the kill-switch below.
+   · AI/SEO safe: all animations use opacity/transform only — text is always
+     in the DOM and fully crawlable by Google, Claude, Perplexity, etc.
+
+   CMS-driven animation styles (data-reveal attribute values):
+     data-reveal="fade-rise"   — default: fade + rise from below
+     data-reveal="slide-left"  — enter from the left
+     data-reveal="slide-right" — enter from the right
+     data-reveal="scale-up"    — scale from 96% + fade
+     data-reveal="stagger"     — cascade: nth-child gets 80 ms incremental delay
    ============================================================================ */
 
 @theme {
   /* durations */
-  --duration-fast: 150ms; /* hovers, micro-interactions in/out */
+  --duration-fast: 150ms; /* hovers, micro-interactions */
   --duration-base: 250ms; /* default UI transition */
   --duration-slow: 450ms; /* entrances / reveals */
+  --duration-epic: 700ms; /* hero, large orchestrated entrances */
 
-  /* hover-reveal anti-flicker delay — see the nav dropdown description reveal */
+  /* hover-reveal anti-flicker delay (nav dropdown, team bio, card reveal) */
   --delay-reveal: 150ms;
 
-  /* easings (these `--ease-*` keys also generate `ease-*` Tailwind utilities) */
-  --ease-brand: cubic-bezier(0.22, 1, 0.36, 1); /* confident entrances/exits — the house curve */
-  --ease-standard: cubic-bezier(
-    0.4,
-    0,
-    0.2,
-    1
-  ); /* micro-interactions: buttons, cards, hover lifts */
+  /* easings — generate ease-* Tailwind utilities */
+  --ease-brand: cubic-bezier(0.22, 1, 0.36, 1); /* confident entrance — house curve */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1); /* micro-interactions, buttons, cards */
   --ease-emphasis: cubic-bezier(0.83, 0, 0.17, 1); /* large, deliberate moves */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* subtle overshoot for icons/badges */
 }
 
-/* Hero load reveal — CSS only so content is SSR-visible and LCP-safe. The resting
-   state is visible; the entrance is added solely under `no-preference`. */
+/* ── Keyframes ────────────────────────────────────────────────────────────── */
+
+/* Hero entrance — slightly larger travel distance for gravitas */
 @keyframes hero-rise {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(24px);
   }
   to {
     opacity: 1;
     transform: none;
   }
 }
-@media (prefers-reduced-motion: no-preference) {
-  .hero-rise {
-    animation: hero-rise var(--duration-slow) var(--ease-brand) both;
-  }
-}
 
-/* Scroll fade-rise (once). Primary path: CSS scroll-driven animations — no JS, runs on
-   the compositor at 60fps. Resting state is visible (crawlable, and safe where scroll
-   timelines are unsupported or motion is reduced); the entrance is layered on only where
-   supported. Browsers without `animation-timeline: view()` (Firefox/Safari today) get an
-   equivalent reveal from the IntersectionObserver fallback below. */
+/* Standard scroll reveal — fade + rise */
 @keyframes reveal-rise {
   from {
     opacity: 0;
@@ -64,29 +62,193 @@
     transform: none;
   }
 }
+
+/* Slide from left — for timelines, steps, left-aligned narrative blocks */
+@keyframes reveal-slide-left {
+  from {
+    opacity: 0;
+    transform: translateX(-32px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Slide from right — for alternating sections, right-panel content */
+@keyframes reveal-slide-right {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Scale up — for cards, stats, callout blocks; creates a sense of weight */
+@keyframes reveal-scale {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Hero gradient slow pulse — "breathing" quality on dark bands */
+@keyframes gradient-breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* ── Hero load animations (CSS-only, LCP-safe) ───────────────────────────── */
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-rise {
+    animation: hero-rise var(--duration-epic) var(--ease-brand) both;
+  }
+  /* Gradient overlay breathes very subtly — depth without distraction */
+  .hero-gradient {
+    animation: gradient-breathe 7s var(--ease-standard) infinite;
+  }
+}
+
+/* ── Scroll-driven reveals ───────────────────────────────────────────────── */
+/*
+   Primary path: CSS scroll-driven animations (no JS, compositor thread 60 fps).
+   Resting state = fully visible → crawlable, safe where scroll-timelines are
+   unsupported (Firefox < 132 / Safari < 18) or motion is reduced.
+   Fallback: IntersectionObserver in components/ui/reveal-fallback.tsx adds
+   .reveal-js → .reveal-js-in classes for browsers without animation-timeline.
+
+   The CMS sets data-reveal="<style>" on each block's wrapper via
+   components/ui/reveal.tsx. A block can also pass a --reveal-delay CSS var
+   for the initial delay, and individual items pass their own var for stagger.
+*/
+
 @media (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: view()) {
-    [data-reveal] {
-      animation: reveal-rise both;
+    /* ── fade-rise (default) ── */
+    [data-reveal="fade-rise"],
+    [data-reveal] /* backward-compat catch-all */ {
+      animation: reveal-rise var(--duration-slow) var(--ease-brand) both;
+      animation-delay: var(--reveal-delay, 0ms);
       animation-timeline: view();
       animation-range: entry 5% cover 22%;
     }
+
+    /* ── slide from left ── */
+    [data-reveal="slide-left"] {
+      animation: reveal-slide-left var(--duration-slow) var(--ease-brand) both;
+      animation-delay: var(--reveal-delay, 0ms);
+      animation-timeline: view();
+      animation-range: entry 5% cover 22%;
+    }
+
+    /* ── slide from right ── */
+    [data-reveal="slide-right"] {
+      animation: reveal-slide-right var(--duration-slow) var(--ease-brand) both;
+      animation-delay: var(--reveal-delay, 0ms);
+      animation-timeline: view();
+      animation-range: entry 5% cover 22%;
+    }
+
+    /* ── scale up ── */
+    [data-reveal="scale-up"] {
+      animation: reveal-scale var(--duration-slow) var(--ease-brand) both;
+      animation-delay: var(--reveal-delay, 0ms);
+      animation-timeline: view();
+      animation-range: entry 5% cover 22%;
+    }
+
+    /* ── stagger: cascade children with 80 ms incremental delays ──
+       The parent container gets data-reveal="stagger". Each direct child
+       inherits reveal-rise but with an index-based delay. Up to 12 items
+       are covered; beyond that they share the last delay. Pure CSS — zero JS.
+    */
+    [data-reveal="stagger"] > * {
+      animation: reveal-rise var(--duration-slow) var(--ease-brand) both;
+      animation-timeline: view();
+      animation-range: entry 5% cover 25%;
+    }
+    [data-reveal="stagger"] > *:nth-child(1) {
+      animation-delay: 0ms;
+    }
+    [data-reveal="stagger"] > *:nth-child(2) {
+      animation-delay: 80ms;
+    }
+    [data-reveal="stagger"] > *:nth-child(3) {
+      animation-delay: 160ms;
+    }
+    [data-reveal="stagger"] > *:nth-child(4) {
+      animation-delay: 240ms;
+    }
+    [data-reveal="stagger"] > *:nth-child(5) {
+      animation-delay: 320ms;
+    }
+    [data-reveal="stagger"] > *:nth-child(6) {
+      animation-delay: 400ms;
+    }
+    [data-reveal="stagger"] > *:nth-child(7) {
+      animation-delay: 480ms;
+    }
+    [data-reveal="stagger"] > *:nth-child(8) {
+      animation-delay: 560ms;
+    }
+    [data-reveal="stagger"] > *:nth-child(n + 9) {
+      animation-delay: 640ms;
+    }
   }
 
-  /* IntersectionObserver fallback (components/ui/reveal-fallback.tsx). The component
-     only arms these classes when scroll-timeline is unsupported AND motion is allowed,
-     so Chromium pays zero JS and no-JS users keep the visible resting state. */
+  /* ── IntersectionObserver fallback ─────────────────────────────────
+     reveal-fallback.tsx arms these only when scroll-timeline is unsupported
+     AND prefers-reduced-motion is not set. Chromium gets zero JS overhead.
+  */
   .reveal-js {
     opacity: 0;
     transform: translateY(20px);
     will-change: opacity, transform;
   }
+  .reveal-js-slide-left {
+    opacity: 0;
+    transform: translateX(-32px);
+    will-change: opacity, transform;
+  }
+  .reveal-js-slide-right {
+    opacity: 0;
+    transform: translateX(32px);
+    will-change: opacity, transform;
+  }
+  .reveal-js-scale {
+    opacity: 0;
+    transform: scale(0.96);
+    will-change: opacity, transform;
+  }
   .reveal-js-in {
     animation: reveal-rise var(--duration-slow) var(--ease-brand) both;
   }
+  .reveal-js-slide-left-in {
+    animation: reveal-slide-left var(--duration-slow) var(--ease-brand) both;
+  }
+  .reveal-js-slide-right-in {
+    animation: reveal-slide-right var(--duration-slow) var(--ease-brand) both;
+  }
+  .reveal-js-scale-in {
+    animation: reveal-scale var(--duration-slow) var(--ease-brand) both;
+  }
 }
 
-/* Global reduced-motion kill-switch — neutralises every animation/transition/smooth-scroll. */
+/* ── Global reduced-motion kill-switch ──────────────────────────────────── */
+/* Neutralises every animation, transition and smooth-scroll site-wide.      */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

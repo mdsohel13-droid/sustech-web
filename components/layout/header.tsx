@@ -125,6 +125,18 @@ export function Header({ items, cta, logo }: HeaderProps) {
   );
 }
 
+/**
+ * The index page a dropdown's label links to. Prefers an explicit CMS href;
+ * otherwise derives it from the first child's top-level segment
+ * (e.g. /services/solar → /services, /solutions/garments → /solutions).
+ */
+function parentIndexHref(item: NavItem): string {
+  if (item.href && item.href !== "#") return item.href;
+  const firstChild = item.children?.[0]?.href ?? "";
+  const seg = firstChild.split("/").filter(Boolean)[0];
+  return seg ? `/${seg}` : "#";
+}
+
 function DesktopDropdown({
   item,
   open,
@@ -137,17 +149,27 @@ function DesktopDropdown({
   onClose: () => void;
 }) {
   const panelId = useId();
+  const indexHref = parentIndexHref(item);
   return (
-    <div className="relative">
+    <div className="relative flex items-center">
+      {/* Label → goes to the section index page (all services / all sectors) */}
+      <Link
+        href={indexHref}
+        prefetch={true}
+        className="text-text-soft hover:text-ink-900 focus-visible:outline-brand rounded-md py-2 pr-1 pl-3 text-[0.9375rem] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
+      >
+        {item.label}
+      </Link>
+      {/* Caret → toggles the dropdown menu */}
       <button
         type="button"
         aria-expanded={open}
         aria-controls={open ? panelId : undefined}
         aria-haspopup="true"
+        aria-label={`Show ${item.label} menu`}
         onClick={onToggle}
-        className="text-text-soft hover:text-ink-900 focus-visible:outline-brand aria-expanded:text-ink-900 inline-flex items-center gap-1 rounded-md px-3 py-2 text-[0.9375rem] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
+        className="text-text-soft hover:text-ink-900 focus-visible:outline-brand aria-expanded:text-ink-900 rounded-md py-2 pr-2 pl-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
       >
-        {item.label}
         <ChevronDown
           className={cn(
             "ease-brand h-4 w-4 transition-transform duration-200",
@@ -241,6 +263,16 @@ function MobileMenu({
                   </button>
                   {openSection === item.label && (
                     <ul className="border-border mb-1 ml-3 grid gap-0.5 border-l pl-3">
+                      <li>
+                        <Link
+                          href={parentIndexHref(item)}
+                          prefetch={true}
+                          onClick={onNavigate}
+                          className="text-brand hover:text-brand-600 focus-visible:outline-brand block rounded-md px-3 py-2.5 text-[0.9375rem] font-medium focus-visible:outline-2 focus-visible:outline-offset-2"
+                        >
+                          All {item.label} →
+                        </Link>
+                      </li>
                       {item.children.map((leaf) => (
                         <li key={leaf.href + leaf.label}>
                           <Link

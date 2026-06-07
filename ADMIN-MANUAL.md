@@ -1,0 +1,480 @@
+# Sustech CMS — Admin & Super Admin User Manual
+
+> **Who this is for:** Super Admins and Admins managing the Sustech Technology Ltd website through the CMS admin panel at `/admin`.
+> This document is your complete reference. No coding or technical knowledge required for the tasks described here.
+
+---
+
+## Table of Contents
+
+1. [Accessing the Admin Panel](#1-accessing-the-admin-panel)
+2. [User Roles Explained](#2-user-roles-explained)
+3. [Super Admin Responsibilities](#3-super-admin-responsibilities)
+4. [Managing Pages](#4-managing-pages)
+5. [Building Pages with Blocks](#5-building-pages-with-blocks)
+6. [Block Style Controls (Width, Padding, Fonts, Borders)](#6-block-style-controls)
+7. [Managing Content Collections](#7-managing-content-collections)
+8. [Hero Carousel & Photo Strip](#8-hero-carousel--photo-strip)
+9. [Icons & 3D Assets](#9-icons--3d-assets)
+10. [Site Settings (Logo, Contact, SEO)](#10-site-settings)
+11. [WhatsApp Chat & Chatbot](#11-whatsapp-chat--chatbot)
+12. [Navigation & Menus](#12-navigation--menus)
+13. [Deploying Updates (Super Admin)](#13-deploying-updates-super-admin)
+14. [Troubleshooting](#14-troubleshooting)
+
+---
+
+## 1. Accessing the Admin Panel
+
+| Environment | URL |
+|-------------|-----|
+| Local development | `http://localhost:4123/admin` |
+| Staging / beta | `https://beta.sustechltd.com/admin` |
+| Production | `https://www.sustechltd.com/admin` |
+
+**Login:** use the email and password created for your account. If you forget your password, ask the Super Admin to reset it.
+
+> ⚠️ **Never share your admin credentials.** Each person should have their own account.
+
+---
+
+## 2. User Roles Explained
+
+| Role | What they can do |
+|------|-----------------|
+| ⭐ **Super Admin** | Everything: manage users, deploy widgets, change all settings, publish/unpublish content |
+| **Admin** | Full CMS: create/edit/publish all content, manage media and icons. Cannot manage other users. |
+| **Editor** | Create and edit content (pages, articles, projects, etc.) but **cannot publish** — an Admin must approve and publish. |
+| **Hermes** | Service account for the AI integration. Cannot log into the admin panel. |
+
+**Principle of least privilege:** give people the lowest role that lets them do their job.
+
+---
+
+## 3. Super Admin Responsibilities
+
+Only the Super Admin can do the following:
+
+### 3.1 Creating new users
+1. Go to **Admin → Users → Create new**
+2. Enter name, email, and choose role
+3. The user will receive a password-reset email
+4. Only Super Admin can set `Admin` or `Super Admin` roles
+
+### 3.2 Deactivating a user
+1. Go to **Admin → Users**
+2. Open the user record
+3. Click **Delete** (only Super Admin can delete users)
+
+### 3.3 Changing site-wide settings
+See [Section 10 — Site Settings](#10-site-settings).
+
+### 3.4 Enabling the WhatsApp button and Chatbot
+See [Section 11 — WhatsApp Chat & Chatbot](#11-whatsapp-chat--chatbot).
+
+### 3.5 Making the site publicly indexable (Go-live)
+When you're ready to launch:
+1. On the server, edit the `.env` file
+2. Change `SITE_INDEXABLE=false` → `SITE_INDEXABLE=true`
+3. Restart the server (`pm2 restart sustech-web`)
+
+> 🔴 **Do not do this on the beta/staging server.** Only on the production server.
+
+---
+
+## 4. Managing Pages
+
+### Creating a new page
+1. Go to **Pages → Create new**
+2. Enter a **Title** (required) and a **Slug** — the URL path (e.g. `about-us` → `/about-us`)
+3. Set the page **Status** to `Draft` while building it
+4. Add blocks to the **Layout** (see Section 5)
+5. Fill in the **SEO** tab: title, description, Open Graph image
+6. When ready: change Status to **Published** and click **Save**
+
+> Pages only appear on the live site when **Published**.
+
+### Editing an existing page
+1. Go to **Pages**
+2. Click the page name to open it
+3. Make changes
+4. Click **Save** — changes go live instantly if already published
+
+### Preview a draft
+Click the **Preview** button (eye icon) at the top right to see how the page looks before publishing.
+
+---
+
+## 5. Building Pages with Blocks
+
+Every page is built by stacking **blocks** — like LEGO bricks. Each block is a self-contained section of the page.
+
+### Available blocks
+
+| Block | What it shows |
+|-------|--------------|
+| **Hero** | Full-width hero banner with heading, subheading, buttons, background image/video, or carousel |
+| **Rich Text** | Formatted paragraphs, headings, lists, quotes |
+| **Stats / Counters** | Animated number counters (e.g. "250+ Projects") |
+| **Services Grid** | Card grid of your services (auto-loads from Services collection) |
+| **Sector Tiles** | Visual tiles for each industry sector |
+| **Projects List** | Showcases featured/selected projects |
+| **Image Gallery** | Grid of images from media |
+| **Photo Strip** | Infinite-scroll marquee or one-by-one carousel of photos |
+| **Logo Wall** | Client logos in a grid |
+| **Partner Bar** | Partner/certification logos in a row |
+| **Product Showcase** | Featured products with specs |
+| **Articles List** | Latest articles from the knowledge hub |
+| **Testimonials** | Client quotes carousel |
+| **Team Grid** | Team member cards |
+| **Steps / How it works** | Numbered process steps |
+| **CTA Band** | Full-width call-to-action banner (e.g. "Get a Quote") |
+| **FAQ** | Expandable Q&A (also adds FAQ schema for SEO) |
+| **Calculator Embed** | Solar ROI / savings calculator |
+| **Contact / RFQ** | Request-a-Quote form |
+| **Spacer / Divider** | Vertical spacing or a horizontal rule |
+
+### Adding a block
+1. On a page, scroll to the **Layout** field
+2. Click **Add Block**
+3. Choose the block type
+4. Fill in the block's content fields
+5. Optionally open **Style & Animation** to customise appearance
+
+### Reordering blocks
+Drag the ⠿ handle on the left of each block up or down.
+
+### Removing a block
+Click the **⋮** menu on the block → **Remove**.
+
+---
+
+## 6. Block Style Controls
+
+Every block (except Spacer) has a collapsible **Style & Animation** panel at the bottom. You do **not** need to touch this for the default site look — only open it when you want a custom treatment.
+
+### Colour scheme
+Sets the background + text colour for the block:
+
+| Option | Result |
+|--------|--------|
+| Default (white) | White background, dark text |
+| Muted (light grey) | Light grey background |
+| Dark (navy) | Deep navy/ink background, white text |
+| Brand — True Blue | Brand blue background |
+| Energy — Lime Green | Lime green background |
+| Solar — Golden Poppy | Gold/amber background |
+
+### Content width
+Controls how wide the content area is:
+
+| Option | Width |
+|--------|-------|
+| Narrow | 640 px — good for text-heavy blocks |
+| Standard | 1200 px — default |
+| Wide | 1400 px — good for galleries, grids |
+| Full bleed | Edge to edge — no margins |
+
+### Vertical padding
+Controls the space **above and below** the block:
+
+| Option | Space |
+|--------|-------|
+| Compact | Less space — tighten up adjacent sections |
+| Standard | Default spacing |
+| Spacious | Extra breathing room |
+
+### Text alignment
+- **Left** (default) — standard reading alignment
+- **Centre** — centred heading and lede, good for CTA bands and hero sections
+
+### Heading size
+- **Default (h2)** — standard section heading
+- **Large (h1)** — bigger, for emphasis
+- **XL — display** — largest, bold impact
+
+### Heading font
+- **Display — Cabinet Grotesk** — the brand display typeface
+- **Mono — JetBrains** — technical/engineering feel
+
+### Body text font
+- **Sans — Switzer** — default body text
+- **Display — Cabinet Grotesk** — matches the heading face
+- **Mono — JetBrains** — code/technical look
+
+### Body text size
+- Small / Base (default) / Large / XL (lede)
+
+### Card border + 3D shadow
+Tick this to wrap the section in a rounded card with a subtle border and depth shadow — gives a "lifted" 3D feel. Works well for sections that need to stand out from neighbours.
+
+### Entrance animation
+How the block enters the screen as the user scrolls:
+
+| Option | Effect |
+|--------|--------|
+| Fade + Rise | Content fades in and rises up (default) |
+| Slide from Left | Sweeps in from the left |
+| Slide from Right | Sweeps in from the right |
+| Scale Up | Grows from slightly smaller |
+| Stagger (cascade) | Grid items enter one after another |
+| None — instant | No animation, appears immediately |
+
+### Animation delay
+Pause before the animation starts: None / Short (150ms) / Medium (300ms) / Long (500ms). Use to sequence blocks on the same page.
+
+---
+
+## 7. Managing Content Collections
+
+### Projects
+**Path:** Projects in the sidebar
+
+Fields: Name, Summary, Sector, Location, Capacity, Year, Challenge, Solution, Outcome, Featured (checkbox).
+
+Slug is auto-generated from the name. Published projects appear in the Projects List block and at `/projects/[slug]`.
+
+### Services
+**Path:** Services
+
+Fields: Title, Slug, Summary, Description (richtext), Icon (from Icons collection), Featured.
+
+### Articles (Knowledge Hub)
+**Path:** Articles
+
+Fields: Title, Slug, Excerpt, Body (richtext), Author, Published Date, FAQ array.
+
+Published articles appear in the Articles List block and at `/knowledge/[slug]`.
+
+### Clients (Logo Wall)
+**Path:** Clients
+
+Fields: Name, Logo (upload), Website, Featured.
+
+### Testimonials
+**Path:** Testimonials
+
+Fields: Quote, Author, Company, Role, Photo, Rating.
+
+### Media
+**Path:** Media
+
+General images and videos used in blocks. Accepts JPEG, PNG, WebP, AVIF, GIF, MP4.
+
+> 💡 For icons and small brand assets, use the **Icons** collection instead (see Section 9).
+
+---
+
+## 8. Hero Carousel & Photo Strip
+
+### Hero Carousel
+In any Hero block, you can switch from a single background to a carousel:
+
+1. Open a Hero block
+2. Find **Hero mode** → change to **Carousel — auto-advance through media**
+3. Click **Add Item** under **Carousel slides**
+4. For each slide, upload an Image or MP4 video from Media
+5. Optionally add a caption
+6. Set the **Slide interval** (default 5 seconds)
+
+The slides crossfade automatically. Navigation dots appear at the bottom for the user to skip ahead.
+
+### Photo Strip
+The **Photo Strip** block shows a row of photos as either:
+
+- **Marquee** — photos scroll continuously from right to left, looping forever
+- **Carousel** — one photo at a time with left/right arrows and swipe support
+
+**To add:**
+1. On a page, Add Block → Photo Strip
+2. Choose **Display mode**: Marquee or Carousel
+3. For Marquee: choose **Scroll speed** (Slow / Normal / Fast)
+4. Click **Add Photo** to upload photos
+5. Optionally add a caption to each photo
+
+---
+
+## 9. Icons & 3D Assets
+
+The **Icons** collection is a dedicated folder for:
+- 3D-rendered engineering icons
+- AI-generated icons
+- SVG symbols
+- Brand marks and certification logos
+
+### Uploading an icon
+1. Go to **Icons → Create new**
+2. Upload the file (SVG, PNG, WebP, AVIF accepted)
+3. Fill in:
+   - **Name** — shown in the picker (e.g. "Solar Panel 3D")
+   - **Category** — Service icon / Sector icon / UI icon / Brand / 3D render / AI-generated / Other
+   - **Tags** — comma-separated keywords for searching
+   - **Alt text** — describe it for screen readers (leave blank if purely decorative)
+
+### Using icons in blocks
+When editing a Service, Sector, or any block that has an "Icon" field:
+1. Click the icon picker
+2. Browse or search by name/tag
+3. Click to select
+
+---
+
+## 10. Site Settings
+
+**Path:** Settings → Site Settings in the sidebar
+
+This is the central control for company-wide information that appears across all pages.
+
+### Brand tab
+- **Logo** — upload the company logo (SVG/PNG recommended)
+- **Company Name** — appears in the header wordmark if no logo is set
+- **Tagline** — short tagline (shown in footer)
+- **Description** — company blurb for footer and SEO
+- **Founding Year** — used in schema.org data
+
+### Contact tab
+- **Phone numbers** — add multiple numbers; the first one is used in the WhatsApp button
+- **Email**
+- **Address** — street, city, region, postal code, country
+- **Business hours** — e.g. "Sun–Thu, 9:00–18:00"
+- **Map coordinates** — latitude/longitude for Google Maps and LocalBusiness schema
+- **Social links** — LinkedIn, Facebook, YouTube, etc.
+
+### SEO Defaults tab
+- **Default title** — used when a page has no SEO title set
+- **Title template** — how page titles are formatted (e.g. "Page Name · Sustech Technology Ltd")
+- **Default description** — fallback meta description
+- **Default OG image** — fallback social share image (1200×630 px)
+
+### Chat & Engagement tab
+See Section 11 below.
+
+---
+
+## 11. WhatsApp Chat & Chatbot
+
+Both widgets are controlled from **Settings → Site Settings → Chat & Engagement**.
+
+### WhatsApp Button
+1. **Enable WhatsApp button** → tick the checkbox
+2. **WhatsApp number** → enter the number in international format (e.g. `8801711000000` — country code first, no spaces, no +)
+3. **Pre-filled message** → the text pre-typed when the user taps the button (e.g. "Hello, I'd like a quote for...")
+4. **Button position** → Bottom right (default) or Bottom left
+5. Click **Save** at the top of the page
+
+The button appears immediately on all pages.
+
+### Chatbot Widget
+
+**Provider options:**
+
+#### Option A: Hermes (Recommended — your own AI agent)
+- **Enable chatbot widget** → tick
+- **Chatbot provider** → Hermes — Sustech AI agent
+- **Greeting message** → the first message the bot shows (e.g. "Hello! How can I help?")
+- **Hermes webhook URL** → leave blank to use the built-in chat route, OR enter the URL of a custom Hermes endpoint
+
+#### Option B: Crisp (Free live chat)
+1. Create a free account at [crisp.chat](https://crisp.chat)
+2. Go to Crisp Dashboard → Settings → Website Settings → copy your **Website ID**
+3. In CMS: Provider → Crisp → paste the Website ID
+4. Enable and save
+
+#### Option C: Custom embed
+- Paste the full `<script>` tag from any chat provider (Intercom, Tidio, Tawk.to, etc.)
+- The script is injected into the page footer
+
+**Widget position:** choose Bottom right or Bottom left.
+
+---
+
+## 12. Navigation & Menus
+
+**Path:** Settings → Navigation
+
+The navigation controls:
+- **Header items** — main menu tabs and dropdowns
+- **Footer columns** — footer link groups
+- **Header CTA** — the button in the top-right of the header (e.g. "Get a Quote")
+
+### Adding a menu item
+1. Open Navigation
+2. Under **Header items**, click **Add Item**
+3. Enter a **Label** and choose a **Link type**:
+   - **Internal page** → pick a page from the Pages collection
+   - **Custom URL** → enter any path or external URL
+4. To add a dropdown: tick **Has dropdown** and add sub-items
+
+### Reordering
+Drag items up/down using the ⠿ handle.
+
+---
+
+## 13. Deploying Updates (Super Admin)
+
+### How publishing works
+- **Draft** → visible only in the admin panel preview
+- **Published** → live on the website immediately after save
+- Pages use ISR (Incremental Static Regeneration) — they refresh automatically every hour or when you save
+
+### Forcing an immediate refresh
+If a page doesn't update after saving, go to the page URL and add `?revalidate=true` — this forces a fresh render.
+
+### Server restart (if needed)
+On the Virtarix VPS, SSH in and run:
+```bash
+pm2 restart sustech-web
+```
+
+### Go-live checklist (first deployment)
+- [ ] All important pages are Published
+- [ ] Site Settings has the correct logo, phone, address
+- [ ] WhatsApp button is configured and tested
+- [ ] Navigation has all required menu items
+- [ ] Flip `SITE_INDEXABLE=true` in server `.env`
+- [ ] Restart server: `pm2 restart sustech-web`
+- [ ] Submit sitemap to Google Search Console: `https://www.sustechltd.com/sitemap.xml`
+- [ ] Test on mobile (phone and tablet)
+- [ ] Verify WhatsApp button appears and opens correctly
+- [ ] Run Lighthouse audit (aim for Performance ≥ 90, Accessibility ≥ 95, SEO ≥ 95)
+
+---
+
+## 14. Troubleshooting
+
+### "My changes aren't showing on the live site"
+- Check the page **Status** is **Published** (not Draft)
+- Wait up to 1 minute for ISR to kick in
+- Hard-refresh the browser (Ctrl+Shift+R / Cmd+Shift+R)
+- If still not updated, contact your developer
+
+### "The WhatsApp button isn't appearing"
+- Check **Settings → Site Settings → Chat & Engagement → WhatsApp → Enable WhatsApp button** is ticked
+- Check that a phone number has been entered
+- Click Save at the top of the page
+
+### "I can't log in"
+- Check you're using the correct email
+- Use the **Forgot password** link on the login page
+- If the forgot password email doesn't arrive, check your spam folder
+- If still locked out, contact your Super Admin
+
+### "I can't delete a user / can't create an Admin"
+- Only Super Admins can create or delete users
+- Only Super Admins can assign Admin or Super Admin roles
+- Contact your Super Admin
+
+### "The admin panel is showing an error"
+- Try a hard refresh
+- Clear browser cache
+- Try a different browser
+- If persisting, contact your developer
+
+### "I uploaded an image but it looks blurry"
+- Upload the highest-resolution version you have
+- Minimum recommended: 1600 × 900 px for full-width images
+- For OG/share images: exactly 1200 × 630 px
+
+---
+
+*This manual covers all CMS functionality. For developer-level changes (new block types, code changes, server configuration), contact the development team.*

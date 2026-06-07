@@ -7,6 +7,7 @@ import sharp from "sharp";
 
 import { Articles } from "./cms/collections/articles";
 import { Clients } from "./cms/collections/clients";
+import { Icons } from "./cms/collections/icons";
 import { Media } from "./cms/collections/media";
 import { Pages } from "./cms/collections/pages";
 import { Products } from "./cms/collections/products";
@@ -16,7 +17,7 @@ import { Sectors } from "./cms/collections/sectors";
 import { Services } from "./cms/collections/services";
 import { Team } from "./cms/collections/team";
 import { Testimonials } from "./cms/collections/testimonials";
-import { Users } from "./cms/collections/users";
+import { Users } from "./cms/collections/Users";
 import { Navigation } from "./cms/globals/navigation";
 import { SiteSettings } from "./cms/globals/site-settings";
 
@@ -42,6 +43,7 @@ export default buildConfig({
     Clients,
     Articles,
     Media,
+    Icons,
     RfqRequests,
     Users,
   ],

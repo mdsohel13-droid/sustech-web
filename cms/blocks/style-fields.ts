@@ -155,6 +155,42 @@ export const blockStyleGroup: Field = {
         },
       ],
     },
+    {
+      type: "row",
+      fields: [
+        {
+          name: "bodyFont",
+          type: "select",
+          label: "Body text font",
+          defaultValue: "sans",
+          admin: {
+            width: "50%",
+            description: "Typeface for paragraph and body text in this block.",
+          },
+          options: [
+            { label: "Sans — Switzer (default)", value: "sans" },
+            { label: "Display — Cabinet Grotesk", value: "display" },
+            { label: "Mono — JetBrains", value: "mono" },
+          ],
+        },
+        {
+          name: "bodySize",
+          type: "select",
+          label: "Body text size",
+          defaultValue: "base",
+          admin: {
+            width: "50%",
+            description: "Override the paragraph / body copy size.",
+          },
+          options: [
+            { label: "Small", value: "sm" },
+            { label: "Base (default)", value: "base" },
+            { label: "Large", value: "lg" },
+            { label: "XL — lede", value: "xl" },
+          ],
+        },
+      ],
+    },
 
     /* ── Animation ───────────────────────────────────────────────────── */
     {
@@ -193,6 +229,24 @@ export const blockStyleGroup: Field = {
             { label: "Medium — 300 ms", value: "medium" },
             { label: "Long — 500 ms", value: "long" },
           ],
+        },
+      ],
+    },
+
+    /* ── Visual treatment ────────────────────────────────────────────── */
+    {
+      type: "row",
+      fields: [
+        {
+          name: "withBorder",
+          type: "checkbox",
+          label: "Card border + 3D shadow",
+          defaultValue: false,
+          admin: {
+            width: "50%",
+            description:
+              "Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.",
+          },
         },
       ],
     },

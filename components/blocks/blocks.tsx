@@ -49,6 +49,8 @@ import type {
   Team,
   Testimonial,
 } from "@/payload-types";
+import { HeroCarousel } from "./hero-carousel";
+import { PhotoStripClient } from "./photo-strip";
 import { CtaButtons, type Cta } from "./shared";
 
 type RichData = ComponentProps<typeof RichText>["data"];
@@ -100,6 +102,33 @@ export function HeroView({ block, isFirst }: { block: HeroBlock; isFirst: boolea
   const bg = mediaUrl(block.backgroundImage);
   const video = mediaUrl(block.backgroundVideo);
   const Heading = isFirst ? "h1" : "h2";
+
+  // Carousel mode: use client-side HeroCarousel component
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const isCarousel = (block as any).heroMode === "carousel";
+  const carouselItems: {
+    url: string;
+    mimeType?: string | null;
+    alt?: string | null;
+    caption?: string | null;
+  }[] = isCarousel
+    ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ((block as any).carouselItems ?? [])
+        .map((item: { media?: Record<string, unknown> | null; caption?: string | null }) => {
+          const m = item.media;
+          if (!m || typeof m !== "object") return null;
+          return {
+            url: String(m["url"] ?? ""),
+            mimeType: m["mimeType"] as string | null | undefined,
+            alt: m["alt"] as string | null | undefined,
+            caption: item.caption,
+          };
+        })
+        .filter(Boolean)
+    : [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const intervalSec = (block as any).carouselInterval ?? 5;
+
   return (
     <section
       className={
@@ -117,31 +146,40 @@ export function HeroView({ block, isFirst }: { block: HeroBlock; isFirst: boolea
           <GridMotif tone="dark" />
         </>
       )}
-      {video ? (
-        // Autoplay-muted-loop video. The image is the poster — it paints instantly (LCP-safe)
-        // and stays visible if the video is blocked, slow, or motion is reduced. `motion-reduce`
-        // hides the <video> entirely under prefers-reduced-motion (poster remains visible).
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          poster={bg?.url}
-          aria-hidden
-          className="absolute inset-0 -z-10 h-full w-full object-cover opacity-30 motion-reduce:hidden"
-        >
-          <source src={video.url} type="video/mp4" />
-        </video>
-      ) : null}
-      {bg && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={bg.url}
-          alt={bg.alt}
-          className={`absolute inset-0 -z-20 h-full w-full object-cover opacity-25 ${video ? "motion-reduce:opacity-30" : ""}`}
-        />
+
+      {/* Carousel mode — client component handles the crossfade */}
+      {isCarousel && carouselItems.length > 0 ? (
+        <HeroCarousel items={carouselItems} interval={intervalSec} />
+      ) : (
+        <>
+          {video ? (
+            // Autoplay-muted-loop video. The image is the poster — it paints instantly (LCP-safe)
+            // and stays visible if the video is blocked, slow, or motion is reduced. `motion-reduce`
+            // hides the <video> entirely under prefers-reduced-motion (poster remains visible).
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              poster={bg?.url}
+              aria-hidden
+              className="absolute inset-0 -z-10 h-full w-full object-cover opacity-30 motion-reduce:hidden"
+            >
+              <source src={video.url} type="video/mp4" />
+            </video>
+          ) : null}
+          {bg && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={bg.url}
+              alt={bg.alt}
+              className={`absolute inset-0 -z-20 h-full w-full object-cover opacity-25 ${video ? "motion-reduce:opacity-30" : ""}`}
+            />
+          )}
+        </>
       )}
+
       <Container className="relative py-24 md:py-32 lg:py-40">
         <div className="max-w-3xl">
           {block.eyebrow && (
@@ -149,7 +187,9 @@ export function HeroView({ block, isFirst }: { block: HeroBlock; isFirst: boolea
               {block.eyebrow}
             </Eyebrow>
           )}
-          <Heading className="text-display mt-4 font-bold text-balance">{block.heading}</Heading>
+          <Heading className="text-display hero-rise mt-4 font-bold text-balance [animation-delay:70ms]">
+            {block.heading}
+          </Heading>
           {block.subhead && (
             <p
               className={`text-lede hero-rise mt-6 max-w-2xl [animation-delay:140ms] ${dark ? "text-text-invert-soft" : "text-text-soft"}`}
@@ -163,6 +203,51 @@ export function HeroView({ block, isFirst }: { block: HeroBlock; isFirst: boolea
         </div>
       </Container>
     </section>
+  );
+}
+
+// --- PhotoStrip -------------------------------------------------------------
+
+export function PhotoStripView({
+  block,
+}: {
+  block: {
+    heading?: string | null;
+    photos?: Array<{ image: number | Media; caption?: string | null }> | null;
+    displayMode?: string | null;
+    speed?: string | null;
+    appearance?: string | null;
+  };
+}) {
+  const bs = resolveBlockStyle(getBlockStyle(block), block.appearance);
+  const photos = (block.photos ?? [])
+    .map((item) => {
+      const img = mediaUrl(item.image);
+      if (!img) return null;
+      return { url: img.url, alt: img.alt, caption: item.caption };
+    })
+    .filter(Boolean) as Array<{ url: string; alt: string; caption?: string | null }>;
+
+  return (
+    <Section
+      tone={bs.tone}
+      width={bs.width === "full-bleed" ? "full-bleed" : "wide"}
+      paddingSize={bs.paddingSize}
+      align={bs.textAlign}
+      headingSize={bs.headingSize}
+      headingFont={bs.headingFont}
+      eyebrowAccent={bs.accentColour}
+      withBorder={bs.withBorder}
+      headerAnimation={bs.animationStyle}
+      title={block.heading ?? undefined}
+      srTitle={block.heading ? undefined : "Photo gallery"}
+    >
+      <PhotoStripClient
+        photos={photos}
+        displayMode={(block.displayMode as "marquee" | "carousel" | null) ?? "marquee"}
+        speed={block.speed}
+      />
+    </Section>
   );
 }
 
@@ -183,6 +268,8 @@ export function RichTextView({
       headingSize={bs.headingSize}
       headingFont={bs.headingFont}
       eyebrowAccent={bs.accentColour}
+      withBorder={bs.withBorder}
+      headerAnimation={bs.animationStyle}
     >
       <Rich data={block.content} className="richtext max-w-prose" />
     </Section>
@@ -202,6 +289,8 @@ export function StatsCountersView({ block }: { block: StatsCountersBlock }) {
       headingSize={bs.headingSize}
       headingFont={bs.headingFont}
       eyebrowAccent={bs.accentColour}
+      withBorder={bs.withBorder}
+      headerAnimation={bs.animationStyle}
       srTitle="Key figures"
     >
       {block.intro && (
@@ -246,6 +335,8 @@ export async function ServicesGridView({
       headingSize={bs.headingSize}
       headingFont={bs.headingFont}
       eyebrowAccent={bs.accentColour}
+      withBorder={bs.withBorder}
+      headerAnimation={bs.animationStyle}
       eyebrow="What we do"
       title={block.heading ?? undefined}
       lede={block.lede ?? undefined}
@@ -306,6 +397,8 @@ export async function SectorTilesView({
       headingSize={bs.headingSize}
       headingFont={bs.headingFont}
       eyebrowAccent={bs.accentColour}
+      withBorder={bs.withBorder}
+      headerAnimation={bs.animationStyle}
       eyebrow="Solutions by sector"
       title={block.heading ?? undefined}
       lede={block.lede ?? undefined}
@@ -364,6 +457,8 @@ export async function ProjectsListView({
       headingSize={bs.headingSize}
       headingFont={bs.headingFont}
       eyebrowAccent={bs.accentColour}
+      withBorder={bs.withBorder}
+      headerAnimation={bs.animationStyle}
       eyebrow="Featured projects"
       title={block.heading ?? undefined}
       lede={block.lede ?? undefined}
@@ -474,6 +569,8 @@ export async function TeamGridView({
       headingSize={bs.headingSize}
       headingFont={bs.headingFont}
       eyebrowAccent={bs.accentColour}
+      withBorder={bs.withBorder}
+      headerAnimation={bs.animationStyle}
       eyebrow="Our team"
       title={block.heading ?? undefined}
       lede={block.lede ?? undefined}
@@ -553,6 +650,8 @@ export async function ArticlesListView({ block }: { block: ArticlesListBlock }) 
       headingSize={bs.headingSize}
       headingFont={bs.headingFont}
       eyebrowAccent={bs.accentColour}
+      withBorder={bs.withBorder}
+      headerAnimation={bs.animationStyle}
       eyebrow="Knowledge"
       title={block.heading ?? undefined}
       lede={block.lede ?? undefined}
@@ -611,6 +710,8 @@ export async function ProductShowcaseView({ block }: { block: ProductShowcaseBlo
       headingSize={bs.headingSize}
       headingFont={bs.headingFont}
       eyebrowAccent={bs.accentColour}
+      withBorder={bs.withBorder}
+      headerAnimation={bs.animationStyle}
       eyebrow="Products & distribution"
       title={block.heading ?? undefined}
       lede={block.lede ?? undefined}
@@ -690,6 +791,8 @@ export function PartnerBarView({ block }: { block: PartnerBarBlock }) {
       headingSize={bs.headingSize}
       headingFont={bs.headingFont}
       eyebrowAccent={bs.accentColour}
+      withBorder={bs.withBorder}
+      headerAnimation={bs.animationStyle}
       srTitle="Technology partners"
     >
       {block.heading && (
@@ -736,6 +839,8 @@ export function ImageGalleryView({ block }: { block: ImageGalleryBlock }) {
       headingSize={bs.headingSize}
       headingFont={bs.headingFont}
       eyebrowAccent={bs.accentColour}
+      withBorder={bs.withBorder}
+      headerAnimation={bs.animationStyle}
       title={block.heading ?? undefined}
     >
       <ul className="grid grid-cols-2 gap-4 md:grid-cols-3">
@@ -769,6 +874,8 @@ export async function LogoWallView({ block }: { block: LogoWallBlock }) {
       headingSize={bs.headingSize}
       headingFont={bs.headingFont}
       eyebrowAccent={bs.accentColour}
+      withBorder={bs.withBorder}
+      headerAnimation={bs.animationStyle}
     >
       {block.heading && (
         <h2 className="text-text-soft text-center text-base font-medium">{block.heading}</h2>
@@ -829,6 +936,8 @@ export async function TestimonialsView({
       headingSize={bs.headingSize}
       headingFont={bs.headingFont}
       eyebrowAccent={bs.accentColour}
+      withBorder={bs.withBorder}
+      headerAnimation={bs.animationStyle}
       eyebrow="Testimonials"
       title={block.heading ?? undefined}
     >
@@ -887,6 +996,8 @@ export function StepsView({ block }: { block: StepsBlock }) {
       headingSize={bs.headingSize}
       headingFont={bs.headingFont}
       eyebrowAccent={bs.accentColour}
+      withBorder={bs.withBorder}
+      headerAnimation={bs.animationStyle}
       eyebrow={block.eyebrow ?? "How we work"}
       title={block.heading ?? undefined}
     >
@@ -912,27 +1023,62 @@ export function StepsView({ block }: { block: StepsBlock }) {
 // --- CTABand ----------------------------------------------------------------
 
 export function CTABandView({ block }: { block: CTABandBlock }) {
-  // CTABand has no legacy `appearance` field — style group only.
+  // CTABand now fully respects the block-style system:
+  // padding, width, tone, text-align and animation are all CMS-driven.
+  // Default tone is "dark" but editors can switch to brand/energy/solar/light.
   const bs = resolveBlockStyle(getBlockStyle(block));
+  const isDark = bs.tone === "dark" || bs.tone === "brand" || bs.tone === "energy";
+  const bgClass =
+    bs.tone === "brand"
+      ? "bg-brand text-white"
+      : bs.tone === "energy"
+        ? "bg-energy text-white"
+        : bs.tone === "solar"
+          ? "bg-solar text-solar-text"
+          : bs.tone === "muted"
+            ? "bg-surface-2 text-text"
+            : bs.tone === "light"
+              ? "bg-surface text-text"
+              : "bg-ink-900 text-text-invert"; // default dark
+  const subheadColour = isDark ? "text-text-invert-soft" : "text-text-soft";
+  // Respect the paddingSize CMS control — override the old hardcoded py-20 md:py-28
+  const bandPadding: Record<string, string> = {
+    compact: "py-10 md:py-14",
+    standard: "py-16 md:py-20",
+    spacious: "py-20 md:py-28",
+  };
+  const py = bandPadding[bs.paddingSize] ?? bandPadding.standard;
   return (
-    <section className="bg-ink-900 text-text-invert relative isolate overflow-hidden">
-      <div
-        aria-hidden
-        className="absolute inset-0 bg-[radial-gradient(50%_60%_at_80%_110%,rgba(245,158,11,0.14),transparent_60%),radial-gradient(50%_60%_at_10%_-10%,rgba(14,95,216,0.22),transparent_60%)]"
-      />
-      <GridMotif tone="dark" />
-      <Container className="relative py-20 md:py-28">
+    <section className={cn(bgClass, "relative isolate overflow-hidden")}>
+      {isDark && (
+        <>
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-[radial-gradient(50%_60%_at_80%_110%,rgba(245,158,11,0.14),transparent_60%),radial-gradient(50%_60%_at_10%_-10%,rgba(14,95,216,0.22),transparent_60%)]"
+          />
+          <GridMotif tone="dark" />
+        </>
+      )}
+      <Container width={bs.width} className={cn("relative", py)}>
         <Reveal animation={bs.animationStyle} delay={bs.delayMs}>
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-h1 font-bold text-balance">{block.heading}</h2>
-            {block.subhead && (
-              <p className="text-lede text-text-invert-soft mt-4">{block.subhead}</p>
+          <div
+            className={cn(
+              "mx-auto",
+              bs.textAlign === "center" ? "text-center" : "",
+              bs.width === "narrow" ? "max-w-xl" : "max-w-2xl",
             )}
-            <div className="flex justify-center">
+          >
+            <h2 className={cn(bs.headingSizeClass, bs.headingFontClass, "font-bold text-balance")}>
+              {block.heading}
+            </h2>
+            {block.subhead && (
+              <p className={cn("text-lede mt-4", subheadColour)}>{block.subhead}</p>
+            )}
+            <div className={cn("flex", bs.textAlign === "center" && "justify-center")}>
               <CtaButtons
                 ctas={block.ctas as Cta[] | null}
-                onDark
-                className="mt-9 justify-center"
+                onDark={isDark}
+                className={cn("mt-9", bs.textAlign === "center" && "justify-center")}
               />
             </div>
           </div>
@@ -965,6 +1111,8 @@ export function FAQView({ block }: { block: FAQBlock }) {
       headingSize={bs.headingSize}
       headingFont={bs.headingFont}
       eyebrowAccent={bs.accentColour}
+      withBorder={bs.withBorder}
+      headerAnimation={bs.animationStyle}
       title={block.heading ?? "Frequently asked questions"}
     >
       {items.length > 0 && <JsonLd data={schema} />}
@@ -993,6 +1141,8 @@ export function CalculatorEmbedView({ block }: { block: CalculatorEmbedBlock }) 
       headingSize={bs.headingSize}
       headingFont={bs.headingFont}
       eyebrowAccent={bs.accentColour}
+      withBorder={bs.withBorder}
+      headerAnimation={bs.animationStyle}
     >
       <Reveal animation={bs.animationStyle} delay={bs.delayMs}>
         <div className="border-border bg-surface-2 relative overflow-hidden rounded-xl border p-8 md:p-12">
@@ -1032,6 +1182,8 @@ export function ContactRFQView({ block }: { block: ContactRFQBlock }) {
       headingSize={bs.headingSize}
       headingFont={bs.headingFont}
       eyebrowAccent={bs.accentColour}
+      withBorder={bs.withBorder}
+      headerAnimation={bs.animationStyle}
       title={block.heading ?? "Request a consultation"}
       lede={block.subhead ?? undefined}
     >

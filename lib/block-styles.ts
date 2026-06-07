@@ -21,6 +21,8 @@ export type PaddingSize = "compact" | "standard" | "spacious";
 export type TextAlign = "left" | "center";
 export type HeadingSize = "default" | "large" | "xl";
 export type HeadingFont = "display" | "mono";
+export type BodyFont = "sans" | "display" | "mono";
+export type BodySize = "sm" | "base" | "lg" | "xl";
 export type AnimationStyle =
   | "fade-rise"
   | "slide-left"
@@ -45,6 +47,12 @@ export interface BlockStyleInput {
   animationStyle?: string | null;
   animationDelay?: string | null;
   accentColour?: string | null;
+  /** Whether to render the section with a card border + depth shadow. */
+  withBorder?: boolean | null;
+  /** Body text font family override. */
+  bodyFont?: string | null;
+  /** Body text size override. */
+  bodySize?: string | null;
 }
 
 /* ── Value sets (used for safe coercion) ─────────────────────────────── */
@@ -55,6 +63,8 @@ const PADDING_SIZES: PaddingSize[] = ["compact", "standard", "spacious"];
 const TEXT_ALIGNS: TextAlign[] = ["left", "center"];
 const HEADING_SIZES: HeadingSize[] = ["default", "large", "xl"];
 const HEADING_FONTS: HeadingFont[] = ["display", "mono"];
+const BODY_FONTS: BodyFont[] = ["sans", "display", "mono"];
+const BODY_SIZES: BodySize[] = ["sm", "base", "lg", "xl"];
 const ANIMATION_STYLES: AnimationStyle[] = [
   "fade-rise",
   "slide-left",
@@ -110,6 +120,21 @@ export const headingFontClass: Record<HeadingFont, string> = {
   mono: "font-mono",
 };
 
+/** Tailwind classes for body/paragraph font families */
+export const bodyFontClass: Record<BodyFont, string> = {
+  sans: "font-sans",
+  display: "font-display",
+  mono: "font-mono",
+};
+
+/** Tailwind classes for body/paragraph text sizes */
+export const bodySizeClass: Record<BodySize, string> = {
+  sm: "text-sm",
+  base: "text-base",
+  lg: "text-lg",
+  xl: "text-lede",
+};
+
 /* ── Safe coercion helper ─────────────────────────────────────────────── */
 
 function safe<T extends string>(
@@ -135,19 +160,27 @@ export interface ResolvedBlockStyle {
   headingSize: HeadingSize;
   /** Raw heading font enum → pass directly to <Section headingFont> */
   headingFont: HeadingFont;
-  /** Animation style for <Reveal animation> */
+  /** Animation style for <Reveal animation> and the section header */
   animationStyle: AnimationStyle;
   /** Animation delay in ms (pass to Reveal or stagger calc) */
   delayMs: number;
   /** Accent colour for <Section eyebrowAccent> */
   accentColour: AccentColour;
+  /** Whether to add card border + depth shadow to the section */
+  withBorder: boolean;
   /** True when the colour scheme is a dark background */
   isDark: boolean;
+  /** Body text font family */
+  bodyFont: BodyFont;
+  /** Body text size */
+  bodySize: BodySize;
   /** Pre-computed Tailwind class strings for renderers that bypass Section */
   widthClass: string;
   paddingClass: string;
   headingSizeClass: string;
   headingFontClass: string;
+  bodyFontClass: string;
+  bodySizeClass: string;
 }
 
 /**
@@ -180,6 +213,8 @@ export function resolveBlockStyle(
   const anim = safe(style?.animationStyle, ANIMATION_STYLES, "fade-rise");
   const delay = safe(style?.animationDelay, ANIMATION_DELAYS, "none");
   const accent = safe(style?.accentColour, ACCENT_COLOURS, "brand");
+  const bFont = safe(style?.bodyFont, BODY_FONTS, "sans");
+  const bSize = safe(style?.bodySize, BODY_SIZES, "base");
 
   // Map colourScheme → SectionTone (default → light for Section's existing API)
   const tone: SectionTone = colourScheme === "default" ? "light" : colourScheme;
@@ -194,12 +229,17 @@ export function resolveBlockStyle(
     animationStyle: anim,
     delayMs: DELAY_MS[delay],
     accentColour: accent,
+    withBorder: Boolean(style?.withBorder),
     isDark: tone === "dark",
+    bodyFont: bFont,
+    bodySize: bSize,
     // Pre-computed class strings for custom renderers that bypass <Section>
     widthClass: widthClass[width],
     paddingClass: paddingClass[padding],
     headingSizeClass: headingSizeClass[hSize],
     headingFontClass: headingFontClass[hFont],
+    bodyFontClass: bodyFontClass[bFont],
+    bodySizeClass: bodySizeClass[bSize],
   };
 }
 

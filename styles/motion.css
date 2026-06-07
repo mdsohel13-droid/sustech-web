@@ -39,6 +39,17 @@
 
 /* ── Keyframes ────────────────────────────────────────────────────────────── */
 
+/* Photo strip marquee — infinite left-scroll */
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    /* Move left by exactly half the list (the duplicated half) */
+    transform: translateX(-50%);
+  }
+}
+
 /* Hero entrance — slightly larger travel distance for gravitas */
 @keyframes hero-rise {
   from {

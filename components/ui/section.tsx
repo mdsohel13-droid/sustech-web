@@ -5,6 +5,7 @@ import { GridMotif } from "@/components/ui/grid-motif";
 import { cn } from "@/lib/utils";
 import type {
   AccentColour,
+  AnimationStyle,
   BlockWidth,
   HeadingFont,
   HeadingSize,
@@ -42,8 +43,17 @@ interface SectionProps {
   headingFont?: HeadingFont;
   /** Colour of the eyebrow label and inline accent elements. */
   eyebrowAccent?: AccentColour;
+  /** Entrance animation for the section header (title + eyebrow + lede). */
+  headerAnimation?: AnimationStyle;
   /** Add the faint engineering-grid texture to the section background. */
   withGrid?: boolean;
+  /**
+   * Wrap the section in a subtle card border + shadow for a 3-D "lifted"
+   * effect. Applies a rounded card treatment with a light border and
+   * depth shadow. Automatically skipped on full-bleed and dark sections
+   * unless you force it with `withBorder`.
+   */
+  withBorder?: boolean;
   className?: string;
   /** Visually-hidden heading for sections whose visible title is omitted. */
   srTitle?: string;
@@ -87,9 +97,9 @@ const eyebrowColour: Record<AccentColour, { light: string; dark: string }> = {
 /* ── Padding presets ─────────────────────────────────────────────────────── */
 
 const paddingClass: Record<PaddingSize, string> = {
-  compact: "py-8 md:py-12",
-  standard: "py-16 md:py-24 lg:py-32",
-  spacious: "py-24 md:py-32 lg:py-40",
+  compact: "py-8 md:py-10",
+  standard: "py-14 md:py-20 lg:py-28",
+  spacious: "py-20 md:py-28 lg:py-36",
 };
 
 /* ── Heading size ────────────────────────────────────────────────────────── */
@@ -104,6 +114,19 @@ const headingFontClass: Record<HeadingFont, string> = {
   display: "font-display",
   mono: "font-mono",
 };
+
+/* ── Border/3-D card classes ─────────────────────────────────────────────── */
+
+/**
+ * Light border + layered shadow gives sections a lifted "card" feel.
+ * Two box-shadow layers: a near inset ring and a soft ambient depth.
+ * The border uses a semi-transparent brand-tinted rule so it adapts to
+ * both light and dark backgrounds without hardcoding a colour.
+ */
+const borderClass =
+  "rounded-2xl border border-ink-200/40 dark:border-ink-700/40 " +
+  "shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_24px_rgba(0,0,0,0.07)] " +
+  "mx-4 md:mx-6 lg:mx-8 overflow-hidden";
 
 /* ── Component ───────────────────────────────────────────────────────────── */
 
@@ -121,7 +144,9 @@ export function Section({
   headingSize = "default",
   headingFont = "display",
   eyebrowAccent = "brand",
+  headerAnimation = "fade-rise",
   withGrid = false,
+  withBorder = false,
   className,
   srTitle,
 }: SectionProps) {
@@ -141,19 +166,34 @@ export function Section({
   return (
     <section
       id={id}
-      className={cn("relative scroll-mt-24", paddingClass[paddingSize], toneClass[tone], className)}
+      className={cn(
+        "relative scroll-mt-24",
+        // When withBorder is active the outer <section> has no padding — padding
+        // lives on the Container instead so the border wraps the content tightly.
+        withBorder ? "" : paddingClass[paddingSize],
+        toneClass[tone],
+        withBorder && borderClass,
+        className,
+      )}
     >
       {withGrid && <GridMotif tone={isDark ? "dark" : "light"} />}
 
-      <Container width={resolvedWidth} className="relative">
+      <Container
+        width={resolvedWidth}
+        className={cn("relative", withBorder && paddingClass[paddingSize])}
+      >
         {/* srTitle is only rendered when no visible title is present — avoids duplicate h2 in the a11y tree */}
         {srTitle && !title && <h2 className="sr-only">{srTitle}</h2>}
 
         {hasHeader && (
-          /* Section header always gets a gentle fade-rise entrance.
-             The content (children) gets the CMS-selected animation style. */
+          /*
+           * Section header entrance animation follows the CMS-selected style
+           * (passed as `headerAnimation`). Default is fade-rise which is safe
+           * for all section positions. The content (children) gets the same
+           * animation style so heading and content move in unison.
+           */
           <header
-            data-reveal="fade-rise"
+            data-reveal={headerAnimation}
             className={cn("mb-10 max-w-2xl md:mb-14", align === "center" && "mx-auto text-center")}
           >
             {eyebrow && (

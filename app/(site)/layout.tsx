@@ -2,14 +2,13 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "@/styles/globals.css";
 import { cabinet, jetbrains, switzer } from "@/app/fonts";
-import { ChatWidgetLoader } from "@/components/chat/chat-widget-loader";
+import { EngagementWidgets } from "@/components/layout/engagement-widgets";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
-import { WhatsAppFab } from "@/components/layout/whatsapp-fab";
 import { JsonLd } from "@/components/seo/json-ld";
 import { RevealFallback } from "@/components/ui/reveal-fallback";
 import { buildFooterColumns, buildHeaderNav } from "@/lib/nav";
-import { getNavigation, getServices, getSiteSettings } from "@/lib/payload";
+import { getNavigation, getSiteSettings } from "@/lib/payload";
 import { serverUrl, siteJsonLd } from "@/lib/seo";
 
 export const metadata: Metadata = {
@@ -24,11 +23,7 @@ export const metadata: Metadata = {
 };
 
 export default async function SiteLayout({ children }: { children: ReactNode }) {
-  const [nav, settings, services] = await Promise.all([
-    getNavigation(),
-    getSiteSettings(),
-    getServices(),
-  ]);
+  const [nav, settings] = await Promise.all([getNavigation(), getSiteSettings()]);
   const { items, cta } = buildHeaderNav(nav);
   const columns = buildFooterColumns(nav);
 
@@ -46,11 +41,8 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
       <JsonLd data={siteJsonLd(settings)} />
       <Header items={items} cta={cta} logo={settings.logo} />
       <main id="main">{children}</main>
-      <WhatsAppFab phone={settings.phones?.[0]?.number} />
-      <ChatWidgetLoader
-        services={services.map((s) => s.title)}
-        phone={settings.phones?.[0]?.number}
-      />
+      {/* CMS-driven WhatsApp + chatbot widgets (enabled/configured in Settings) */}
+      <EngagementWidgets />
       <Footer columns={columns} settings={settings} />
       <RevealFallback />
       <noscript>

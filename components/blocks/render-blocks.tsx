@@ -9,6 +9,7 @@ import {
   ImageGalleryView,
   LogoWallView,
   PartnerBarView,
+  PhotoStripView,
   ProductShowcaseView,
   ProjectsListView,
   RichTextView,
@@ -22,8 +23,10 @@ import {
 } from "./blocks";
 
 type Block = NonNullable<Page["layout"]>[number];
+// Extended to cover newly-added block types before payload-types.ts is regenerated.
+type AnyBlock = Block | { blockType: "photoStrip"; [k: string]: unknown };
 
-function BlockSwitch({ block, index }: { block: Block; index: number }) {
+function BlockSwitch({ block, index }: { block: AnyBlock; index: number }) {
   switch (block.blockType) {
     case "hero":
       return <HeroView block={block} isFirst={index === 0} />;
@@ -39,6 +42,8 @@ function BlockSwitch({ block, index }: { block: Block; index: number }) {
       return <ProjectsListView block={block} />;
     case "imageGallery":
       return <ImageGalleryView block={block} />;
+    case "photoStrip":
+      return <PhotoStripView block={block as Parameters<typeof PhotoStripView>[0]["block"]} />;
     case "logoWall":
       return <LogoWallView block={block} />;
     case "partnerBar":
@@ -72,8 +77,8 @@ export function RenderBlocks({ blocks }: { blocks?: Page["layout"] | null }) {
   if (!blocks?.length) return null;
   return (
     <>
-      {blocks.map((block, i) => (
-        <BlockSwitch key={block.id ?? i} block={block} index={i} />
+      {(blocks as AnyBlock[]).map((block, i) => (
+        <BlockSwitch key={(block as { id?: string }).id ?? i} block={block} index={i} />
       ))}
     </>
   );

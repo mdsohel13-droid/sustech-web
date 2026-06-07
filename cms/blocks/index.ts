@@ -82,6 +82,59 @@ const Hero: Block = {
       admin: {
         description:
           "Optional MP4 (autoplay, muted, looping, ≤ 10s). Falls back to the image when motion is reduced.",
+        condition: (_data, siblingData) => siblingData?.heroMode !== "carousel",
+      },
+    },
+    /* ── Carousel mode ─────────────────────────────────────────────── */
+    {
+      name: "heroMode",
+      type: "select",
+      defaultValue: "single",
+      label: "Hero mode",
+      admin: {
+        description:
+          "Single: one background image/video. Carousel: cycle through multiple media items automatically.",
+      },
+      options: [
+        { label: "Single background (default)", value: "single" },
+        { label: "Carousel — auto-advance through media", value: "carousel" },
+      ],
+    },
+    {
+      name: "carouselItems",
+      type: "array",
+      label: "Carousel slides",
+      minRows: 2,
+      maxRows: 8,
+      admin: {
+        description: "Add images or videos. They cycle automatically every 5 seconds.",
+        condition: (_data, siblingData) => siblingData?.heroMode === "carousel",
+      },
+      fields: [
+        {
+          name: "media",
+          type: "upload",
+          relationTo: "media",
+          required: true,
+          admin: { description: "Image (AVIF/WebP/JPG) or MP4 video." },
+        },
+        {
+          name: "caption",
+          type: "text",
+          admin: { description: "Optional visible caption shown on this slide." },
+        },
+      ],
+    },
+    {
+      name: "carouselInterval",
+      type: "number",
+      label: "Slide interval (seconds)",
+      defaultValue: 5,
+      min: 2,
+      max: 30,
+      admin: {
+        description: "How long each slide shows before advancing. Default: 5 s.",
+        condition: (_data, siblingData) => siblingData?.heroMode === "carousel",
       },
     },
     ctaArray,
@@ -474,6 +527,65 @@ const ArticlesList: Block = {
   ],
 };
 
+/**
+ * Photo Strip — infinite-scroll horizontal marquee of images.
+ * Two display modes:
+ *  - "marquee"   : images scroll continuously left (no JS, CSS-only)
+ *  - "carousel"  : images advance one-by-one with prev/next controls
+ */
+const PhotoStrip: Block = {
+  slug: "photoStrip",
+  interfaceName: "PhotoStripBlock",
+  labels: { singular: "Photo strip", plural: "Photo strips" },
+  fields: [
+    { type: "row", fields: [{ name: "heading", type: "text" }, appearance] },
+    {
+      name: "displayMode",
+      type: "select",
+      defaultValue: "marquee",
+      label: "Display mode",
+      options: [
+        {
+          label: "Marquee — continuous infinite scroll",
+          value: "marquee",
+        },
+        {
+          label: "Carousel — one at a time with arrows",
+          value: "carousel",
+        },
+      ],
+    },
+    {
+      name: "speed",
+      type: "select",
+      defaultValue: "normal",
+      label: "Scroll speed (marquee only)",
+      admin: { condition: (_d, s) => s?.displayMode !== "carousel" },
+      options: [
+        { label: "Slow", value: "slow" },
+        { label: "Normal", value: "normal" },
+        { label: "Fast", value: "fast" },
+      ],
+    },
+    {
+      name: "photos",
+      type: "array",
+      minRows: 2,
+      labels: { singular: "Photo", plural: "Photos" },
+      fields: [
+        {
+          name: "image",
+          type: "upload",
+          relationTo: "media",
+          required: true,
+        },
+        { name: "caption", type: "text" },
+      ],
+    },
+    blockStyleGroup,
+  ],
+};
+
 /** Every block type an editor can stack inside a Page's layout. */
 export const layoutBlocks: Block[] = [
   Hero,
@@ -483,6 +595,7 @@ export const layoutBlocks: Block[] = [
   SectorTiles,
   ProjectsList,
   ImageGallery,
+  PhotoStrip,
   LogoWall,
   PartnerBar,
   ProductShowcase,

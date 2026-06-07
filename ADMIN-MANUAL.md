@@ -477,4 +477,130 @@ pm2 restart sustech-web
 
 ---
 
+## 15. GEO / AEO — Getting Cited by AI Engines
+
+**GEO (Generative Engine Optimization)** and **AEO (Answer Engine Optimization)** are how you make the site show up when people ask AI assistants — ChatGPT, Perplexity, Claude, Gemini, Bing Copilot — questions like:
+
+> *"Who does solar EPC in Bangladesh?"*
+> *"Best grounding and lightning protection contractor in Dhaka?"*
+
+The site is already built for AI citability (see what's automatic below). But admins have a recurring job here, just like SEO — and it pays dividends quickly because AI engines are refreshed often.
+
+---
+
+### What the site does automatically (no admin action needed)
+
+| Signal | What it does |
+|--------|-------------|
+| **robots.txt** | Explicitly allows GPTBot, ClaudeBot, PerplexityBot, Google-Extended — every major AI crawler |
+| **sitemap.xml** | Dynamic, updates hourly — all published pages, services, projects, articles |
+| **Schema.org JSON-LD** | Machine-readable structured data on every page type (Organization, LocalBusiness, WebSite, Service, CreativeWork, FAQPage, BreadcrumbList, Article) |
+| **Server-rendered HTML** | All content is in the raw HTML — no JavaScript required to read it |
+| **llms.txt** | Machine-readable index at `/llms.txt` listing every canonical page with a one-line description — refreshes hourly from the CMS |
+| **Per-page metadata** | Title, description, canonical URL, OpenGraph image on every page |
+
+---
+
+### What admins do regularly (your GEO/AEO job)
+
+These are the actions that directly improve how AI engines answer questions about Sustech. Do them on a rolling basis — monthly is a good cadence.
+
+---
+
+#### ✅ 1. Write FAQ sections on every Service page
+
+This is the **single highest-impact action**. When you add Q&A pairs to a service's FAQ array, the site automatically generates `FAQPage` schema. AI engines use this to give direct answers.
+
+**How:**
+1. Open any service (e.g. Solar & Energy)
+2. Scroll to the **FAQ** section
+3. Add 5–10 questions people actually ask:
+   - "How much does a 100 kW solar system cost in Bangladesh?"
+   - "What is the payback period for commercial solar?"
+   - "Do you handle grid-connection permits?"
+   - "What standards do you use for earthing systems?"
+4. Write answers in plain, direct language — first sentence should be the actual answer, then explain
+
+**Why it works:** AI engines use FAQPage schema as a direct source for answers. If your FAQ says "Sustech installs grid-tie solar from 10 kW to 5 MW", that answer gets attributed to Sustech when someone asks the question.
+
+---
+
+#### ✅ 2. Write full project case studies with the Challenge → Solution → Outcome structure
+
+Every published project is listed in `llms.txt` and indexed for AI retrieval. A rich case study (500–1000 words) is cited far more often than a bare name + location.
+
+**Fields to fill in:**
+- **Summary** — one sentence ("5 MW rooftop solar for a textile factory in Gazipur, reducing grid dependence by 60%.")
+- **Challenge** — what the client faced (specifics: load profile, grid unreliability, budget constraints)
+- **Solution** — what Sustech did (technical specifics: panel type, inverter brand, earthing standards used)
+- **Outcome** — measurable results (kWh saved, cost reduction %, CO2 avoided, payback period)
+- **Year, Location, Capacity** — always fill these — they're used in the schema.org CreativeWork data
+
+**Why it works:** AI engines treat case studies as primary evidence. "Sustech completed a 5 MW solar installation for a textile factory" is the kind of citable, specific fact that appears in AI answers.
+
+---
+
+#### ✅ 3. Publish Knowledge Hub articles that answer specific questions
+
+Articles live at `/knowledge/[slug]` and are listed in `llms.txt`. Each one is an indexed `Article` schema entry. Write articles that directly answer questions your buyers search for.
+
+**High-value topics for Sustech:**
+- "What is earthing in electrical installations? (Bangladesh standards)"
+- "Hybrid solar vs grid-tie: which is better for factories in Bangladesh?"
+- "How to spec a lightning protection system for a warehouse"
+- "BESS (Battery Energy Storage) for commercial buildings — a buyer's guide"
+
+**Format for best citability:**
+1. **Excerpt (TL;DR)** — answer the question in 1–2 sentences, right up top
+2. **Body** — explain in detail
+3. **FAQ array** — add 3–5 related questions as Q&A pairs at the bottom
+
+**Why it works:** AI engines prefer content that leads with a direct answer. The excerpt field becomes the short answer; the body becomes the supporting evidence; the FAQ array becomes additional citable Q&As.
+
+---
+
+#### ✅ 4. Keep Site Settings complete and accurate
+
+The Organization, LocalBusiness, and WebSite schema on every page is built entirely from **Settings → Site Settings**. AI engines use this to identify and locate the business.
+
+**Keep these current:**
+- **Description** — 2–3 sentences that describe exactly what Sustech does and for whom
+- **Phone and email** — used in LocalBusiness schema
+- **Address** — street, city, postal code, country
+- **Business hours** — used in LocalBusiness schema
+- **Social links** — LinkedIn, Facebook, YouTube — used as `sameAs` (tells AI engines that your LinkedIn is the same business)
+- **Founding year** — credibility signal
+
+---
+
+#### ✅ 5. Write good SEO descriptions for every published page
+
+In any Page, Service, Project, or Article — open the **SEO** tab and fill in:
+- **SEO title** — how you want the page named in search and AI results
+- **SEO description** — 1–2 sentences that directly answer what the page is about
+
+This feeds both the meta description (Google) and provides clean context for AI engines.
+
+---
+
+### Monthly GEO/AEO checklist (recommended)
+
+- [ ] Add FAQs to any service page that doesn't have at least 5 Q&As
+- [ ] Publish one Knowledge Hub article on a topic your clients commonly ask about
+- [ ] Add one completed project as a full case study (Challenge + Solution + Outcome)
+- [ ] Check Site Settings → Contact — is everything still current?
+- [ ] Check Site Settings → Social — are all your profile URLs up to date?
+- [ ] Read `/llms.txt` in your browser to verify all new content is appearing
+
+---
+
+### What NOT to do (common mistakes)
+
+- **Do not put key information only in images or PDFs.** AI crawlers cannot read text inside images. If a spec sheet only exists as a PDF image, its content is invisible to AI engines. Type the key specs into a richtext body instead.
+- **Do not write vague descriptions.** "We do great work" is not citable. "We design and install grid-tie solar PV systems from 10 kW to 10 MW for commercial and industrial clients in Bangladesh" is.
+- **Do not leave the Excerpt blank on articles.** The excerpt is the direct answer — the most AI-citable field on an article.
+- **Do not invent statistics.** AI engines attribute claims to Sustech. Only publish numbers you can stand behind.
+
+---
+
 *This manual covers all CMS functionality. For developer-level changes (new block types, code changes, server configuration), contact the development team.*

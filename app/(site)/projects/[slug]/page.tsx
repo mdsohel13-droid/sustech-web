@@ -40,9 +40,9 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
   const p = await getProjectBySlug(slug, isEnabled);
   if (!p) notFound();
 
-  const sector = p.sector && typeof p.sector === "object" ? p.sector.title : null;
+  const sectorName = p.sector && typeof p.sector === "object" ? p.sector.title : null;
   const facts = [
-    sector && { label: "Sector", value: sector },
+    sectorName && { label: "Sector", value: sectorName },
     p.location && { label: "Location", value: p.location },
     p.capacity && { label: "Scale", value: p.capacity },
     p.year && { label: "Year", value: String(p.year) },
@@ -50,13 +50,40 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
 
   return (
     <>
+      {/* CreativeWork schema — mirrors only confirmed visible content (CLAUDE.md §6) */}
       <JsonLd
         data={{
           "@context": "https://schema.org",
           "@type": "CreativeWork",
+          "@id": `${serverUrl}/projects/${p.slug}`,
           name: p.name,
           abstract: p.summary,
           url: `${serverUrl}/projects/${p.slug}`,
+          dateCreated: p.year ? String(p.year) : undefined,
+          locationCreated: p.location ? { "@type": "Place", name: p.location } : undefined,
+          about: sectorName ? { "@type": "Thing", name: sectorName } : undefined,
+          creator: {
+            "@type": "Organization",
+            name: "Sustech Technology Ltd",
+            url: serverUrl,
+          },
+        }}
+      />
+      {/* BreadcrumbList for project pages */}
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: serverUrl },
+            { "@type": "ListItem", position: 2, name: "Projects", item: `${serverUrl}/projects` },
+            {
+              "@type": "ListItem",
+              position: 3,
+              name: p.name,
+              item: `${serverUrl}/projects/${p.slug}`,
+            },
+          ],
         }}
       />
       <section className="bg-ink-900 text-text-invert relative isolate overflow-hidden">

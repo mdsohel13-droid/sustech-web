@@ -6,7 +6,7 @@ test.describe("Knowledge index", () => {
     expect(res?.status()).toBe(200);
     const h1 = page.getByRole("heading", { level: 1 });
     await expect(h1).toHaveCount(1);
-    await expect(h1).toHaveText("Knowledge");
+    await expect(h1).toHaveText("Knowledge Hub");
     // Seeded Tier-1 articles are published.
     await expect(
       page.getByRole("heading", {

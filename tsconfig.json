@@ -17,6 +17,9 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
+    // TypeScript 5.0 deprecated `baseUrl` (replaced by `paths` + `moduleResolution: bundler`),
+    // but Next.js still requires it for @/* path aliases. Suppress the TS5101 warning.
+    "ignoreDeprecations": "5.0",
     "baseUrl": ".",
     "plugins": [
       {

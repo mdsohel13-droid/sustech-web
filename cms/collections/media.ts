@@ -16,8 +16,10 @@ export const Media: CollectionConfig = {
   },
   upload: {
     staticDir: path.resolve(dirname, "../../media"),
-    // Images for everything visual; mp4 for short hero/explainer loops (autoplay-muted, ≤10s).
-    mimeTypes: ["image/*", "video/mp4"],
+    // Explicit MIME allowlist — do NOT use "image/*" because it includes image/svg+xml.
+    // SVG files can contain embedded <script> tags that execute in the browser
+    // context if served same-origin (stored XSS). Enumerate safe types only.
+    mimeTypes: ["image/jpeg", "image/png", "image/webp", "image/avif", "image/gif", "video/mp4"],
     // Generate resized, optimized WebP variants for images only (videos pass through unchanged).
     formatOptions: { format: "webp", options: { quality: 78 } },
     imageSizes: [

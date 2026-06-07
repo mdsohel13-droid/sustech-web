@@ -146,7 +146,8 @@ export function Section({
       {withGrid && <GridMotif tone={isDark ? "dark" : "light"} />}
 
       <Container width={resolvedWidth} className="relative">
-        {srTitle && <h2 className="sr-only">{srTitle}</h2>}
+        {/* srTitle is only rendered when no visible title is present — avoids duplicate h2 in the a11y tree */}
+        {srTitle && !title && <h2 className="sr-only">{srTitle}</h2>}
 
         {hasHeader && (
           /* Section header always gets a gentle fade-rise entrance.

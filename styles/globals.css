@@ -69,7 +69,11 @@
 html {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  scroll-behavior: smooth;
+  /* scroll-behavior: smooth is intentionally omitted here — applying it globally
+     conflicts with CSS scroll-driven animations (animation-timeline: view()) and
+     causes jumpy reveal timing. Use Tailwind's scroll-smooth utility only on
+     specific anchor containers that need it. The prefers-reduced-motion block
+     below handles the motion kill-switch. */
 }
 body {
   background: var(--color-surface);

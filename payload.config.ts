@@ -51,7 +51,11 @@ export default buildConfig({
     // `push` (dev) auto-syncs the schema so no manual migrations are needed locally/CI.
     push: process.env.NODE_ENV !== "production",
   }),
-  secret: process.env.PAYLOAD_SECRET ?? "",
+  secret: (() => {
+    const s = process.env.PAYLOAD_SECRET;
+    if (!s) throw new Error("PAYLOAD_SECRET env var must be set");
+    return s;
+  })(),
   typescript: { outputFile: path.resolve(dirname, "payload-types.ts") },
   sharp,
   cors: [serverURL],

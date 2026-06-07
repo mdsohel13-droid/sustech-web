@@ -24,6 +24,8 @@ const eslintConfig = defineConfig([
     "playwright-report/**",
     "test-results/**",
     "coverage/**",
+    // Plain CJS utility scripts (screenshots, one-off helpers) — not part of the app bundle
+    "scripts/**",
   ]),
 ]);
 

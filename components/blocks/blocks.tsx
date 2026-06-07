@@ -505,8 +505,10 @@ export async function TeamGridView({
                 >
                   <div
                     tabIndex={hasBio ? 0 : -1}
+                    role={hasBio ? "button" : undefined}
                     className="bg-surface-2 aspect-square w-full overflow-hidden focus:outline-none"
-                    aria-label={hasBio ? `${m.name} — show biography` : undefined}
+                    aria-label={hasBio ? `${m.name} — biography` : undefined}
+                    aria-expanded={hasBio ? true : undefined}
                   >
                     {photo ? (
                       // eslint-disable-next-line @next/next/no-img-element

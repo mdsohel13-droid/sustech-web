@@ -172,8 +172,9 @@
 
     /* ── stagger: cascade children with 80 ms incremental delays ──
        The parent container gets data-reveal="stagger". Each direct child
-       inherits reveal-rise but with an index-based delay. Up to 12 items
-       are covered; beyond that they share the last delay. Pure CSS — zero JS.
+       inherits reveal-rise but with an index-based delay. Items 1–8 are
+       individually staggered; items 9 and beyond share a 640ms delay.
+       Pure CSS — zero JS.
     */
     [data-reveal="stagger"] > * {
       animation: reveal-rise var(--duration-slow) var(--ease-brand) both;
@@ -213,24 +214,30 @@
      reveal-fallback.tsx arms these only when scroll-timeline is unsupported
      AND prefers-reduced-motion is not set. Chromium gets zero JS overhead.
   */
+  /* Initial hidden state — no will-change yet (avoids promoting 30+ compositor
+     layers simultaneously on content-heavy pages). The IntersectionObserver
+     in reveal-fallback.tsx adds will-change just before animation starts and
+     removes it after animationend. */
   .reveal-js {
     opacity: 0;
     transform: translateY(20px);
-    will-change: opacity, transform;
   }
   .reveal-js-slide-left {
     opacity: 0;
     transform: translateX(-32px);
-    will-change: opacity, transform;
   }
   .reveal-js-slide-right {
     opacity: 0;
     transform: translateX(32px);
-    will-change: opacity, transform;
   }
   .reveal-js-scale {
     opacity: 0;
     transform: scale(0.96);
+  }
+  /* will-change applied dynamically in reveal-fallback.tsx, right before the
+     animation class is added — this way at most a handful of elements are
+     GPU-promoted at any moment. */
+  .reveal-js-animating {
     will-change: opacity, transform;
   }
   .reveal-js-in {

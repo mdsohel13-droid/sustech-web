@@ -156,7 +156,7 @@ export default async function ProjectsIndexPage({
         <Container className="py-8">
           <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
             {STATS.map((s, i) => (
-              <Reveal key={s.label} delay={i * 0.06}>
+              <Reveal key={s.label} delay={i * 60}>
                 <ProofCounter value={s.value} suffix={s.suffix} label={s.label} />
               </Reveal>
             ))}
@@ -238,7 +238,7 @@ export default async function ProjectsIndexPage({
               const sectorName = projectSector(p)?.title ?? null;
               return (
                 <li key={p.id}>
-                  <Reveal delay={Math.min(i, 5) * 0.05}>
+                  <Reveal delay={Math.min(i, 5) * 50}>
                     <Card interactive className="relative h-full overflow-hidden">
                       {img ? (
                         // eslint-disable-next-line @next/next/no-img-element

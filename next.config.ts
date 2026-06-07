@@ -2,10 +2,16 @@ import { withPayload } from "@payloadcms/next/withPayload";
 import type { NextConfig } from "next";
 
 const securityHeaders = [
-  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  // X-Frame-Options: kept as IE fallback; CSP frame-ancestors 'none' covers modern browsers.
+  { key: "X-Frame-Options", value: "DENY" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+  // Expanded to deny all non-required powerful browser features.
+  {
+    key: "Permissions-Policy",
+    value:
+      "camera=(), microphone=(), geolocation=(), payment=(), usb=(), serial=(), bluetooth=(), display-capture=(), ambient-light-sensor=(), accelerometer=(), gyroscope=(), magnetometer=()",
+  },
   { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
 ];
 
@@ -26,18 +32,31 @@ const serverUrlHost = (() => {
     return null;
   }
 })();
-const imageHosts = Array.from(
-  new Set([serverUrlHost, "localhost", "127.0.0.1"].filter((h): h is string => Boolean(h))),
-);
+
+// Dev-only local hostnames — HTTP allowed
+const devHosts = ["localhost", "127.0.0.1"];
+const prodHosts = Array.from(new Set([serverUrlHost].filter((h): h is string => Boolean(h))));
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // Never expose the Next.js version to potential attackers.
+  poweredByHeader: false,
   images: {
     formats: ["image/avif", "image/webp"],
-    remotePatterns: imageHosts.flatMap((hostname) => [
-      { protocol: "http", hostname },
-      { protocol: "https", hostname },
-    ]),
+    // Cache optimised image variants for 24 h (default is 60 s — too short for a CMS site).
+    minimumCacheTTL: 86400,
+    // Breakpoints tuned to the design system viewport targets.
+    deviceSizes: [640, 768, 1024, 1280, 1440],
+    imageSizes: [16, 32, 64, 128, 256],
+    remotePatterns: [
+      // Production hostname — HTTPS only
+      ...prodHosts.flatMap((hostname) => [{ protocol: "https" as const, hostname }]),
+      // Dev hosts — HTTP + HTTPS
+      ...devHosts.flatMap((hostname) => [
+        { protocol: "http" as const, hostname },
+        { protocol: "https" as const, hostname },
+      ]),
+    ],
   },
   async headers() {
     const headers = indexable
@@ -45,9 +64,14 @@ const nextConfig: NextConfig = {
       : [...securityHeaders, { key: "X-Robots-Tag", value: "noindex, nofollow" }];
     return [{ source: "/:path*", headers }];
   },
+  async redirects() {
+    return [
+      // Prevent a stray /home link from 404-ing (CMS slug is "home" but route is /)
+      { source: "/home", destination: "/", permanent: true },
+    ];
+  },
 };
 
-// NOTE: Content-Security-Policy is added via middleware once the asset/domain list
-// (chat widget, analytics) is known. `output: "standalone"` is added at the Docker
-// packaging stage (see DEPLOYMENT-AND-VPS.md).
+// CSP is injected per-request via middleware.ts using a nonce-based approach.
+// output: "standalone" is injected at Docker packaging time (see DEPLOYMENT-AND-VPS.md).
 export default withPayload(nextConfig);

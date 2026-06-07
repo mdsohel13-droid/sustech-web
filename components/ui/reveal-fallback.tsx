@@ -14,6 +14,10 @@ import { useEffect } from "react";
  *   - no-JS users keep the visible resting state (content is always in the SSR HTML).
  *
  * Mounted once in the site layout. Renders nothing.
+ *
+ * `will-change` is added just before the animation starts and removed after it
+ * completes — this avoids promoting 30+ GPU compositor layers simultaneously on
+ * content-heavy pages and limits GPU memory usage to the currently-animating elements.
  */
 export function RevealFallback() {
   useEffect(() => {
@@ -26,15 +30,48 @@ export function RevealFallback() {
     const els = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
     if (els.length === 0) return;
 
+    // Map each reveal type to its animation class
+    const animClass: Record<string, string> = {
+      "fade-rise": "reveal-js-in",
+      "slide-left": "reveal-js-slide-left-in",
+      "slide-right": "reveal-js-slide-right-in",
+      "scale-up": "reveal-js-scale-in",
+      stagger: "reveal-js-in",
+    };
+
+    // Map each reveal type to its initial-state class
+    const hiddenClass: Record<string, string> = {
+      "fade-rise": "reveal-js",
+      "slide-left": "reveal-js-slide-left",
+      "slide-right": "reveal-js-slide-right",
+      "scale-up": "reveal-js-scale",
+      stagger: "reveal-js",
+    };
+
     // Arm: hide now, then reveal on scroll-in. Done in JS so no-JS users keep content visible.
-    for (const el of els) el.classList.add("reveal-js");
+    for (const el of els) {
+      const type = el.dataset["reveal"] ?? "fade-rise";
+      el.classList.add(hiddenClass[type] ?? "reveal-js");
+    }
 
     const io = new IntersectionObserver(
       (entries, obs) => {
         for (const entry of entries) {
           if (!entry.isIntersecting) continue;
-          entry.target.classList.add("reveal-js-in");
-          obs.unobserve(entry.target); // fire once per section
+          const el = entry.target as HTMLElement;
+          const type = el.dataset["reveal"] ?? "fade-rise";
+          const anim = animClass[type] ?? "reveal-js-in";
+
+          // Promote to GPU layer just before animating
+          el.classList.add("reveal-js-animating");
+          el.classList.add(anim);
+
+          // Remove will-change after the animation completes to free GPU memory
+          el.addEventListener("animationend", () => el.classList.remove("reveal-js-animating"), {
+            once: true,
+          });
+
+          obs.unobserve(el); // fire once per section
         }
       },
       { rootMargin: "0px 0px -10% 0px", threshold: 0.12 },

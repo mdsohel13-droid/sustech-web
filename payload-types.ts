@@ -77,6 +77,7 @@ export interface Config {
     clients: Client;
     articles: Article;
     media: Media;
+    icons: Icon;
     'rfq-requests': RfqRequest;
     users: User;
     'payload-kv': PayloadKv;
@@ -97,6 +98,7 @@ export interface Config {
     clients: ClientsSelect<false> | ClientsSelect<true>;
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    icons: IconsSelect<false> | IconsSelect<true>;
     'rfq-requests': RfqRequestsSelect<false> | RfqRequestsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -173,6 +175,7 @@ export interface Page {
         | SectorTilesBlock
         | ProjectsListBlock
         | ImageGalleryBlock
+        | PhotoStripBlock
         | LogoWallBlock
         | PartnerBarBlock
         | ProductShowcaseBlock
@@ -234,9 +237,33 @@ export interface HeroBlock {
    */
   backgroundImage?: (number | null) | Media;
   /**
-   * Optional MP4 (autoplay, muted, looping, ≤ 10s). Falls back to the image when motion is reduced, on small screens, or when missing.
+   * Optional MP4 (autoplay, muted, looping, ≤ 10s). Falls back to the image when motion is reduced.
    */
   backgroundVideo?: (number | null) | Media;
+  /**
+   * Single: one background image/video. Carousel: cycle through multiple media items automatically.
+   */
+  heroMode?: ('single' | 'carousel') | null;
+  /**
+   * Add images or videos. They cycle automatically every 5 seconds.
+   */
+  carouselItems?:
+    | {
+        /**
+         * Image (AVIF/WebP/JPG) or MP4 video.
+         */
+        media: number | Media;
+        /**
+         * Optional visible caption shown on this slide.
+         */
+        caption?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * How long each slide shows before advancing. Default: 5 s.
+   */
+  carouselInterval?: number | null;
   ctas?:
     | {
         label: string;
@@ -254,6 +281,59 @@ export interface HeroBlock {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     */
+    withBorder?: boolean | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'hero';
@@ -320,6 +400,9 @@ export interface Media {
  * via the `definition` "RichTextBlock".
  */
 export interface RichTextBlock {
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
   appearance?: ('default' | 'muted' | 'dark') | null;
   content: {
     root: {
@@ -336,6 +419,59 @@ export interface RichTextBlock {
     };
     [k: string]: unknown;
   };
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     */
+    withBorder?: boolean | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'richText';
@@ -346,6 +482,9 @@ export interface RichTextBlock {
  */
 export interface StatsCountersBlock {
   intro?: string | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
   appearance?: ('default' | 'muted' | 'dark') | null;
   stats?:
     | {
@@ -361,6 +500,59 @@ export interface StatsCountersBlock {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     */
+    withBorder?: boolean | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'statsCounters';
@@ -373,8 +565,64 @@ export interface ServicesGridBlock {
   heading?: string | null;
   lede?: string | null;
   source?: ('auto' | 'selected') | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
   appearance?: ('default' | 'muted' | 'dark') | null;
   services?: (number | Service)[] | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     */
+    withBorder?: boolean | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'servicesGrid';
@@ -494,8 +742,64 @@ export interface SectorTilesBlock {
   heading?: string | null;
   lede?: string | null;
   source?: ('auto' | 'selected') | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
   appearance?: ('default' | 'muted' | 'dark') | null;
   sectors?: (number | Sector)[] | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     */
+    withBorder?: boolean | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'sectorTiles';
@@ -579,9 +883,65 @@ export interface ProjectsListBlock {
   heading?: string | null;
   lede?: string | null;
   source?: ('featured' | 'selected') | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
   appearance?: ('default' | 'muted' | 'dark') | null;
   projects?: (number | Project)[] | null;
   viewAllLabel?: string | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     */
+    withBorder?: boolean | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'projectsList';
@@ -746,6 +1106,9 @@ export interface Client {
  */
 export interface ImageGalleryBlock {
   heading?: string | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
   appearance?: ('default' | 'muted' | 'dark') | null;
   images?:
     | {
@@ -753,9 +1116,138 @@ export interface ImageGalleryBlock {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     */
+    withBorder?: boolean | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'imageGallery';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PhotoStripBlock".
+ */
+export interface PhotoStripBlock {
+  heading?: string | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
+  appearance?: ('default' | 'muted' | 'dark') | null;
+  displayMode?: ('marquee' | 'carousel') | null;
+  speed?: ('slow' | 'normal' | 'fast') | null;
+  photos?:
+    | {
+        image: number | Media;
+        caption?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     */
+    withBorder?: boolean | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'photoStrip';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -764,8 +1256,64 @@ export interface ImageGalleryBlock {
 export interface LogoWallBlock {
   heading?: string | null;
   source?: ('auto' | 'selected') | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
   appearance?: ('default' | 'muted' | 'dark') | null;
   clients?: (number | Client)[] | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     */
+    withBorder?: boolean | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'logoWall';
@@ -776,6 +1324,9 @@ export interface LogoWallBlock {
  */
 export interface PartnerBarBlock {
   heading?: string | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
   appearance?: ('default' | 'muted' | 'dark') | null;
   partners?:
     | {
@@ -787,6 +1338,59 @@ export interface PartnerBarBlock {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     */
+    withBorder?: boolean | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'partnerBar';
@@ -799,9 +1403,65 @@ export interface ProductShowcaseBlock {
   heading?: string | null;
   lede?: string | null;
   source?: ('featured' | 'selected') | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
   appearance?: ('default' | 'muted' | 'dark') | null;
   products?: (number | Product)[] | null;
   viewAllLabel?: string | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     */
+    withBorder?: boolean | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'productShowcase';
@@ -888,8 +1548,64 @@ export interface Product {
 export interface ArticlesListBlock {
   heading?: string | null;
   lede?: string | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
   appearance?: ('default' | 'muted' | 'dark') | null;
   viewAllLabel?: string | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     */
+    withBorder?: boolean | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'articlesList';
@@ -901,8 +1617,64 @@ export interface ArticlesListBlock {
 export interface TestimonialsBlock {
   heading?: string | null;
   source?: ('auto' | 'selected') | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
   appearance?: ('default' | 'muted' | 'dark') | null;
   testimonials?: (number | Testimonial)[] | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     */
+    withBorder?: boolean | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'testimonials';
@@ -932,11 +1704,67 @@ export interface TeamGridBlock {
   heading?: string | null;
   lede?: string | null;
   source?: ('auto' | 'selected') | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
   appearance?: ('default' | 'muted' | 'dark') | null;
   /**
    * Pick and order the people to show.
    */
   members?: (number | Team)[] | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     */
+    withBorder?: boolean | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'teamGrid';
@@ -975,6 +1803,9 @@ export interface Team {
  */
 export interface StepsBlock {
   eyebrow?: string | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
   appearance?: ('default' | 'muted' | 'dark') | null;
   heading?: string | null;
   steps?:
@@ -984,6 +1815,59 @@ export interface StepsBlock {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     */
+    withBorder?: boolean | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'steps';
@@ -1012,6 +1896,59 @@ export interface CTABandBlock {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     */
+    withBorder?: boolean | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'ctaBand';
@@ -1022,6 +1959,9 @@ export interface CTABandBlock {
  */
 export interface FAQBlock {
   heading?: string | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
   appearance?: ('default' | 'muted' | 'dark') | null;
   items?:
     | {
@@ -1030,6 +1970,59 @@ export interface FAQBlock {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     */
+    withBorder?: boolean | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'faq';
@@ -1040,10 +2033,66 @@ export interface FAQBlock {
  */
 export interface CalculatorEmbedBlock {
   heading?: string | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
   appearance?: ('default' | 'muted' | 'dark') | null;
   body?: string | null;
   tool?: ('solarcalc' | 'roi') | null;
   ctaLabel?: string | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     */
+    withBorder?: boolean | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'calculatorEmbed';
@@ -1054,8 +2103,64 @@ export interface CalculatorEmbedBlock {
  */
 export interface ContactRFQBlock {
   heading?: string | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
   appearance?: ('default' | 'muted' | 'dark') | null;
   subhead?: string | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a subtle border and depth shadow for a lifted, 3-D look.
+     */
+    withBorder?: boolean | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'contactRFQ';
@@ -1139,6 +2244,42 @@ export interface Article {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * 3-D renders, AI-generated icons, SVG symbols and brand marks. Upload here to keep icons separate from general media.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "icons".
+ */
+export interface Icon {
+  id: number;
+  /**
+   * Human-readable name shown in the picker (e.g. 'Solar Panel 3D').
+   */
+  name: string;
+  /**
+   * Organise icons by type so editors can find them quickly.
+   */
+  category?: ('service' | 'sector' | 'ui' | 'brand' | '3d' | 'ai' | 'other') | null;
+  /**
+   * Comma-separated keywords for search (e.g. 'solar, panel, energy').
+   */
+  tags?: string | null;
+  /**
+   * Describe the icon for screen readers. Leave blank if purely decorative (will be rendered as aria-hidden).
+   */
+  alt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
  * Consultation / quote requests submitted from the website.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1162,6 +2303,8 @@ export interface RfqRequest {
   createdAt: string;
 }
 /**
+ * Manage who can access the CMS and what they can do. Only a Super Admin can create or promote users.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
@@ -1169,9 +2312,9 @@ export interface User {
   id: number;
   name?: string | null;
   /**
-   * Controls permissions. Only admins can change roles.
+   * Controls permissions. Only a Super Admin can assign the Super Admin or Admin role.
    */
-  role: 'admin' | 'editor' | 'hermes';
+  role: 'superAdmin' | 'admin' | 'editor' | 'hermes';
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -1348,6 +2491,10 @@ export interface PayloadLockedDocument {
         value: number | Media;
       } | null)
     | ({
+        relationTo: 'icons';
+        value: number | Icon;
+      } | null)
+    | ({
         relationTo: 'rfq-requests';
         value: number | RfqRequest;
       } | null)
@@ -1414,6 +2561,7 @@ export interface PagesSelect<T extends boolean = true> {
         sectorTiles?: T | SectorTilesBlockSelect<T>;
         projectsList?: T | ProjectsListBlockSelect<T>;
         imageGallery?: T | ImageGalleryBlockSelect<T>;
+        photoStrip?: T | PhotoStripBlockSelect<T>;
         logoWall?: T | LogoWallBlockSelect<T>;
         partnerBar?: T | PartnerBarBlockSelect<T>;
         productShowcase?: T | ProductShowcaseBlockSelect<T>;
@@ -1452,6 +2600,15 @@ export interface HeroBlockSelect<T extends boolean = true> {
   tone?: T;
   backgroundImage?: T;
   backgroundVideo?: T;
+  heroMode?: T;
+  carouselItems?:
+    | T
+    | {
+        media?: T;
+        caption?: T;
+        id?: T;
+      };
+  carouselInterval?: T;
   ctas?:
     | T
     | {
@@ -1463,6 +2620,22 @@ export interface HeroBlockSelect<T extends boolean = true> {
         style?: T;
         id?: T;
       };
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1473,6 +2646,22 @@ export interface HeroBlockSelect<T extends boolean = true> {
 export interface RichTextBlockSelect<T extends boolean = true> {
   appearance?: T;
   content?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1491,6 +2680,22 @@ export interface StatsCountersBlockSelect<T extends boolean = true> {
         label?: T;
         id?: T;
       };
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1504,6 +2709,22 @@ export interface ServicesGridBlockSelect<T extends boolean = true> {
   source?: T;
   appearance?: T;
   services?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1517,6 +2738,22 @@ export interface SectorTilesBlockSelect<T extends boolean = true> {
   source?: T;
   appearance?: T;
   sectors?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1531,6 +2768,22 @@ export interface ProjectsListBlockSelect<T extends boolean = true> {
   appearance?: T;
   projects?: T;
   viewAllLabel?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1547,6 +2800,57 @@ export interface ImageGalleryBlockSelect<T extends boolean = true> {
         image?: T;
         id?: T;
       };
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PhotoStripBlock_select".
+ */
+export interface PhotoStripBlockSelect<T extends boolean = true> {
+  heading?: T;
+  appearance?: T;
+  displayMode?: T;
+  speed?: T;
+  photos?:
+    | T
+    | {
+        image?: T;
+        caption?: T;
+        id?: T;
+      };
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1559,6 +2863,22 @@ export interface LogoWallBlockSelect<T extends boolean = true> {
   source?: T;
   appearance?: T;
   clients?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1576,6 +2896,22 @@ export interface PartnerBarBlockSelect<T extends boolean = true> {
         logo?: T;
         id?: T;
       };
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1590,6 +2926,22 @@ export interface ProductShowcaseBlockSelect<T extends boolean = true> {
   appearance?: T;
   products?: T;
   viewAllLabel?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1602,6 +2954,22 @@ export interface ArticlesListBlockSelect<T extends boolean = true> {
   lede?: T;
   appearance?: T;
   viewAllLabel?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1614,6 +2982,22 @@ export interface TestimonialsBlockSelect<T extends boolean = true> {
   source?: T;
   appearance?: T;
   testimonials?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1627,6 +3011,22 @@ export interface TeamGridBlockSelect<T extends boolean = true> {
   source?: T;
   appearance?: T;
   members?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1644,6 +3044,22 @@ export interface StepsBlockSelect<T extends boolean = true> {
         title?: T;
         body?: T;
         id?: T;
+      };
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
       };
   id?: T;
   blockName?: T;
@@ -1666,6 +3082,22 @@ export interface CTABandBlockSelect<T extends boolean = true> {
         style?: T;
         id?: T;
       };
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1683,6 +3115,22 @@ export interface FAQBlockSelect<T extends boolean = true> {
         answer?: T;
         id?: T;
       };
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1696,6 +3144,22 @@ export interface CalculatorEmbedBlockSelect<T extends boolean = true> {
   body?: T;
   tool?: T;
   ctaLabel?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1707,6 +3171,22 @@ export interface ContactRFQBlockSelect<T extends boolean = true> {
   heading?: T;
   appearance?: T;
   subhead?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1983,6 +3463,27 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "icons_select".
+ */
+export interface IconsSelect<T extends boolean = true> {
+  name?: T;
+  category?: T;
+  tags?: T;
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "rfq-requests_select".
  */
 export interface RfqRequestsSelect<T extends boolean = true> {
@@ -2162,6 +3663,45 @@ export interface SiteSetting {
    * Default social share image (1200×630).
    */
   ogImage?: (number | null) | Media;
+  /**
+   * Shows a floating WhatsApp button on every page. Leave the number blank to disable.
+   */
+  whatsapp?: {
+    enabled?: boolean | null;
+    /**
+     * Include country code, no spaces (e.g. 8801711000000).
+     */
+    number?: string | null;
+    /**
+     * Message pre-typed when the user opens WhatsApp.
+     */
+    prefilledMessage?: string | null;
+    position?: ('bottom-right' | 'bottom-left') | null;
+  };
+  /**
+   * Deploy a chatbot widget. Choose between Hermes (your custom AI agent), Crisp (free live chat), or a custom embed script.
+   */
+  chatbot?: {
+    enabled?: boolean | null;
+    /**
+     * Hermes: your own AI agent (recommended). Crisp: free live chat with chatbot add-on. Custom: paste any embed script.
+     */
+    provider?: ('hermes' | 'crisp' | 'custom') | null;
+    /**
+     * The /chat API endpoint of your Hermes agent. Leave blank to use the built-in /api/chat route.
+     */
+    hermesWebhookUrl?: string | null;
+    hermesGreeting?: string | null;
+    /**
+     * Find your Website ID in Crisp Dashboard → Settings → Website Settings.
+     */
+    crispWebsiteId?: string | null;
+    /**
+     * Paste the full <script> tag(s) from your chat provider. Script is injected into the page footer.
+     */
+    customScript?: string | null;
+    chatPosition?: ('bottom-right' | 'bottom-left') | null;
+  };
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -2297,6 +3837,25 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   titleTemplate?: T;
   defaultDescription?: T;
   ogImage?: T;
+  whatsapp?:
+    | T
+    | {
+        enabled?: T;
+        number?: T;
+        prefilledMessage?: T;
+        position?: T;
+      };
+  chatbot?:
+    | T
+    | {
+        enabled?: T;
+        provider?: T;
+        hermesWebhookUrl?: T;
+        hermesGreeting?: T;
+        crispWebsiteId?: T;
+        customScript?: T;
+        chatPosition?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

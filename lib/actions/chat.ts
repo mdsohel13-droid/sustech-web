@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 import { getPayloadClient } from "@/lib/payload";
+import { env } from "@/lib/env";
 
 /**
  * Web-chat lead handler (Brief Part 15). The client widget calls this server
@@ -70,7 +71,7 @@ export async function submitChat(lead: ChatLead): Promise<{ ok: boolean }> {
     .join("\n");
 
   // Forward to n8n (best-effort; never block the user if it fails or is unset).
-  const webhook = process.env.CHAT_WEBHOOK_URL;
+  const webhook = env.CHAT_WEBHOOK_URL;
   if (webhook) {
     try {
       await fetch(webhook, {

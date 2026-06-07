@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SiteLoading() {
   return (
-    <div aria-busy="true" aria-label="Loading page content">
+    <div role="status" aria-busy="true" aria-label="Loading page content">
       {/* Hero placeholder */}
       <div className="bg-ink-900 relative min-h-[60vh] overflow-hidden px-6 py-24">
         <div className="mx-auto max-w-4xl space-y-4">

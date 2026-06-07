@@ -2,6 +2,8 @@
 
 import { headers } from "next/headers";
 import { getPayloadClient } from "@/lib/payload";
+import { isRateLimited } from "@/lib/rate-limit";
+import { env } from "@/lib/env";
 
 /**
  * Web-chat lead handler (Brief Part 15). The client widget calls this server
@@ -19,22 +21,6 @@ export interface ChatLead {
   phone?: string;
   message?: string;
   company_website?: string; // honeypot
-}
-
-const hits = new Map<string, number[]>();
-const WINDOW_MS = 10 * 60 * 1000;
-const MAX_PER_WINDOW = 8;
-
-function rateLimited(ip: string): boolean {
-  const now = Date.now();
-  const recent = (hits.get(ip) ?? []).filter((t) => now - t < WINDOW_MS);
-  if (recent.length >= MAX_PER_WINDOW) {
-    hits.set(ip, recent);
-    return true;
-  }
-  recent.push(now);
-  hits.set(ip, recent);
-  return false;
 }
 
 const str = (v: unknown, max: number): string =>
@@ -56,7 +42,7 @@ export async function submitChat(lead: ChatLead): Promise<{ ok: boolean }> {
 
   const hdrs = await headers();
   const ip = (hdrs.get("x-forwarded-for") ?? "").split(",")[0]?.trim() || "unknown";
-  if (rateLimited(ip)) return { ok: false };
+  if (await isRateLimited(ip, "chat", 8, "10 m")) return { ok: false };
 
   const summary = [
     `Web-chat enquiry: ${intent}`,
@@ -70,7 +56,7 @@ export async function submitChat(lead: ChatLead): Promise<{ ok: boolean }> {
     .join("\n");
 
   // Forward to n8n (best-effort; never block the user if it fails or is unset).
-  const webhook = process.env.CHAT_WEBHOOK_URL;
+  const webhook = env.CHAT_WEBHOOK_URL;
   if (webhook) {
     try {
       await fetch(webhook, {

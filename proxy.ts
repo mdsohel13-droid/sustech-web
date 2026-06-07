@@ -38,8 +38,14 @@ export function proxy(_request: NextRequest) {
     `default-src 'self'`,
     // 'unsafe-inline' needed for Tailwind v4's injected CSS (style-src cannot use nonces for styles)
     `style-src 'self' 'unsafe-inline'`,
-    // Scripts: self + nonce for Next.js inline scripts; no unsafe-eval
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
+    // Scripts: self + nonce for Next.js inline scripts.
+    // 'unsafe-eval' is required by React in development mode for error stack
+    // reconstruction and Turbopack HMR — it is intentionally omitted in
+    // production where React never calls eval(). Never add 'unsafe-inline'
+    // here; the nonce handles legitimate inline scripts.
+    process.env.NODE_ENV === "development"
+      ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-eval'`
+      : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
     `img-src ${imgSrc}`,
     `font-src 'self'`,
     // connect-src: self + WebSocket for Next.js HMR in dev

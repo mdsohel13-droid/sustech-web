@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import type { Media, Page, SiteSetting } from "@/payload-types";
+import { env } from "@/lib/env";
 
-export const serverUrl =
-  process.env.NEXT_PUBLIC_SERVER_URL ?? process.env.SITE_URL ?? "http://localhost:4123";
-const indexable = process.env.SITE_INDEXABLE === "true";
+export const serverUrl = env.NEXT_PUBLIC_SERVER_URL ?? env.SITE_URL ?? "http://localhost:4123";
+const indexable = env.SITE_INDEXABLE === "true";
 
 const mediaUrl = (m?: number | Media | null): string | undefined =>
   m && typeof m === "object" && m.url ? m.url : undefined;

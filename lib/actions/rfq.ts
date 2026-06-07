@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 import { getPayloadClient } from "@/lib/payload";
+import { isRateLimited } from "@/lib/rate-limit";
 
 export type RfqState = {
   ok: boolean;
@@ -21,24 +22,6 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const str = (v: FormDataEntryValue | null, max: number): string =>
   typeof v === "string" ? v.trim().slice(0, max) : "";
-
-// Lightweight in-memory throttle. Production should back this with a durable
-// store (Redis/Upstash); on serverless it is best-effort per instance.
-const hits = new Map<string, number[]>();
-const WINDOW_MS = 10 * 60 * 1000;
-const MAX_PER_WINDOW = 5;
-
-function rateLimited(ip: string): boolean {
-  const now = Date.now();
-  const recent = (hits.get(ip) ?? []).filter((t) => now - t < WINDOW_MS);
-  if (recent.length >= MAX_PER_WINDOW) {
-    hits.set(ip, recent);
-    return true;
-  }
-  recent.push(now);
-  hits.set(ip, recent);
-  return false;
-}
 
 export async function submitRfq(_prev: RfqState, formData: FormData): Promise<RfqState> {
   // Honeypot: real users never fill this hidden field. Pretend success.
@@ -62,7 +45,7 @@ export async function submitRfq(_prev: RfqState, formData: FormData): Promise<Rf
 
   const hdrs = await headers();
   const ip = (hdrs.get("x-forwarded-for") ?? "").split(",")[0]?.trim() || "unknown";
-  if (rateLimited(ip)) {
+  if (await isRateLimited(ip, "rfq", 5, "10 m")) {
     return { ok: false, errors: { form: "Too many requests. Please try again shortly." }, values };
   }
 

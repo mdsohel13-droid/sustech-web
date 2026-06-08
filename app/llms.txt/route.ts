@@ -71,6 +71,25 @@ export async function GET() {
     lines.push(``);
   }
 
+  // ── AI overview (admin-authored authoritative context) ─────────────────────
+  if (settings.aiOverview) {
+    lines.push(`## Overview`);
+    lines.push(``);
+    lines.push(settings.aiOverview.replace(/\n+/g, " ").trim());
+    lines.push(``);
+  }
+
+  // ── Key facts ──────────────────────────────────────────────────────────────
+  const keyFacts = (settings.keyFacts ?? [])
+    .map((f) => f?.fact?.trim())
+    .filter((f): f is string => Boolean(f));
+  if (keyFacts.length) {
+    lines.push(`## Key facts`);
+    lines.push(``);
+    for (const fact of keyFacts) lines.push(`- ${fact}`);
+    lines.push(``);
+  }
+
   // ── Core pages ────────────────────────────────────────────────────────────
   lines.push(`## Core pages`);
   lines.push(``);
@@ -137,6 +156,21 @@ export async function GET() {
       lines.push(mdLink(n.title, `/news/${n.slug}`, n.summary));
     }
     lines.push(``);
+  }
+
+  // ── AI FAQ (admin-authored Q&A) ────────────────────────────────────────────
+  const aiFaqs = (settings.aiFaqs ?? []).filter(
+    (f): f is { question: string; answer: string; id?: string | null } =>
+      Boolean(f?.question?.trim() && f?.answer?.trim()),
+  );
+  if (aiFaqs.length) {
+    lines.push(`## Frequently asked questions`);
+    lines.push(``);
+    for (const f of aiFaqs) {
+      lines.push(`### ${f.question.trim()}`);
+      lines.push(f.answer.replace(/\n+/g, " ").trim());
+      lines.push(``);
+    }
   }
 
   // ── Footer note ───────────────────────────────────────────────────────────

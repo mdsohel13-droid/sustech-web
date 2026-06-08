@@ -4217,6 +4217,29 @@ export interface SiteSetting {
    */
   ogImage?: (number | null) | Media;
   /**
+   * One authoritative paragraph describing Sustech for AI engines. Facts only — this becomes the lead context AI assistants cite when asked about the company.
+   */
+  aiOverview?: string | null;
+  /**
+   * Short, citable facts (e.g. 'Founded 2017', 'IEC 62305 / NFPA 780 lightning protection', 'Serves C&I clients across Bangladesh'). Verifiable only.
+   */
+  keyFacts?:
+    | {
+        fact: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Common questions about Sustech with accurate answers. Added to /llms.txt so AI engines answer correctly. For an on-page FAQ with rich-result schema, use the FAQ block on a Page instead.
+   */
+  aiFaqs?:
+    | {
+        question: string;
+        answer: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
    * Shows a floating WhatsApp button on every page. Leave the number blank to disable.
    */
   whatsapp?: {
@@ -4390,6 +4413,20 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   titleTemplate?: T;
   defaultDescription?: T;
   ogImage?: T;
+  aiOverview?: T;
+  keyFacts?:
+    | T
+    | {
+        fact?: T;
+        id?: T;
+      };
+  aiFaqs?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
   whatsapp?:
     | T
     | {

@@ -144,6 +144,54 @@ export const SiteSettings: GlobalConfig = {
             },
           ],
         },
+        /* ── GEO / AEO (AI engine optimisation) ──────────────────────── */
+        {
+          label: "GEO / AEO",
+          description:
+            "Authoritative facts for AI answer engines (ChatGPT, Claude, Perplexity, Google AI). " +
+            "Everything here is emitted into /llms.txt. Use real, verifiable facts only — never " +
+            "invent statistics, certifications or claims.",
+          fields: [
+            {
+              name: "aiOverview",
+              type: "textarea",
+              label: "AI overview (structured prompt)",
+              admin: {
+                description:
+                  "One authoritative paragraph describing Sustech for AI engines. Facts only — " +
+                  "this becomes the lead context AI assistants cite when asked about the company.",
+              },
+            },
+            {
+              name: "keyFacts",
+              type: "array",
+              label: "Key facts",
+              labels: { singular: "Fact", plural: "Facts" },
+              admin: {
+                description:
+                  "Short, citable facts (e.g. 'Founded 2017', 'IEC 62305 / NFPA 780 lightning " +
+                  "protection', 'Serves C&I clients across Bangladesh'). Verifiable only.",
+              },
+              fields: [{ name: "fact", type: "text", required: true }],
+            },
+            {
+              name: "aiFaqs",
+              type: "array",
+              label: "AI FAQ (question & answer)",
+              labels: { singular: "Q&A", plural: "Q&A pairs" },
+              admin: {
+                description:
+                  "Common questions about Sustech with accurate answers. Added to /llms.txt so AI " +
+                  "engines answer correctly. For an on-page FAQ with rich-result schema, use the " +
+                  "FAQ block on a Page instead.",
+              },
+              fields: [
+                { name: "question", type: "text", required: true },
+                { name: "answer", type: "textarea", required: true },
+              ],
+            },
+          ],
+        },
         /* ── Chat & Engagement widgets ───────────────────────────────── */
         {
           label: "Chat & Engagement",

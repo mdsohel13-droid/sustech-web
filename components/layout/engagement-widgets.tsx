@@ -72,7 +72,11 @@ export async function EngagementWidgets() {
       {/* ── Chatbot widget ─────────────────────────────────────────────── */}
       {chatEnabled && (
         <>
-          {chatProvider === "hermes" && (
+          {/* Hermes and n8n both resolve to the same brand-styled, open-ended
+              assistant. It posts to the same-origin /api/chat route, which
+              proxies to the configured n8n workflow (CHAT_N8N_ENDPOINT) —
+              keeping the secret server-side and the call inside the strict CSP. */}
+          {(chatProvider === "hermes" || chatProvider === "n8n") && (
             <ChatWidgetLoader
               services={services.map((sv) => sv.title)}
               phone={settings.phones?.[0]?.number}

@@ -4229,9 +4229,9 @@ export interface SiteSetting {
   chatbot?: {
     enabled?: boolean | null;
     /**
-     * Hermes: your own AI agent (recommended). Crisp: free live chat with chatbot add-on. Custom: paste any embed script.
+     * Hermes / n8n: your own open-ended AI assistant (recommended) — same brand widget, answers from your database with text + image support. Crisp: free live chat. Custom: paste any embed script.
      */
-    provider?: ('hermes' | 'crisp' | 'custom') | null;
+    provider?: ('hermes' | 'n8n' | 'crisp' | 'custom') | null;
     /**
      * The /chat API endpoint of your Hermes agent. Leave blank to use the built-in /api/chat route.
      */

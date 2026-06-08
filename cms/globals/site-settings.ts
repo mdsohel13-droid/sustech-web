@@ -214,12 +214,16 @@ export const SiteSettings: GlobalConfig = {
                   admin: {
                     condition: (_d, s) => Boolean(s?.enabled),
                     description:
-                      "Hermes: your own AI agent (recommended). Crisp: free live chat with chatbot add-on. Custom: paste any embed script.",
+                      "Hermes / n8n: your own open-ended AI assistant (recommended) — same brand widget, answers from your database with text + image support. Crisp: free live chat. Custom: paste any embed script.",
                   },
                   options: [
                     {
                       label: "Hermes — Sustech AI agent (recommended)",
                       value: "hermes",
+                    },
+                    {
+                      label: "n8n — open-ended AI via secure proxy",
+                      value: "n8n",
                     },
                     { label: "Crisp — free live chat + chatbot", value: "crisp" },
                     {

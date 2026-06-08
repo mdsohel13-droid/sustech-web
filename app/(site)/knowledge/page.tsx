@@ -66,6 +66,7 @@ const FORMAT_BADGE: Record<string, { label: string; colour: string }> = {
   pdf: { label: "PDF", colour: "bg-red-100 text-red-700" },
   docx: { label: "DOCX", colour: "bg-blue-100 text-blue-700" },
   xlsx: { label: "XLSX", colour: "bg-green-100 text-green-700" },
+  image: { label: "IMAGE", colour: "bg-purple-100 text-purple-700" },
   zip: { label: "ZIP", colour: "bg-amber-100 text-amber-700" },
   other: { label: "FILE", colour: "bg-gray-100 text-gray-700" },
 };
@@ -325,15 +326,35 @@ export default async function KnowledgeIndexPage({
                       )}
                       {d.fileSize && <p className="text-text-soft mt-3 text-xs">{d.fileSize}</p>}
                       {url ? (
-                        <a
-                          href={url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          download
-                          className="bg-brand hover:bg-brand-dark focus-visible:outline-brand mt-4 inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
-                        >
-                          {d.downloadLabel ?? "Download"}
-                        </a>
+                        (() => {
+                          // Admin-selected per document; default to offering both.
+                          const mode = d.openMode ?? "both";
+                          const showView = mode === "view" || mode === "both";
+                          const showDownload = mode === "download" || mode === "both";
+                          return (
+                            <div className="mt-4 flex flex-wrap gap-2">
+                              {showView && (
+                                <a
+                                  href={url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="border-brand text-brand hover:bg-brand/5 focus-visible:outline-brand inline-flex items-center justify-center rounded-lg border px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
+                                >
+                                  View
+                                </a>
+                              )}
+                              {showDownload && (
+                                <a
+                                  href={url}
+                                  download
+                                  className="bg-brand hover:bg-brand-dark focus-visible:outline-brand inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
+                                >
+                                  {d.downloadLabel ?? "Download"}
+                                </a>
+                              )}
+                            </div>
+                          );
+                        })()
                       ) : (
                         <p className="text-text-soft mt-4 text-sm italic">
                           Contact us to request this document.

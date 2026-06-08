@@ -2517,9 +2517,13 @@ export interface KnowledgeResource {
    * Human-readable size, e.g. "420 KB" or "1.2 MB".
    */
   fileSize?: string | null;
-  fileFormat?: ('pdf' | 'docx' | 'xlsx' | 'zip' | 'other') | null;
+  fileFormat?: ('pdf' | 'docx' | 'xlsx' | 'image' | 'zip' | 'other') | null;
   /**
-   * Text on the download/open button. Default: "Download".
+   * View opens the file in the browser (PDFs and images render inline); Download saves it to the visitor's device. Choose one or both.
+   */
+  openMode?: ('both' | 'view' | 'download') | null;
+  /**
+   * Text on the download button. Default: "Download".
    */
   downloadLabel?: string | null;
   updatedAt: string;
@@ -3891,6 +3895,7 @@ export interface KnowledgeResourcesSelect<T extends boolean = true> {
   fileUrl?: T;
   fileSize?: T;
   fileFormat?: T;
+  openMode?: T;
   downloadLabel?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -4166,7 +4171,10 @@ export interface SiteSetting {
         id?: string | null;
       }[]
     | null;
-  email?: string | null;
+  /**
+   * Primary contact email — shown in the footer and used in schema.
+   */
+  email: string;
   address?: {
     street?: string | null;
     city?: string | null;

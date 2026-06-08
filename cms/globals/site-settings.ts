@@ -61,7 +61,14 @@ export const SiteSettings: GlobalConfig = {
               labels: { singular: "Phone", plural: "Phones" },
               fields: [{ name: "number", type: "text", required: true }],
             },
-            { name: "email", type: "email" },
+            {
+              name: "email",
+              type: "email",
+              required: true,
+              admin: {
+                description: "Primary contact email — shown in the footer and used in schema.",
+              },
+            },
             {
               name: "address",
               type: "group",

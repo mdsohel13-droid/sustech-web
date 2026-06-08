@@ -29,8 +29,15 @@ export const FILE_FORMATS = [
   { label: "PDF", value: "pdf" },
   { label: "Word (DOCX)", value: "docx" },
   { label: "Excel (XLSX)", value: "xlsx" },
+  { label: "Image (PNG / JPG)", value: "image" },
   { label: "ZIP", value: "zip" },
   { label: "Other", value: "other" },
+] as const;
+
+export const OPEN_MODES = [
+  { label: "View + Download (both)", value: "both" },
+  { label: "View in browser only", value: "view" },
+  { label: "Download only", value: "download" },
 ] as const;
 
 export const KnowledgeResources: CollectionConfig = {
@@ -167,13 +174,26 @@ export const KnowledgeResources: CollectionConfig = {
       ],
     },
     {
+      name: "openMode",
+      type: "select",
+      label: "How visitors can open this file",
+      defaultValue: "both",
+      options: [...OPEN_MODES],
+      admin: {
+        condition: (data) => data?.type === "sample",
+        description:
+          "View opens the file in the browser (PDFs and images render inline); " +
+          "Download saves it to the visitor's device. Choose one or both.",
+      },
+    },
+    {
       name: "downloadLabel",
       type: "text",
       label: "Download button label",
       defaultValue: "Download",
       admin: {
         condition: (data) => data?.type === "sample",
-        description: 'Text on the download/open button. Default: "Download".',
+        description: 'Text on the download button. Default: "Download".',
       },
     },
   ],

@@ -807,6 +807,84 @@ export async function ProjectsListView({
 
 // --- TeamGrid ---------------------------------------------------------------
 
+const TEAM_CATEGORY_ORDER = [
+  "leadership",
+  "management",
+  "engineering",
+  "consultant",
+  "advisor",
+  "other",
+] as const;
+
+const TEAM_CATEGORY_LABEL: Record<string, string> = {
+  leadership: "Leadership",
+  management: "Management",
+  engineering: "Engineering Team",
+  consultant: "Consultants",
+  advisor: "Advisors",
+  other: "Team",
+};
+
+const TEAM_GRID_CLS = "grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
+
+/** One team-member card — extracted so it works in both flat and grouped layouts. */
+function TeamMemberCard({
+  m,
+  bs,
+  index,
+}: {
+  m: Team;
+  bs: ReturnType<typeof resolveBlockStyle>;
+  index: number;
+}) {
+  const photo = mediaUrl(m.photo);
+  const hasBio = Boolean(m.bio);
+  return (
+    <li>
+      <Reveal {...itemRevealProps(bs, index)} className="h-full">
+        {/*
+         * Image + name + role always visible; the bio expands below the role on
+         * hover/focus/tap via the pure-CSS grid-rows trick (reduced-motion shows
+         * it statically). The whole card is the disclosure trigger.
+         */}
+        <Card
+          className={cn(
+            "group ease-standard relative flex h-full flex-col overflow-hidden transition-[border-color,box-shadow,transform] duration-[var(--duration-base)]",
+            hasBio &&
+              "focus-visible:outline-brand hover:border-brand/30 focus:border-brand/30 cursor-pointer hover:-translate-y-0.5 hover:shadow-md focus:-translate-y-0.5 focus:shadow-md focus-visible:outline-2 focus-visible:-outline-offset-2",
+          )}
+        >
+          <div
+            tabIndex={hasBio ? 0 : -1}
+            role={hasBio ? "button" : undefined}
+            className="bg-surface-2 aspect-square w-full overflow-hidden focus:outline-none"
+            aria-label={hasBio ? `${m.name} — biography` : undefined}
+            aria-expanded={hasBio ? true : undefined}
+          >
+            {photo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={photo.url}
+                alt={photo.alt}
+                className="ease-standard h-full w-full object-cover transition-transform duration-[var(--duration-slow)] group-focus-within:scale-[1.04] group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-focus-within:scale-100 motion-reduce:group-hover:scale-100"
+              />
+            ) : (
+              <Skeleton className="h-full w-full rounded-none" />
+            )}
+          </div>
+          <div className="flex flex-1 flex-col p-5">
+            <h3 className="text-h3 text-ink-900 font-semibold">{m.name}</h3>
+            <p className="text-brand mt-1 font-mono text-xs tracking-[0.08em] uppercase">
+              {m.role}
+            </p>
+            {hasBio && <HoverRevealText className="mt-3">{m.bio}</HoverRevealText>}
+          </div>
+        </Card>
+      </Reveal>
+    </li>
+  );
+}
+
 export async function TeamGridView({
   block,
 }: {
@@ -820,15 +898,27 @@ export async function TeamGridView({
   };
 }) {
   const bs = resolveBlockStyle(getBlockStyle(block), block.appearance);
-  const all = block.source === "selected" ? objs<Team>(block.members) : await getTeam();
-  // Automatic mode can scope to a single group (Leadership, Engineering, …) so an
-  // admin can stack one Team block per group, each with its own heading.
+  const isSelected = block.source === "selected";
+  const all = isSelected ? objs<Team>(block.members) : await getTeam();
   const group = block.group ?? "all";
-  const members =
-    block.source === "selected" || group === "all"
-      ? all
-      : all.filter((m) => (m.category ?? "leadership") === group);
-  if (members.length === 0) return null;
+
+  // Members to show: selected = as picked; a specific group = filtered; all = everyone.
+  const visible =
+    isSelected || group === "all" ? all : all.filter((m) => (m.category ?? "leadership") === group);
+  if (visible.length === 0) return null;
+
+  // In automatic "all" mode, auto-group members by category (Leadership,
+  // Engineering, …) so the admin only has to set each person's group — no need to
+  // stack multiple blocks. Grouping kicks in only when members span >1 group.
+  const grouped =
+    !isSelected && group === "all"
+      ? TEAM_CATEGORY_ORDER.map((cat) => ({
+          cat,
+          members: visible.filter((m) => (m.category ?? "leadership") === cat),
+        })).filter((g) => g.members.length > 0)
+      : [];
+  const showGroups = grouped.length > 1;
+
   return (
     <Section
       tone={bs.tone}
@@ -844,62 +934,28 @@ export async function TeamGridView({
       title={block.heading ?? undefined}
       lede={block.lede ?? undefined}
     >
-      <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {members.map((m, i) => {
-          const photo = mediaUrl(m.photo);
-          const hasBio = Boolean(m.bio);
-          return (
-            <li key={m.id}>
-              <Reveal {...itemRevealProps(bs, i)} className="h-full">
-                {/*
-                 * The whole card is the disclosure target. Image + name + role are always
-                 * visible. The bio expands BELOW the role on hover (desktop), focus (keyboard)
-                 * or tap (mobile tap = focus). Pure CSS — the same grid-rows trick used by
-                 * the nav dropdown reveal, so the height animates smoothly with no layout
-                 * thrash. `tabIndex={0}` (when there's a bio) makes the card reachable by Tab
-                 * and discoverable by touch. Reduced-motion users get the bio shown statically.
-                 */}
-                <Card
-                  className={cn(
-                    "group ease-standard relative flex h-full flex-col overflow-hidden transition-[border-color,box-shadow,transform] duration-[var(--duration-base)]",
-                    hasBio &&
-                      "focus-visible:outline-brand hover:border-brand/30 focus:border-brand/30 cursor-pointer hover:-translate-y-0.5 hover:shadow-md focus:-translate-y-0.5 focus:shadow-md focus-visible:outline-2 focus-visible:-outline-offset-2",
-                  )}
-                  // Whole card is one trigger; we don't double-tabstop on the image.
-                  // No role="button" / aria-expanded — without JS toggling it would lie to AT;
-                  // the bio is in the DOM at all times and always read by assistive tech.
-                >
-                  <div
-                    tabIndex={hasBio ? 0 : -1}
-                    role={hasBio ? "button" : undefined}
-                    className="bg-surface-2 aspect-square w-full overflow-hidden focus:outline-none"
-                    aria-label={hasBio ? `${m.name} — biography` : undefined}
-                    aria-expanded={hasBio ? true : undefined}
-                  >
-                    {photo ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={photo.url}
-                        alt={photo.alt}
-                        className="ease-standard h-full w-full object-cover transition-transform duration-[var(--duration-slow)] group-focus-within:scale-[1.04] group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-focus-within:scale-100 motion-reduce:group-hover:scale-100"
-                      />
-                    ) : (
-                      <Skeleton className="h-full w-full rounded-none" />
-                    )}
-                  </div>
-                  <div className="flex flex-1 flex-col p-5">
-                    <h3 className="text-h3 text-ink-900 font-semibold">{m.name}</h3>
-                    <p className="text-brand mt-1 font-mono text-xs tracking-[0.08em] uppercase">
-                      {m.role}
-                    </p>
-                    {hasBio && <HoverRevealText className="mt-3">{m.bio}</HoverRevealText>}
-                  </div>
-                </Card>
-              </Reveal>
-            </li>
-          );
-        })}
-      </ul>
+      {showGroups ? (
+        <div className="space-y-12 md:space-y-16">
+          {grouped.map((g) => (
+            <div key={g.cat}>
+              <h3 className="text-h3 text-ink-900 mb-6 font-semibold">
+                {TEAM_CATEGORY_LABEL[g.cat] ?? "Team"}
+              </h3>
+              <ul className={TEAM_GRID_CLS}>
+                {g.members.map((m, i) => (
+                  <TeamMemberCard key={m.id} m={m} bs={bs} index={i} />
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <ul className={TEAM_GRID_CLS}>
+          {visible.map((m, i) => (
+            <TeamMemberCard key={m.id} m={m} bs={bs} index={i} />
+          ))}
+        </ul>
+      )}
     </Section>
   );
 }

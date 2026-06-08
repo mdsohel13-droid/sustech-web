@@ -78,6 +78,9 @@ export interface Config {
     articles: Article;
     'knowledge-resources': KnowledgeResource;
     'news-items': NewsItem;
+    awards: Award;
+    partners: Partner;
+    'job-openings': JobOpening;
     media: Media;
     icons: Icon;
     'rfq-requests': RfqRequest;
@@ -101,6 +104,9 @@ export interface Config {
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
     'knowledge-resources': KnowledgeResourcesSelect<false> | KnowledgeResourcesSelect<true>;
     'news-items': NewsItemsSelect<false> | NewsItemsSelect<true>;
+    awards: AwardsSelect<false> | AwardsSelect<true>;
+    partners: PartnersSelect<false> | PartnersSelect<true>;
+    'job-openings': JobOpeningsSelect<false> | JobOpeningsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     icons: IconsSelect<false> | IconsSelect<true>;
     'rfq-requests': RfqRequestsSelect<false> | RfqRequestsSelect<true>;
@@ -2636,6 +2642,108 @@ export interface NewsItem {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Awards, certifications and accreditations. Populate as needed — these can be surfaced on a page later.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "awards".
+ */
+export interface Award {
+  id: number;
+  title: string;
+  kind?: ('award' | 'certification' | 'accreditation') | null;
+  /**
+   * Body that issued it (e.g. Bureau Veritas, SREDA, ISO).
+   */
+  issuer?: string | null;
+  dateAwarded?: string | null;
+  /**
+   * Leave blank if it does not expire.
+   */
+  validUntil?: string | null;
+  description?: string | null;
+  /**
+   * Scan or photo of the certificate (PDF or image).
+   */
+  certificate?: (number | null) | Media;
+  /**
+   * Optional link to verify the award/certificate.
+   */
+  referenceUrl?: string | null;
+  /**
+   * Lower numbers appear first.
+   */
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Technology, distribution and channel partners.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partners".
+ */
+export interface Partner {
+  id: number;
+  name: string;
+  /**
+   * Partner logo (transparent PNG).
+   */
+  logo?: (number | null) | Media;
+  type?: ('technology' | 'distribution' | 'channel' | 'strategic') | null;
+  description?: string | null;
+  /**
+   * Optional link to the partner's website.
+   */
+  url?: string | null;
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Open roles. Ready to drive a Careers page when you want one.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "job-openings".
+ */
+export interface JobOpening {
+  id: number;
+  title: string;
+  /**
+   * The URL path segment. Auto-filled from the title — edit only if you must.
+   */
+  slug: string;
+  /**
+   * e.g. Engineering, Sales, Operations.
+   */
+  department?: string | null;
+  /**
+   * e.g. Chattogram, BD or Remote.
+   */
+  location?: string | null;
+  employmentType?: ('full-time' | 'part-time' | 'contract' | 'internship') | null;
+  status?: ('open' | 'closed') | null;
+  /**
+   * One or two sentences shown on the careers list.
+   */
+  summary?: string | null;
+  /**
+   * Full role description, responsibilities and requirements.
+   */
+  description?: string | null;
+  /**
+   * Where applicants send their CV.
+   */
+  applyEmail?: string | null;
+  /**
+   * Optional external application link.
+   */
+  applyUrl?: string | null;
+  closingDate?: string | null;
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * 3-D renders, AI-generated icons, SVG symbols and brand marks. Upload here to keep icons separate from general media.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2885,6 +2993,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'news-items';
         value: number | NewsItem;
+      } | null)
+    | ({
+        relationTo: 'awards';
+        value: number | Award;
+      } | null)
+    | ({
+        relationTo: 'partners';
+        value: number | Partner;
+      } | null)
+    | ({
+        relationTo: 'job-openings';
+        value: number | JobOpening;
       } | null)
     | ({
         relationTo: 'media';
@@ -3950,6 +4070,57 @@ export interface NewsItemsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "awards_select".
+ */
+export interface AwardsSelect<T extends boolean = true> {
+  title?: T;
+  kind?: T;
+  issuer?: T;
+  dateAwarded?: T;
+  validUntil?: T;
+  description?: T;
+  certificate?: T;
+  referenceUrl?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partners_select".
+ */
+export interface PartnersSelect<T extends boolean = true> {
+  name?: T;
+  logo?: T;
+  type?: T;
+  description?: T;
+  url?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "job-openings_select".
+ */
+export interface JobOpeningsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  department?: T;
+  location?: T;
+  employmentType?: T;
+  status?: T;
+  summary?: T;
+  description?: T;
+  applyEmail?: T;
+  applyUrl?: T;
+  closingDate?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
@@ -4221,6 +4392,10 @@ export interface SiteSetting {
    */
   knowledgeLayout?: ('vertical' | 'horizontal') | null;
   /**
+   * Layout for the Projects listing. Horizontal shows a thumbnail beside each case study with its summary revealed on hover.
+   */
+  projectsLayout?: ('vertical' | 'horizontal') | null;
+  /**
    * One authoritative paragraph describing Sustech for AI engines. Facts only — this becomes the lead context AI assistants cite when asked about the company.
    */
   aiOverview?: string | null;
@@ -4418,6 +4593,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   defaultDescription?: T;
   ogImage?: T;
   knowledgeLayout?: T;
+  projectsLayout?: T;
   aiOverview?: T;
   keyFacts?:
     | T

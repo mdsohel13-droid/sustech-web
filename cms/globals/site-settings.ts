@@ -164,6 +164,21 @@ export const SiteSettings: GlobalConfig = {
                   "description pops up on hover — the same interaction as the About → Our Team section.",
               },
             },
+            {
+              name: "projectsLayout",
+              type: "select",
+              label: "Projects / case-study card layout",
+              defaultValue: "vertical",
+              options: [
+                { label: "Vertical cards (grid)", value: "vertical" },
+                { label: "Horizontal rows (hover to reveal text)", value: "horizontal" },
+              ],
+              admin: {
+                description:
+                  "Layout for the Projects listing. Horizontal shows a thumbnail beside each " +
+                  "case study with its summary revealed on hover.",
+              },
+            },
           ],
         },
         /* ── GEO / AEO (AI engine optimisation) ──────────────────────── */

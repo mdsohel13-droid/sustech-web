@@ -7,10 +7,11 @@ import { Card } from "@/components/ui/card";
 import { Container } from "@/components/ui/container";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { GridMotif } from "@/components/ui/grid-motif";
+import { HoverRevealText } from "@/components/ui/hover-reveal-text";
 import { Reveal } from "@/components/ui/reveal";
 import { Section } from "@/components/ui/section";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getProjects } from "@/lib/payload";
+import { getProjects, getSiteSettings } from "@/lib/payload";
 import { ProofCounter } from "@/components/ui/proof-counter";
 import { serverUrl } from "@/lib/seo";
 import { cn } from "@/lib/utils";
@@ -56,6 +57,51 @@ function coverImage(p: Project): { url: string; alt: string } | null {
   return { url: img.url, alt: img.alt ?? "" };
 }
 
+/**
+ * One project card. `horizontal` mirrors the Knowledge Hub / Our Team
+ * interaction: a thumbnail beside the text with the summary revealed on hover.
+ * The summary stays in the DOM either way, so it remains crawlable.
+ */
+function ProjectCard({ p, index, horizontal }: { p: Project; index: number; horizontal: boolean }) {
+  const img = coverImage(p);
+  const sectorName = projectSector(p)?.title ?? null;
+  const meta = [sectorName, p.year].filter(Boolean).join(" · ");
+  const imgCls = horizontal ? "aspect-[4/3] w-32 shrink-0 sm:w-44" : "aspect-[4/3] w-full";
+  return (
+    <li>
+      <Reveal delay={Math.min(index, 5) * 50}>
+        <Card
+          interactive
+          className={cn("group relative overflow-hidden", horizontal ? "flex flex-row" : "h-full")}
+        >
+          {img ? (
+            // eslint-disable-next-line @next/next/no-img-element -- CMS media; <img> matches existing pattern in this file
+            <img src={img.url} alt={img.alt} className={cn("object-cover", imgCls)} />
+          ) : (
+            <Skeleton className={cn("rounded-none", imgCls)} />
+          )}
+          <div className={horizontal ? "min-w-0 flex-1 p-5" : "p-6"}>
+            <p className="text-brand font-mono text-xs tracking-[0.08em] uppercase">{meta}</p>
+            <h3 className="text-h3 text-ink-900 mt-2 font-semibold">{p.name}</h3>
+            {p.summary &&
+              (horizontal ? (
+                <HoverRevealText className="mt-2">{p.summary}</HoverRevealText>
+              ) : (
+                <p className="text-text-soft mt-2 text-[0.9375rem]">{p.summary}</p>
+              ))}
+          </div>
+          <Link
+            href={`/projects/${p.slug}`}
+            prefetch={false}
+            aria-label={`${p.name} — read case study`}
+            className="focus-visible:outline-brand absolute inset-0 focus-visible:outline-2 focus-visible:outline-offset-2"
+          />
+        </Card>
+      </Reveal>
+    </li>
+  );
+}
+
 /** Build a /projects URL that toggles one filter while preserving the others. */
 function hrefWith(current: Filters, key: keyof Filters, value?: string): string {
   const next: Filters = { ...current, [key]: value };
@@ -74,7 +120,11 @@ export default async function ProjectsIndexPage({
 }) {
   const current = await searchParams;
   const { sector: activeSector, service: activeService, year: activeYear } = current;
-  const all = await getProjects();
+  const [all, settings] = await Promise.all([getProjects(), getSiteSettings()]);
+
+  // CMS-driven layout: vertical grid (default) or horizontal hover-reveal rows.
+  const horizontal = settings.projectsLayout === "horizontal";
+  const listCls = horizontal ? "flex flex-col gap-4" : "grid gap-6 sm:grid-cols-2 lg:grid-cols-3";
 
   // Derive filter options + counts across the full published set.
   const sectorCounts = new Map<string, { title: string; icon: SectorRef["icon"]; count: number }>();
@@ -232,44 +282,10 @@ export default async function ProjectsIndexPage({
               : "Project case studies are being published — check back soon."}
           </p>
         ) : (
-          <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {projects.map((p, i) => {
-              const img = coverImage(p);
-              const sectorName = projectSector(p)?.title ?? null;
-              return (
-                <li key={p.id}>
-                  <Reveal delay={Math.min(i, 5) * 50}>
-                    <Card interactive className="relative h-full overflow-hidden">
-                      {img ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={img.url}
-                          alt={img.alt}
-                          className="aspect-[4/3] w-full object-cover"
-                        />
-                      ) : (
-                        <Skeleton className="aspect-[4/3] w-full rounded-none" />
-                      )}
-                      <div className="p-6">
-                        <p className="text-brand font-mono text-xs tracking-[0.08em] uppercase">
-                          {[sectorName, p.year].filter(Boolean).join(" · ")}
-                        </p>
-                        <h3 className="text-h3 text-ink-900 mt-2 font-semibold">{p.name}</h3>
-                        {p.summary && (
-                          <p className="text-text-soft mt-2 text-[0.9375rem]">{p.summary}</p>
-                        )}
-                      </div>
-                      <Link
-                        href={`/projects/${p.slug}`}
-                        prefetch={false}
-                        aria-label={`${p.name} — read case study`}
-                        className="focus-visible:outline-brand absolute inset-0 focus-visible:outline-2 focus-visible:outline-offset-2"
-                      />
-                    </Card>
-                  </Reveal>
-                </li>
-              );
-            })}
+          <ul className={listCls}>
+            {projects.map((p, i) => (
+              <ProjectCard key={p.id} p={p} index={i} horizontal={horizontal} />
+            ))}
           </ul>
         )}
       </Section>

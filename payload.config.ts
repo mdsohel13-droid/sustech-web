@@ -6,6 +6,9 @@ import { buildConfig } from "payload";
 import sharp from "sharp";
 
 import { Articles } from "./cms/collections/articles";
+import { Awards } from "./cms/collections/awards";
+import { JobOpenings } from "./cms/collections/job-openings";
+import { Partners } from "./cms/collections/partners";
 import { KnowledgeResources } from "./cms/collections/knowledge-resources";
 import { NewsItems } from "./cms/collections/news-items";
 import { Clients } from "./cms/collections/clients";
@@ -46,6 +49,10 @@ export default buildConfig({
     Articles,
     KnowledgeResources,
     NewsItems,
+    // Company credentials & careers (pre-built; populate from the admin)
+    Awards,
+    Partners,
+    JobOpenings,
     Media,
     Icons,
     RfqRequests,
@@ -54,8 +61,11 @@ export default buildConfig({
   globals: [SiteSettings, Navigation],
   db: postgresAdapter({
     pool: { connectionString: process.env.DATABASE_URI },
-    // `push` (dev) auto-syncs the schema so no manual migrations are needed locally/CI.
-    push: process.env.NODE_ENV !== "production",
+    // `push` auto-syncs the DB schema from the collection configs — on by default
+    // in dev/CI. In production it stays OFF (safer) UNLESS PAYLOAD_DB_PUSH=true is
+    // set explicitly: set it for one boot after adding/removing collections or
+    // fields so the new tables/columns are created, then unset it again.
+    push: process.env.PAYLOAD_DB_PUSH === "true" || process.env.NODE_ENV !== "production",
   }),
   secret: (() => {
     const s = process.env.PAYLOAD_SECRET;

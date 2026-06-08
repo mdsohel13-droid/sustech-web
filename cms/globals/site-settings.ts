@@ -144,6 +144,28 @@ export const SiteSettings: GlobalConfig = {
             },
           ],
         },
+        /* ── Display / layout ────────────────────────────────────────── */
+        {
+          label: "Display",
+          description: "Visual layout options that apply across content listings.",
+          fields: [
+            {
+              name: "knowledgeLayout",
+              type: "select",
+              label: "Knowledge Hub card layout",
+              defaultValue: "vertical",
+              options: [
+                { label: "Vertical cards (grid)", value: "vertical" },
+                { label: "Horizontal rows (hover to reveal text)", value: "horizontal" },
+              ],
+              admin: {
+                description:
+                  "Vertical: the standard grid of cards. Horizontal: full-width rows where the " +
+                  "description pops up on hover — the same interaction as the About → Our Team section.",
+              },
+            },
+          ],
+        },
         /* ── GEO / AEO (AI engine optimisation) ──────────────────────── */
         {
           label: "GEO / AEO",

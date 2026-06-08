@@ -4217,6 +4217,10 @@ export interface SiteSetting {
    */
   ogImage?: (number | null) | Media;
   /**
+   * Vertical: the standard grid of cards. Horizontal: full-width rows where the description pops up on hover — the same interaction as the About → Our Team section.
+   */
+  knowledgeLayout?: ('vertical' | 'horizontal') | null;
+  /**
    * One authoritative paragraph describing Sustech for AI engines. Facts only — this becomes the lead context AI assistants cite when asked about the company.
    */
   aiOverview?: string | null;
@@ -4413,6 +4417,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   titleTemplate?: T;
   defaultDescription?: T;
   ogImage?: T;
+  knowledgeLayout?: T;
   aiOverview?: T;
   keyFacts?:
     | T

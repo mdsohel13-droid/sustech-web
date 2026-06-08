@@ -1,7 +1,7 @@
 import { RichText } from "@payloadcms/richtext-lexical/react";
 import { ArrowRight, Calculator, Check, Quote } from "lucide-react";
 import Link from "next/link";
-import type { ComponentProps, ReactNode } from "react";
+import type { ComponentProps } from "react";
 import { sectorIcons, serviceIcons } from "@/components/icons";
 import { JsonLd } from "@/components/seo/json-ld";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Container } from "@/components/ui/container";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { GridMotif } from "@/components/ui/grid-motif";
+import { HoverRevealText } from "@/components/ui/hover-reveal-text";
 import { ProofCounter } from "@/components/ui/proof-counter";
 import { Reveal } from "@/components/ui/reveal";
 import { Section } from "@/components/ui/section";
@@ -85,23 +86,6 @@ function mediaUrl(m?: number | Media | null): { url: string; alt: string } | nul
  * Under prefers-reduced-motion the description is shown statically (no animation).
  * For the reveal to fire, the ANCESTOR card needs the `group` class.
  */
-function HoverRevealText({ children, className }: { children: ReactNode; className?: string }) {
-  return (
-    <div className="ease-standard grid grid-rows-[0fr] transition-[grid-template-rows] delay-0 duration-[var(--duration-base)] group-focus-within:grid-rows-[1fr] group-focus-within:delay-[var(--delay-reveal)] group-hover:grid-rows-[1fr] group-hover:delay-[var(--delay-reveal)] motion-reduce:grid-rows-[1fr]">
-      <div className="overflow-hidden">
-        <p
-          className={cn(
-            "text-text-soft ease-standard -translate-y-1 text-[0.9375rem] opacity-0 transition-[opacity,transform] duration-[var(--duration-base)] group-focus-within:translate-y-0 group-focus-within:opacity-100 group-focus-within:delay-[var(--delay-reveal)] group-hover:translate-y-0 group-hover:opacity-100 group-hover:delay-[var(--delay-reveal)] motion-reduce:translate-y-0 motion-reduce:opacity-100",
-            className,
-          )}
-        >
-          {children}
-        </p>
-      </div>
-    </div>
-  );
-}
-
 // --- Hero -------------------------------------------------------------------
 
 /** Map a (possibly unpopulated) media relation to a hero panel item. */

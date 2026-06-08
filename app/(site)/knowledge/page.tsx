@@ -17,11 +17,13 @@ import { Card } from "@/components/ui/card";
 import { Container } from "@/components/ui/container";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { GridMotif } from "@/components/ui/grid-motif";
+import { HoverRevealText } from "@/components/ui/hover-reveal-text";
 import { Section } from "@/components/ui/section";
-import type { KnowledgeResource } from "@/payload-types";
+import type { Article, KnowledgeResource } from "@/payload-types";
 import { CALCULATOR_REGISTRY } from "@/components/calculators/calculator-registry";
-import { getArticles, getKnowledgeResources } from "@/lib/payload";
+import { getArticles, getKnowledgeResources, getSiteSettings } from "@/lib/payload";
 import { serverUrl } from "@/lib/seo";
+import { cn } from "@/lib/utils";
 
 export const revalidate = 3600;
 
@@ -71,6 +73,151 @@ const FORMAT_BADGE: Record<string, { label: string; colour: string }> = {
   other: { label: "FILE", colour: "bg-gray-100 text-gray-700" },
 };
 
+// ── Cards (vertical grid card OR horizontal hover-reveal row) ─────────────────
+// `horizontal` mirrors the About → Our Team interaction: a full-width row whose
+// description is collapsed at rest and pops up on hover/focus. The text stays in
+// the DOM (HoverRevealText only collapses height), so it remains crawlable.
+
+const CARD_LINK =
+  "focus-visible:outline-brand absolute inset-0 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2";
+
+function ArticleCard({ a, horizontal }: { a: Article; horizontal: boolean }) {
+  const date = formatDate(a.publishedDate);
+  const meta = [a.author, date].filter(Boolean).join(" · ");
+  return (
+    <li>
+      <Card
+        interactive
+        className={cn("group relative flex flex-col", horizontal ? "p-5" : "h-full p-6")}
+      >
+        <h2 className="text-h3 text-ink-900 font-semibold">{a.title}</h2>
+        {a.excerpt &&
+          (horizontal ? (
+            <HoverRevealText className="mt-1">{a.excerpt}</HoverRevealText>
+          ) : (
+            <p className="text-text-soft mt-2 flex-1 text-[0.9375rem]">{a.excerpt}</p>
+          ))}
+        {meta && (
+          <p className="text-text-soft mt-4 font-mono text-xs tracking-[0.04em] uppercase">
+            {meta}
+          </p>
+        )}
+        <Link
+          href={`/knowledge/${a.slug}`}
+          prefetch={false}
+          aria-label={`${a.title} — read article`}
+          className={CARD_LINK}
+        />
+      </Card>
+    </li>
+  );
+}
+
+function CalculatorCard({ c, horizontal }: { c: KnowledgeResource; horizontal: boolean }) {
+  const regMeta = c.calcType ? CALCULATOR_REGISTRY[c.calcType] : null;
+  const icon = regMeta?.icon ?? "⚙️";
+  const standards = regMeta?.standards ?? [];
+  const href = `/knowledge/calculators/${c.calcType ?? ""}`;
+  return (
+    <li>
+      <Card
+        interactive
+        className={cn(
+          "group relative",
+          horizontal ? "flex flex-row items-center gap-4 p-5" : "flex h-full flex-col p-6",
+        )}
+      >
+        <div className={cn("text-3xl", horizontal ? "shrink-0" : "mb-3")} aria-hidden>
+          {icon}
+        </div>
+        <div className={horizontal ? "min-w-0 flex-1" : "flex flex-1 flex-col"}>
+          <h3 className="text-h3 text-ink-900 font-semibold">{c.title}</h3>
+          {c.description &&
+            (horizontal ? (
+              <HoverRevealText className="mt-1">{c.description}</HoverRevealText>
+            ) : (
+              <p className="text-text-soft mt-2 flex-1 text-[0.9375rem]">{c.description}</p>
+            ))}
+          {standards.length > 0 && !horizontal && (
+            <p className="text-text-soft mt-4 text-xs">
+              {standards.map((s) => (
+                <code
+                  key={s}
+                  className="bg-surface-3 mr-1 rounded px-1.5 py-0.5 font-mono text-[10px]"
+                >
+                  {s}
+                </code>
+              ))}
+            </p>
+          )}
+        </div>
+        <Link
+          href={href}
+          prefetch={false}
+          aria-label={`Open ${c.title} calculator`}
+          className={CARD_LINK}
+        />
+      </Card>
+    </li>
+  );
+}
+
+function DownloadCard({ d, horizontal }: { d: KnowledgeResource; horizontal: boolean }) {
+  const url = resolveDownloadUrl(d);
+  const fmtInfo = d.fileFormat ? FORMAT_BADGE[d.fileFormat] : null;
+  const mode = d.openMode ?? "both";
+  const showView = mode === "view" || mode === "both";
+  const showDownload = mode === "download" || mode === "both";
+  return (
+    <li>
+      <Card className={cn("group flex flex-col", horizontal ? "p-5" : "h-full p-6")}>
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="text-h3 text-ink-900 font-semibold">{d.title}</h3>
+          {fmtInfo && (
+            <span
+              className={`shrink-0 rounded px-2 py-0.5 text-xs font-bold tracking-wide uppercase ${fmtInfo.colour}`}
+            >
+              {fmtInfo.label}
+            </span>
+          )}
+        </div>
+        {d.description &&
+          (horizontal ? (
+            <HoverRevealText className="mt-1">{d.description}</HoverRevealText>
+          ) : (
+            <p className="text-text-soft mt-2 flex-1 text-[0.9375rem]">{d.description}</p>
+          ))}
+        {d.fileSize && <p className="text-text-soft mt-3 text-xs">{d.fileSize}</p>}
+        {url ? (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {showView && (
+              <a
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="border-brand text-brand hover:bg-brand/5 focus-visible:outline-brand inline-flex items-center justify-center rounded-lg border px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
+              >
+                View
+              </a>
+            )}
+            {showDownload && (
+              <a
+                href={url}
+                download
+                className="bg-brand hover:bg-brand-dark focus-visible:outline-brand inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
+              >
+                {d.downloadLabel ?? "Download"}
+              </a>
+            )}
+          </div>
+        ) : (
+          <p className="text-text-soft mt-4 text-sm italic">Contact us to request this document.</p>
+        )}
+      </Card>
+    </li>
+  );
+}
+
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function KnowledgeIndexPage({
@@ -82,10 +229,18 @@ export default async function KnowledgeIndexPage({
   const activeTab: TabKey =
     rawTab === "calculators" || rawTab === "downloads" ? rawTab : "articles";
 
-  const [articles, resources] = await Promise.all([getArticles(), getKnowledgeResources()]);
+  const [articles, resources, settings] = await Promise.all([
+    getArticles(),
+    getKnowledgeResources(),
+    getSiteSettings(),
+  ]);
 
   const calculators = resources.filter((r) => r.type === "calculator");
   const downloads = resources.filter((r) => r.type === "sample");
+
+  // CMS-driven layout: vertical grid (default) or horizontal hover-reveal rows.
+  const horizontal = settings.knowledgeLayout === "horizontal";
+  const listCls = horizontal ? "flex flex-col gap-3" : "grid gap-6 sm:grid-cols-2 lg:grid-cols-3";
 
   // Build ItemList entities for schema
   const allItems = [
@@ -185,31 +340,10 @@ export default async function KnowledgeIndexPage({
               Articles are on the way — check back soon.
             </p>
           ) : (
-            <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {articles.map((a) => {
-                const date = formatDate(a.publishedDate);
-                return (
-                  <li key={a.id}>
-                    <Card interactive className="relative flex h-full flex-col p-6">
-                      <h2 className="text-h3 text-ink-900 font-semibold">{a.title}</h2>
-                      {a.excerpt && (
-                        <p className="text-text-soft mt-2 flex-1 text-[0.9375rem]">{a.excerpt}</p>
-                      )}
-                      {(a.author || date) && (
-                        <p className="text-text-soft mt-4 font-mono text-xs tracking-[0.04em] uppercase">
-                          {[a.author, date].filter(Boolean).join(" · ")}
-                        </p>
-                      )}
-                      <Link
-                        href={`/knowledge/${a.slug}`}
-                        prefetch={false}
-                        aria-label={`${a.title} — read article`}
-                        className="focus-visible:outline-brand absolute inset-0 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2"
-                      />
-                    </Card>
-                  </li>
-                );
-              })}
+            <ul className={listCls}>
+              {articles.map((a) => (
+                <ArticleCard key={a.id} a={a} horizontal={horizontal} />
+              ))}
             </ul>
           )}
         </Section>
@@ -230,46 +364,10 @@ export default async function KnowledgeIndexPage({
               Calculators coming soon.
             </p>
           ) : (
-            <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {calculators.map((c) => {
-                const regMeta = c.calcType ? CALCULATOR_REGISTRY[c.calcType] : null;
-                const icon = regMeta?.icon ?? "⚙️";
-                const standards = regMeta?.standards ?? [];
-                const href = `/knowledge/calculators/${c.calcType ?? ""}`;
-                return (
-                  <li key={c.id}>
-                    <Card interactive className="relative flex h-full flex-col p-6">
-                      <div className="mb-3 text-3xl" aria-hidden>
-                        {icon}
-                      </div>
-                      <h3 className="text-h3 text-ink-900 font-semibold">{c.title}</h3>
-                      {c.description && (
-                        <p className="text-text-soft mt-2 flex-1 text-[0.9375rem]">
-                          {c.description}
-                        </p>
-                      )}
-                      {standards.length > 0 && (
-                        <p className="text-text-soft mt-4 text-xs">
-                          {standards.map((s) => (
-                            <code
-                              key={s}
-                              className="bg-surface-3 mr-1 rounded px-1.5 py-0.5 font-mono text-[10px]"
-                            >
-                              {s}
-                            </code>
-                          ))}
-                        </p>
-                      )}
-                      <Link
-                        href={href}
-                        prefetch={false}
-                        aria-label={`Open ${c.title} calculator`}
-                        className="focus-visible:outline-brand absolute inset-0 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2"
-                      />
-                    </Card>
-                  </li>
-                );
-              })}
+            <ul className={listCls}>
+              {calculators.map((c) => (
+                <CalculatorCard key={c.id} c={c} horizontal={horizontal} />
+              ))}
             </ul>
           )}
           <p className="text-text-soft mt-8 text-sm">
@@ -302,68 +400,10 @@ export default async function KnowledgeIndexPage({
               for project-specific templates.
             </p>
           ) : (
-            <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {downloads.map((d) => {
-                const url = resolveDownloadUrl(d);
-                const fmtInfo = d.fileFormat ? FORMAT_BADGE[d.fileFormat] : null;
-                return (
-                  <li key={d.id}>
-                    <Card className="flex h-full flex-col p-6">
-                      <div className="flex items-start justify-between gap-2">
-                        <h3 className="text-h3 text-ink-900 font-semibold">{d.title}</h3>
-                        {fmtInfo && (
-                          <span
-                            className={`shrink-0 rounded px-2 py-0.5 text-xs font-bold tracking-wide uppercase ${fmtInfo.colour}`}
-                          >
-                            {fmtInfo.label}
-                          </span>
-                        )}
-                      </div>
-                      {d.description && (
-                        <p className="text-text-soft mt-2 flex-1 text-[0.9375rem]">
-                          {d.description}
-                        </p>
-                      )}
-                      {d.fileSize && <p className="text-text-soft mt-3 text-xs">{d.fileSize}</p>}
-                      {url ? (
-                        (() => {
-                          // Admin-selected per document; default to offering both.
-                          const mode = d.openMode ?? "both";
-                          const showView = mode === "view" || mode === "both";
-                          const showDownload = mode === "download" || mode === "both";
-                          return (
-                            <div className="mt-4 flex flex-wrap gap-2">
-                              {showView && (
-                                <a
-                                  href={url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="border-brand text-brand hover:bg-brand/5 focus-visible:outline-brand inline-flex items-center justify-center rounded-lg border px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
-                                >
-                                  View
-                                </a>
-                              )}
-                              {showDownload && (
-                                <a
-                                  href={url}
-                                  download
-                                  className="bg-brand hover:bg-brand-dark focus-visible:outline-brand inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
-                                >
-                                  {d.downloadLabel ?? "Download"}
-                                </a>
-                              )}
-                            </div>
-                          );
-                        })()
-                      ) : (
-                        <p className="text-text-soft mt-4 text-sm italic">
-                          Contact us to request this document.
-                        </p>
-                      )}
-                    </Card>
-                  </li>
-                );
-              })}
+            <ul className={listCls}>
+              {downloads.map((d) => (
+                <DownloadCard key={d.id} d={d} horizontal={horizontal} />
+              ))}
             </ul>
           )}
         </Section>

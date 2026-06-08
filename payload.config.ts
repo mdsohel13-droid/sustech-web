@@ -62,10 +62,12 @@ export default buildConfig({
   db: postgresAdapter({
     pool: { connectionString: process.env.DATABASE_URI },
     // `push` auto-syncs the DB schema from the collection configs — on by default
-    // in dev/CI. In production it stays OFF (safer) UNLESS PAYLOAD_DB_PUSH=true is
-    // set explicitly: set it for one boot after adding/removing collections or
-    // fields so the new tables/columns are created, then unset it again.
+    // in dev/CI. In production it stays OFF (safer): production schema changes
+    // are applied as committed, reviewable SQL migrations via `pnpm migrate`
+    // (see ./migrations and DB-MIGRATIONS.md). PAYLOAD_DB_PUSH=true remains as an
+    // emergency escape hatch to force a one-off push, but migrations are preferred.
     push: process.env.PAYLOAD_DB_PUSH === "true" || process.env.NODE_ENV !== "production",
+    migrationDir: path.resolve(dirname, "./migrations"),
   }),
   secret: (() => {
     const s = process.env.PAYLOAD_SECRET;

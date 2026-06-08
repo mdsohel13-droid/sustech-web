@@ -121,19 +121,25 @@
   }
 }
 
-/* Page transition — the new page fades + gently rises in on every navigation.
+/* Page transition — the new page fades + gently rises + settles on every
+   navigation. Opacity reaches full before the rise finishes (the 55% keyframe),
+   so content is readable almost immediately and the motion reads as a smooth,
+   deliberate settle rather than a hard flash/blink.
    animation-fill-mode is `backwards` (set on the rule below), so the transform
-   exists ONLY while the 300 ms animation runs and reverts to none afterwards —
-   the brief transform never leaves a lingering containing block, so sticky/fixed
+   exists ONLY while the animation runs and reverts to none afterwards — the
+   brief transform never leaves a lingering containing block, so sticky/fixed
    descendants (e.g. the Knowledge tab bar) keep working once the page settles. */
 @keyframes page-enter {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(16px) scale(0.994);
+  }
+  55% {
+    opacity: 1;
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -147,7 +153,8 @@
      that masks the brief route-change delay. Reduced-motion users skip it
      (this rule is inside the no-preference query) and see content instantly. */
   .page-enter {
-    animation: page-enter 320ms var(--ease-brand) backwards;
+    animation: page-enter 480ms var(--ease-brand) backwards;
+    will-change: opacity, transform;
   }
   /* Gradient overlay breathes very subtly — depth without distraction */
   .hero-gradient {

@@ -22,6 +22,7 @@ import { Section } from "@/components/ui/section";
 import type { Article, KnowledgeResource } from "@/payload-types";
 import { CALCULATOR_REGISTRY } from "@/components/calculators/calculator-registry";
 import { getArticles, getKnowledgeResources, getSiteSettings } from "@/lib/payload";
+import { isHorizontal } from "@/lib/content-layout";
 import { serverUrl } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 
@@ -239,7 +240,7 @@ export default async function KnowledgeIndexPage({
   const downloads = resources.filter((r) => r.type === "sample");
 
   // CMS-driven layout: vertical grid (default) or horizontal hover-reveal rows.
-  const horizontal = settings.knowledgeLayout === "horizontal";
+  const horizontal = isHorizontal(settings, "knowledge");
   const listCls = horizontal ? "flex flex-col gap-3" : "grid gap-6 sm:grid-cols-2 lg:grid-cols-3";
 
   // Build ItemList entities for schema

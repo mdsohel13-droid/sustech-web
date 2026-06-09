@@ -4336,6 +4336,23 @@ export interface SiteSetting {
   description?: string | null;
   foundingYear?: number | null;
   areaServed?: string | null;
+  /**
+   * Real, verified figures shown on the Projects page. Leave empty to hide the stats band. Use real numbers only — never invented or placeholder values.
+   */
+  stats?:
+    | {
+        value: number;
+        /**
+         * e.g. "+", "%", "MWp"
+         */
+        suffix?: string | null;
+        /**
+         * e.g. Projects executed
+         */
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
   phones?:
     | {
         number: string;
@@ -4388,13 +4405,15 @@ export interface SiteSetting {
    */
   ogImage?: (number | null) | Media;
   /**
-   * Vertical: the standard grid of cards. Horizontal: full-width rows where the description pops up on hover — the same interaction as the About → Our Team section.
+   * Add a rule per listing you want to control. Pick the surface and the card style. Any surface without a rule uses the default (vertical grid). Horizontal rows reveal the description on hover — the same interaction as About → Our Team.
    */
-  knowledgeLayout?: ('vertical' | 'horizontal') | null;
-  /**
-   * Layout for the Projects listing. Horizontal shows a thumbnail beside each case study with its summary revealed on hover.
-   */
-  projectsLayout?: ('vertical' | 'horizontal') | null;
+  contentLayouts?:
+    | {
+        surface: 'knowledge' | 'projects' | 'services' | 'sectors';
+        style: 'vertical' | 'horizontal';
+        id?: string | null;
+      }[]
+    | null;
   /**
    * One authoritative paragraph describing Sustech for AI engines. Facts only — this becomes the lead context AI assistants cite when asked about the company.
    */
@@ -4558,6 +4577,14 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   description?: T;
   foundingYear?: T;
   areaServed?: T;
+  stats?:
+    | T
+    | {
+        value?: T;
+        suffix?: T;
+        label?: T;
+        id?: T;
+      };
   phones?:
     | T
     | {
@@ -4592,8 +4619,13 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   titleTemplate?: T;
   defaultDescription?: T;
   ogImage?: T;
-  knowledgeLayout?: T;
-  projectsLayout?: T;
+  contentLayouts?:
+    | T
+    | {
+        surface?: T;
+        style?: T;
+        id?: T;
+      };
   aiOverview?: T;
   keyFacts?:
     | T

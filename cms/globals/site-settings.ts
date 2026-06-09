@@ -2,6 +2,19 @@ import type { GlobalConfig } from "payload";
 import { anyone, isAdmin } from "../access";
 import { revalidateLayout } from "../hooks/revalidate";
 
+/**
+ * Listing surfaces an admin can assign a card layout to (vertical | horizontal).
+ * Each value must be wired in the corresponding page via `layoutFor()` in
+ * lib/content-layout.ts. To support a new listing: add it here AND read
+ * `layoutFor(settings, "<value>")` in that page — no other change needed.
+ */
+export const LAYOUT_SURFACES = [
+  { label: "Knowledge Hub", value: "knowledge" },
+  { label: "Projects / case studies", value: "projects" },
+  { label: "Services (all-services page)", value: "services" },
+  { label: "Solutions / Sectors (all)", value: "sectors" },
+] as const;
+
 export const SiteSettings: GlobalConfig = {
   slug: "site-settings",
   label: "Site Settings",
@@ -50,6 +63,41 @@ export const SiteSettings: GlobalConfig = {
             },
             { name: "foundingYear", type: "number", defaultValue: 2017 },
             { name: "areaServed", type: "text", defaultValue: "Bangladesh" },
+            {
+              name: "stats",
+              type: "array",
+              label: "Headline statistics",
+              labels: { singular: "Statistic", plural: "Statistics" },
+              admin: {
+                description:
+                  "Real, verified figures shown on the Projects page. Leave empty to hide the " +
+                  "stats band. Use real numbers only — never invented or placeholder values.",
+              },
+              fields: [
+                {
+                  type: "row",
+                  fields: [
+                    {
+                      name: "value",
+                      type: "number",
+                      required: true,
+                      admin: { width: "33%" },
+                    },
+                    {
+                      name: "suffix",
+                      type: "text",
+                      admin: { width: "33%", description: 'e.g. "+", "%", "MWp"' },
+                    },
+                    {
+                      name: "label",
+                      type: "text",
+                      required: true,
+                      admin: { width: "34%", description: "e.g. Projects executed" },
+                    },
+                  ],
+                },
+              ],
+            },
           ],
         },
         {
@@ -150,34 +198,44 @@ export const SiteSettings: GlobalConfig = {
           description: "Visual layout options that apply across content listings.",
           fields: [
             {
-              name: "knowledgeLayout",
-              type: "select",
-              label: "Knowledge Hub card layout",
-              defaultValue: "vertical",
-              options: [
-                { label: "Vertical cards (grid)", value: "vertical" },
-                { label: "Horizontal rows (hover to reveal text)", value: "horizontal" },
-              ],
+              name: "contentLayouts",
+              type: "array",
+              label: "Content listing layouts",
+              labels: { singular: "Layout rule", plural: "Layout rules" },
               admin: {
                 description:
-                  "Vertical: the standard grid of cards. Horizontal: full-width rows where the " +
-                  "description pops up on hover — the same interaction as the About → Our Team section.",
+                  "Add a rule per listing you want to control. Pick the surface and the card " +
+                  "style. Any surface without a rule uses the default (vertical grid). Horizontal " +
+                  "rows reveal the description on hover — the same interaction as About → Our Team.",
+                initCollapsed: false,
               },
-            },
-            {
-              name: "projectsLayout",
-              type: "select",
-              label: "Projects / case-study card layout",
-              defaultValue: "vertical",
-              options: [
-                { label: "Vertical cards (grid)", value: "vertical" },
-                { label: "Horizontal rows (hover to reveal text)", value: "horizontal" },
+              fields: [
+                {
+                  type: "row",
+                  fields: [
+                    {
+                      name: "surface",
+                      type: "select",
+                      label: "Listing",
+                      required: true,
+                      admin: { width: "60%" },
+                      options: [...LAYOUT_SURFACES],
+                    },
+                    {
+                      name: "style",
+                      type: "select",
+                      label: "Card style",
+                      required: true,
+                      defaultValue: "horizontal",
+                      admin: { width: "40%" },
+                      options: [
+                        { label: "Vertical cards (grid)", value: "vertical" },
+                        { label: "Horizontal rows (hover to reveal)", value: "horizontal" },
+                      ],
+                    },
+                  ],
+                },
               ],
-              admin: {
-                description:
-                  "Layout for the Projects listing. Horizontal shows a thumbnail beside each " +
-                  "case study with its summary revealed on hover.",
-              },
             },
           ],
         },

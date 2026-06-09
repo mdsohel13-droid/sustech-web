@@ -26,6 +26,8 @@ const eslintConfig = defineConfig([
     "coverage/**",
     // Plain CJS utility scripts (screenshots, one-off helpers) — not part of the app bundle
     "scripts/**",
+    // Payload-generated DB migrations — run by Payload's own tooling, not the app build
+    "migrations/**",
   ]),
 ]);
 

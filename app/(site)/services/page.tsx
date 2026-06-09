@@ -7,9 +7,12 @@ import { Card } from "@/components/ui/card";
 import { Container } from "@/components/ui/container";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { GridMotif } from "@/components/ui/grid-motif";
+import { HoverRevealText } from "@/components/ui/hover-reveal-text";
 import { Section } from "@/components/ui/section";
-import { getServices } from "@/lib/payload";
+import { getServices, getSiteSettings } from "@/lib/payload";
+import { isHorizontal } from "@/lib/content-layout";
 import { serverUrl } from "@/lib/seo";
+import { cn } from "@/lib/utils";
 
 export const revalidate = 3600;
 
@@ -28,7 +31,11 @@ export function generateMetadata(): Metadata {
 }
 
 export default async function ServicesIndexPage() {
-  const services = await getServices();
+  const [services, settings] = await Promise.all([getServices(), getSiteSettings()]);
+  const horizontal = isHorizontal(settings, "services");
+  const listCls = horizontal
+    ? "flex flex-col gap-3"
+    : "grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
 
   return (
     <>
@@ -76,22 +83,46 @@ export default async function ServicesIndexPage() {
             Services are on the way — check back soon.
           </p>
         ) : (
-          <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <ul className={listCls}>
             {services.map((svc) => {
               const Icon = serviceIcons[svc.icon] ?? serviceIcons.solar;
               return (
                 <li key={svc.id}>
-                  <Card interactive className="relative flex h-full flex-col p-6">
-                    <span className="bg-brand/10 text-brand inline-flex h-11 w-11 items-center justify-center rounded-md">
+                  <Card
+                    interactive
+                    className={cn(
+                      "group relative",
+                      horizontal
+                        ? "flex flex-row items-center gap-4 p-5"
+                        : "flex h-full flex-col p-6",
+                    )}
+                  >
+                    <span className="bg-brand/10 text-brand inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md">
                       <Icon className="h-6 w-6" aria-hidden />
                     </span>
-                    <h2 className="text-h3 text-ink-900 mt-5 font-semibold">{svc.title}</h2>
-                    {svc.summary && (
-                      <p className="text-text-soft mt-2 flex-1 text-[0.9375rem]">{svc.summary}</p>
-                    )}
-                    <span className="text-brand mt-5 inline-flex items-center gap-1.5 text-sm font-medium">
-                      Explore <ArrowRight className="h-4 w-4" aria-hidden />
-                    </span>
+                    <div className={horizontal ? "min-w-0 flex-1" : "contents"}>
+                      <h2
+                        className={cn(
+                          "text-h3 text-ink-900 font-semibold",
+                          horizontal ? "" : "mt-5",
+                        )}
+                      >
+                        {svc.title}
+                      </h2>
+                      {svc.summary &&
+                        (horizontal ? (
+                          <HoverRevealText className="mt-1">{svc.summary}</HoverRevealText>
+                        ) : (
+                          <p className="text-text-soft mt-2 flex-1 text-[0.9375rem]">
+                            {svc.summary}
+                          </p>
+                        ))}
+                      {!horizontal && (
+                        <span className="text-brand mt-5 inline-flex items-center gap-1.5 text-sm font-medium">
+                          Explore <ArrowRight className="h-4 w-4" aria-hidden />
+                        </span>
+                      )}
+                    </div>
                     <Link
                       href={`/services/${svc.slug}`}
                       prefetch={false}

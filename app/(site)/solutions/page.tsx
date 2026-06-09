@@ -7,9 +7,12 @@ import { Card } from "@/components/ui/card";
 import { Container } from "@/components/ui/container";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { GridMotif } from "@/components/ui/grid-motif";
+import { HoverRevealText } from "@/components/ui/hover-reveal-text";
 import { Section } from "@/components/ui/section";
-import { getSectors } from "@/lib/payload";
+import { getSectors, getSiteSettings } from "@/lib/payload";
+import { isHorizontal } from "@/lib/content-layout";
 import { serverUrl } from "@/lib/seo";
+import { cn } from "@/lib/utils";
 
 export const revalidate = 3600;
 
@@ -28,7 +31,9 @@ export function generateMetadata(): Metadata {
 }
 
 export default async function SolutionsIndexPage() {
-  const sectors = await getSectors();
+  const [sectors, settings] = await Promise.all([getSectors(), getSiteSettings()]);
+  const horizontal = isHorizontal(settings, "sectors");
+  const listCls = horizontal ? "flex flex-col gap-3" : "grid gap-6 sm:grid-cols-2 lg:grid-cols-4";
 
   return (
     <>
@@ -76,22 +81,46 @@ export default async function SolutionsIndexPage() {
             Sector solutions are on the way — check back soon.
           </p>
         ) : (
-          <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <ul className={listCls}>
             {sectors.map((sec) => {
               const Icon = sectorIcons[sec.icon] ?? sectorIcons.industrial;
               return (
                 <li key={sec.id}>
-                  <Card interactive className="relative flex h-full flex-col p-6">
-                    <span className="bg-ink-900/[0.06] text-ink-900 inline-flex h-11 w-11 items-center justify-center rounded-md">
+                  <Card
+                    interactive
+                    className={cn(
+                      "group relative",
+                      horizontal
+                        ? "flex flex-row items-center gap-4 p-5"
+                        : "flex h-full flex-col p-6",
+                    )}
+                  >
+                    <span className="bg-ink-900/[0.06] text-ink-900 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md">
                       <Icon className="h-6 w-6" aria-hidden />
                     </span>
-                    <h2 className="text-h3 text-ink-900 mt-5 font-semibold">{sec.title}</h2>
-                    {sec.summary && (
-                      <p className="text-text-soft mt-2 flex-1 text-[0.9375rem]">{sec.summary}</p>
-                    )}
-                    <span className="text-brand mt-5 inline-flex items-center gap-1.5 text-sm font-medium">
-                      View sector <ArrowRight className="h-4 w-4" aria-hidden />
-                    </span>
+                    <div className={horizontal ? "min-w-0 flex-1" : "contents"}>
+                      <h2
+                        className={cn(
+                          "text-h3 text-ink-900 font-semibold",
+                          horizontal ? "" : "mt-5",
+                        )}
+                      >
+                        {sec.title}
+                      </h2>
+                      {sec.summary &&
+                        (horizontal ? (
+                          <HoverRevealText className="mt-1">{sec.summary}</HoverRevealText>
+                        ) : (
+                          <p className="text-text-soft mt-2 flex-1 text-[0.9375rem]">
+                            {sec.summary}
+                          </p>
+                        ))}
+                      {!horizontal && (
+                        <span className="text-brand mt-5 inline-flex items-center gap-1.5 text-sm font-medium">
+                          View sector <ArrowRight className="h-4 w-4" aria-hidden />
+                        </span>
+                      )}
+                    </div>
                     <Link
                       href={`/solutions/${sec.slug}`}
                       prefetch={false}

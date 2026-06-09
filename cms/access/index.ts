@@ -57,3 +57,17 @@ export const readPublished: Access = ({ req }) => {
   if (req.user) return true;
   return { _status: { equals: "published" } };
 };
+
+/**
+ * Read access for collections whose visibility is controlled by an `enabled`
+ * checkbox rather than draft/publish versions (e.g. knowledge-resources).
+ * Anonymous users see only enabled rows; logged-in staff see everything.
+ *
+ * Using readPublished here would filter on `_status`, which those collections
+ * don't have — that makes their public REST API 500. This is the correct,
+ * matching access for an `enabled`-gated collection.
+ */
+export const readEnabled: Access = ({ req }) => {
+  if (req.user) return true;
+  return { enabled: { equals: true } };
+};

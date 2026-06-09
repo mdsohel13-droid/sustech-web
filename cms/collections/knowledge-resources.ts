@@ -11,7 +11,7 @@
  * add a new calc type, but admins can toggle existing ones on/off and reorder).
  */
 import type { CollectionConfig } from "payload";
-import { isAdminOrEditor, readPublished } from "../access";
+import { isAdminOrEditor, readEnabled } from "../access";
 import { slugField } from "../fields/slug";
 import { revalidateCollectionRoute } from "../hooks/revalidate";
 
@@ -52,7 +52,7 @@ export const KnowledgeResources: CollectionConfig = {
       "Toggle enabled/disabled without a code deploy.",
   },
   access: {
-    read: readPublished,
+    read: readEnabled,
     create: isAdminOrEditor,
     update: isAdminOrEditor,
     delete: isAdminOrEditor,

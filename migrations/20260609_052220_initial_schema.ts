@@ -6,10 +6,13 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   // `push` before migrations existed), this baseline must be a NO-OP so Payload
   // can RECORD it without trying to re-create existing objects. On a fresh
   // database `pages` is absent, so the full schema below is created normally.
-  const probe = (await db.execute(
-    sql`SELECT to_regclass('public.pages') AS t`,
-  )) as unknown as { rows?: Array<{ t: string | null }> };
-  if (probe.rows?.[0]?.t != null) {
+  // Robust against driver result shapes: node-postgres returns { rows: [...] },
+  // postgres-js returns the array directly. Treat either as "row list".
+  const probe = (await db.execute(sql`SELECT to_regclass('public.pages') AS t`)) as unknown;
+  const rows = (
+    Array.isArray(probe) ? probe : ((probe as { rows?: unknown[] }).rows ?? [])
+  ) as Array<{ t: string | null }>;
+  if (rows.length > 0 && rows[0]?.t != null) {
     payload.logger.info(
       "Schema already provisioned — recording the baseline migration as a no-op.",
     );

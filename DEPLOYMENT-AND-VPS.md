@@ -141,6 +141,22 @@ SELECTs a column the database doesn't have yet, so Postgres errors and Payload
 returns nothing — the rows are never deleted, just unreadable until the column
 exists.
 
+> **Never hand-write schema SQL to "catch up" a database — it always misses
+> pieces.** Adding ONE collection (e.g. `awards`) changes the DB in several
+> places at once:
+> 1. its own table (`awards`);
+> 2. a foreign-key column in the shared system join tables
+>    `payload_locked_documents_rels` and `payload_preferences_rels`
+>    (`awards_id`) — the admin reads these on every dashboard load, so a
+>    missing column here 500s the whole admin;
+> 3. enum types, indexes, sequences.
+>
+> A hand-written `ALTER TABLE` only ever covers what you remembered. Only
+> Payload's own generator (`pnpm migrate:create`) — or a full `push` in dev —
+> captures **all** of it. So: change schema in dev, `pnpm migrate:create`,
+> review, commit, and `pnpm migrate` on deploy. `db:sync` is a *detector*
+> (it surfaces a missing column by failing), not a substitute for migrations.
+
 **Every deploy** (use the script — it runs migrate before build):
 
 ```bash

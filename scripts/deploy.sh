@@ -28,8 +28,12 @@ pnpm migrate
 echo "==> [4/5] Build"
 pnpm build
 
-echo "==> [5/5] Restart $APP"
+echo "==> [5/6] Restart $APP"
 pm2 restart "$APP" --update-env
 pm2 status "$APP"
+
+echo "==> [6/6] Post-deploy health check"
+sleep 6   # give the app a moment to come up
+pnpm health   # non-zero exit here = something is red; investigate before walking away
 
 echo "==> Deploy complete."

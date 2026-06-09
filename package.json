@@ -13,6 +13,7 @@
     "migrate:create": "payload migrate:create",
     "migrate:status": "payload migrate:status",
     "db:sync": "node --import jiti/register cms/scripts/db-sync.ts",
+    "health": "node scripts/healthcheck.mjs",
     "seed": "node --import jiti/register cms/scripts/seed.ts",
     "import:projects": "node --import jiti/register cms/scripts/import-projects.ts",
     "enrich:projects": "node --import jiti/register cms/scripts/enrich-projects.ts",

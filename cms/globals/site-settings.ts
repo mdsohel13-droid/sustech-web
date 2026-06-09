@@ -124,12 +124,34 @@ export const SiteSettings: GlobalConfig = {
               fields: [{ name: "number", type: "text", required: true }],
             },
             {
-              name: "email",
-              type: "email",
+              name: "emails",
+              type: "array",
+              labels: { singular: "Email", plural: "Emails" },
+              minRows: 1,
               required: true,
               admin: {
-                description: "Primary contact email — shown in the footer and used in schema.",
+                description:
+                  "Contact emails. The first is the primary (shown in the footer and used in " +
+                  "schema); add more for departments like Sales or Support.",
               },
+              fields: [
+                {
+                  type: "row",
+                  fields: [
+                    {
+                      name: "address",
+                      type: "email",
+                      required: true,
+                      admin: { width: "60%" },
+                    },
+                    {
+                      name: "label",
+                      type: "text",
+                      admin: { width: "40%", description: 'Optional, e.g. "Sales", "Support".' },
+                    },
+                  ],
+                },
+              ],
             },
             {
               name: "address",

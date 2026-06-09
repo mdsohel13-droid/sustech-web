@@ -62,15 +62,18 @@ export default async function ContactPage() {
   const settings = await getSiteSettings();
   const intro = pageIntro(settings, "contact");
   const phones = (settings.phones ?? []).map((p) => p.number).filter(Boolean);
-  const email = settings.email ?? null;
+  const emails = (settings.emails ?? [])
+    .map((e) => ({ address: e?.address?.trim() ?? "", label: e?.label?.trim() ?? "" }))
+    .filter((e) => e.address);
+  const primaryEmail = emails[0]?.address ?? null;
   const address = formatAddress(settings.address);
   const hours = settings.hours ?? null;
   const social = (settings.social ?? []).filter((s) => s.label && s.url);
-  const hasDetails = phones.length > 0 || email || address || hours;
+  const hasDetails = phones.length > 0 || emails.length > 0 || address || hours;
 
   const contactPoint: Record<string, unknown> = { "@type": "ContactPoint", contactType: "sales" };
   if (phones[0]) contactPoint.telephone = phones[0];
-  if (email) contactPoint.email = email;
+  if (primaryEmail) contactPoint.email = primaryEmail;
 
   return (
     <>
@@ -80,7 +83,7 @@ export default async function ContactPage() {
           "@type": "ContactPage",
           name: TITLE,
           url: `${serverUrl}/contact`,
-          ...((phones[0] || email) && {
+          ...((phones[0] || primaryEmail) && {
             mainEntity: {
               "@type": "Organization",
               name: settings.companyName ?? "Sustech Technology Ltd",
@@ -131,11 +134,20 @@ export default async function ContactPage() {
                     ))}
                   </Detail>
                 )}
-                {email && (
+                {emails.length > 0 && (
                   <Detail icon={<Mail className="h-4 w-4" aria-hidden />} label="Email">
-                    <a href={`mailto:${email}`} className="hover:text-brand">
-                      {email}
-                    </a>
+                    <span className="flex flex-col gap-1">
+                      {emails.map((e) => (
+                        <a
+                          key={e.address}
+                          href={`mailto:${e.address}`}
+                          className="hover:text-brand"
+                        >
+                          {e.address}
+                          {e.label && <span className="text-text-soft"> · {e.label}</span>}
+                        </a>
+                      ))}
+                    </span>
                   </Detail>
                 )}
                 {address && (

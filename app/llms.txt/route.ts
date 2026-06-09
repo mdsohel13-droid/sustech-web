@@ -59,7 +59,7 @@ export async function GET() {
   }
 
   const contactParts = [
-    settings.email && `Email: ${settings.email}`,
+    settings.emails?.[0]?.address && `Email: ${settings.emails[0].address}`,
     settings.phones?.[0]?.number && `Phone: ${settings.phones[0].number}`,
     settings.address?.city &&
       `Location: ${[settings.address.city, settings.address.country].filter(Boolean).join(", ")}`,

@@ -65,7 +65,8 @@ export function siteJsonLd(settings: SiteSetting): Record<string, unknown> {
   };
   const phone = settings.phones?.[0]?.number;
   if (phone) lb.telephone = phone;
-  if (settings.email) lb.email = settings.email;
+  const primaryEmail = settings.emails?.[0]?.address;
+  if (primaryEmail) lb.email = primaryEmail;
   if (settings.hours) lb.openingHours = settings.hours;
   const a = settings.address;
   if (a && (a.street || a.city)) {

@@ -4360,9 +4360,16 @@ export interface SiteSetting {
       }[]
     | null;
   /**
-   * Primary contact email — shown in the footer and used in schema.
+   * Contact emails. The first is the primary (shown in the footer and used in schema); add more for departments like Sales or Support.
    */
-  email: string;
+  emails: {
+    address: string;
+    /**
+     * Optional, e.g. "Sales", "Support".
+     */
+    label?: string | null;
+    id?: string | null;
+  }[];
   address?: {
     street?: string | null;
     city?: string | null;
@@ -4630,7 +4637,13 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         number?: T;
         id?: T;
       };
-  email?: T;
+  emails?:
+    | T
+    | {
+        address?: T;
+        label?: T;
+        id?: T;
+      };
   address?:
     | T
     | {

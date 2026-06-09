@@ -22,6 +22,7 @@ const CERTIFICATIONS = [
 export function Footer({ columns, settings }: FooterProps) {
   const year = new Date().getFullYear();
   const phone = settings.phones?.[0]?.number;
+  const primaryEmail = settings.emails?.[0]?.address;
 
   return (
     <footer className="bg-ink-950 text-text-invert">
@@ -89,9 +90,9 @@ export function Footer({ columns, settings }: FooterProps) {
               <a href={`tel:${phone.replace(/\s+/g, "")}`} className="hover:text-text-invert">
                 {phone}
               </a>
-            ) : settings.email ? (
-              <a href={`mailto:${settings.email}`} className="hover:text-text-invert">
-                {settings.email}
+            ) : primaryEmail ? (
+              <a href={`mailto:${primaryEmail}`} className="hover:text-text-invert">
+                {primaryEmail}
               </a>
             ) : (
               <Link

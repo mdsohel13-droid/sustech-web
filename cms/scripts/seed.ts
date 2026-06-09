@@ -945,7 +945,7 @@ async function main(): Promise<void> {
       foundingYear: 2017,
       areaServed: "Bangladesh",
       phones: [{ number: "+880 1867 655 599" }, { number: "+880 1722 002 125" }],
-      email: "info@sustechltd.com",
+      emails: [{ address: "info@sustechltd.com" }],
       address: {
         street: "House #98, Road #08, O.R. Nizam Road R/A, GEC, Nasirabad",
         city: "Chattogram",

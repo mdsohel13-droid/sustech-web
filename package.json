@@ -2,6 +2,11 @@
   "name": "sustech-web",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@10.4.1",
+  "engines": {
+    "node": ">=20 <23",
+    "pnpm": "10.x"
+  },
   "scripts": {
     "dev": "next dev --port 4123",
     "build": "next build",

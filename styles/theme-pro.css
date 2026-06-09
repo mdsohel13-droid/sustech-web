@@ -47,9 +47,15 @@
   background-attachment: fixed;
 }
 
-/* ── Glass cards (default light surface cards only) ───────────────────────── */
+/* ── Glass cards + bordered blocks ────────────────────────────────────────
+   Covers: <Card data-card> (light surface), any element opting in via
+   data-card, AND the "Card border + 3D shadow" block wrapper (a rounded,
+   bordered <section> rendered by components/ui/section.tsx withBorder — now the
+   default for every block). Dark/alt-surface variants are excluded so their
+   tone is preserved. */
 [data-design="pro"]
-  [data-card]:not([class*="bg-ink"]):not([class*="bg-surface-2"]):not([class*="bg-surface-3"]) {
+  [data-card]:not([class*="bg-ink"]):not([class*="bg-surface-2"]):not([class*="bg-surface-3"]),
+[data-design="pro"] section:is(.rounded-2xl, .rounded-3xl).border:not([class*="bg-ink"]) {
   background: var(--pro-glass-fill);
   -webkit-backdrop-filter: blur(var(--pro-glass-blur)) saturate(1.18);
   backdrop-filter: blur(var(--pro-glass-blur)) saturate(1.18);

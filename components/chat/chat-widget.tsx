@@ -178,6 +178,7 @@ export function ChatWidget({
         <div
           role="dialog"
           aria-labelledby={titleId}
+          data-card=""
           className="border-border bg-surface fixed right-5 bottom-24 z-50 flex h-[min(72vh,560px)] w-[min(92vw,380px)] flex-col overflow-hidden rounded-xl border shadow-lg"
         >
           {/* Header */}

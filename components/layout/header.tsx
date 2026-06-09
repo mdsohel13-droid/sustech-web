@@ -181,6 +181,7 @@ function DesktopDropdown({
       {open && (
         <div
           id={panelId}
+          data-card=""
           className="border-border bg-surface absolute top-full left-0 z-50 mt-2 w-[22rem] rounded-lg border p-2 shadow-lg"
         >
           <ul className="grid gap-1">
@@ -230,7 +231,7 @@ function MobileMenu({
 }) {
   const [openSection, setOpenSection] = useState<string | null>(null);
   return (
-    <div id="mobile-menu" className="border-border bg-surface border-t lg:hidden">
+    <div id="mobile-menu" data-card="" className="border-border bg-surface border-t lg:hidden">
       <Container className="py-4">
         {cta && (
           <Button asChild className="mb-4 w-full">

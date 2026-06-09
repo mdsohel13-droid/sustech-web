@@ -558,6 +558,7 @@ export function StatsCountersView({ block }: { block: StatsCountersBlock }) {
 
 export async function ServicesGridView({
   block,
+  cardLayout,
 }: {
   block: {
     heading?: string | null;
@@ -566,10 +567,16 @@ export async function ServicesGridView({
     source?: string | null;
     services?: (number | Service)[] | null;
   };
+  /** Page-level override (e.g. Site Settings → Display for the Capabilities page). */
+  cardLayout?: "vertical" | "horizontal";
 }) {
   const bs = resolveBlockStyle(getBlockStyle(block), block.appearance as string | null);
   const services =
     block.source === "selected" ? objs<Service>(block.services) : await getServices();
+  const horizontal = cardLayout === "horizontal";
+  const listCls = horizontal
+    ? "flex flex-col gap-3"
+    : "grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5";
   return (
     <Section
       id="services"
@@ -586,21 +593,42 @@ export async function ServicesGridView({
       title={block.heading ?? undefined}
       lede={block.lede ?? undefined}
     >
-      <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      <ul className={listCls}>
         {services.map((svc, i) => {
           const Icon = serviceIcons[svc.icon] ?? serviceIcons.solar;
           return (
             <li key={svc.id}>
               <Reveal {...itemRevealProps(bs, i)} className="h-full">
-                <Card interactive className="relative flex h-full flex-col p-6">
-                  <span className="bg-brand/10 text-brand inline-flex h-11 w-11 items-center justify-center rounded-md">
+                <Card
+                  interactive
+                  className={cn(
+                    "group relative",
+                    horizontal
+                      ? "flex flex-row items-center gap-4 p-5"
+                      : "flex h-full flex-col p-6",
+                  )}
+                >
+                  <span className="bg-brand/10 text-brand inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md">
                     <Icon className="h-6 w-6" aria-hidden />
                   </span>
-                  <h3 className="text-h3 text-ink-900 mt-5 font-semibold">{svc.title}</h3>
-                  <p className="text-text-soft mt-2 flex-1 text-[0.9375rem]">{svc.summary}</p>
-                  <span className="text-brand mt-5 inline-flex items-center gap-1.5 text-sm font-medium">
-                    Explore <ArrowRight className="h-4 w-4" aria-hidden />
-                  </span>
+                  <div className={horizontal ? "min-w-0 flex-1" : "contents"}>
+                    <h3
+                      className={cn("text-h3 text-ink-900 font-semibold", horizontal ? "" : "mt-5")}
+                    >
+                      {svc.title}
+                    </h3>
+                    {svc.summary &&
+                      (horizontal ? (
+                        <HoverRevealText className="mt-1">{svc.summary}</HoverRevealText>
+                      ) : (
+                        <p className="text-text-soft mt-2 flex-1 text-[0.9375rem]">{svc.summary}</p>
+                      ))}
+                    {!horizontal && (
+                      <span className="text-brand mt-5 inline-flex items-center gap-1.5 text-sm font-medium">
+                        Explore <ArrowRight className="h-4 w-4" aria-hidden />
+                      </span>
+                    )}
+                  </div>
                   <Link
                     href={`/services/${svc.slug}`}
                     prefetch={false}
@@ -621,6 +649,7 @@ export async function ServicesGridView({
 
 export async function SectorTilesView({
   block,
+  cardLayout,
 }: {
   block: {
     heading?: string | null;
@@ -629,9 +658,13 @@ export async function SectorTilesView({
     source?: string | null;
     sectors?: (number | Sector)[] | null;
   };
+  /** Page-level override (e.g. Site Settings → Display for the Capabilities page). */
+  cardLayout?: "vertical" | "horizontal";
 }) {
   const bs = resolveBlockStyle(getBlockStyle(block), block.appearance);
   const sectors = block.source === "selected" ? objs<Sector>(block.sectors) : await getSectors();
+  const horizontal = cardLayout === "horizontal";
+  const listCls = horizontal ? "flex flex-col gap-3" : "grid gap-6 sm:grid-cols-2 lg:grid-cols-4";
   return (
     <Section
       id="solutions"
@@ -648,18 +681,37 @@ export async function SectorTilesView({
       title={block.heading ?? undefined}
       lede={block.lede ?? undefined}
     >
-      <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <ul className={listCls}>
         {sectors.map((sec, i) => {
           const Icon = sectorIcons[sec.icon] ?? sectorIcons.industrial;
           return (
             <li key={sec.id}>
               <Reveal {...itemRevealProps(bs, i)} className="h-full">
-                <Card interactive className="relative flex h-full flex-col p-6">
-                  <span className="bg-ink-900/[0.06] text-ink-900 inline-flex h-11 w-11 items-center justify-center rounded-md">
+                <Card
+                  interactive
+                  className={cn(
+                    "group relative",
+                    horizontal
+                      ? "flex flex-row items-center gap-4 p-5"
+                      : "flex h-full flex-col p-6",
+                  )}
+                >
+                  <span className="bg-ink-900/[0.06] text-ink-900 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md">
                     <Icon className="h-6 w-6" aria-hidden />
                   </span>
-                  <h3 className="text-h3 text-ink-900 mt-5 font-semibold">{sec.title}</h3>
-                  <p className="text-text-soft mt-2 flex-1 text-[0.9375rem]">{sec.summary}</p>
+                  <div className={horizontal ? "min-w-0 flex-1" : "contents"}>
+                    <h3
+                      className={cn("text-h3 text-ink-900 font-semibold", horizontal ? "" : "mt-5")}
+                    >
+                      {sec.title}
+                    </h3>
+                    {sec.summary &&
+                      (horizontal ? (
+                        <HoverRevealText className="mt-1">{sec.summary}</HoverRevealText>
+                      ) : (
+                        <p className="text-text-soft mt-2 flex-1 text-[0.9375rem]">{sec.summary}</p>
+                      ))}
+                  </div>
                   <Link
                     href={`/solutions/${sec.slug}`}
                     prefetch={false}

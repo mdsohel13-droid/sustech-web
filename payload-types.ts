@@ -4416,7 +4416,7 @@ export interface SiteSetting {
    */
   contentLayouts?:
     | {
-        surface: 'knowledge' | 'projects' | 'services' | 'sectors';
+        surface: 'knowledge' | 'projects' | 'services' | 'sectors' | 'capabilities';
         style: 'vertical' | 'horizontal';
         id?: string | null;
       }[]

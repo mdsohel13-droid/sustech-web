@@ -29,7 +29,16 @@ type Block = NonNullable<Page["layout"]>[number];
 // Extended to cover newly-added block types before payload-types.ts is regenerated.
 type AnyBlock = Block | { blockType: "photoStrip"; [k: string]: unknown };
 
-function BlockSwitch({ block, index }: { block: AnyBlock; index: number }) {
+function BlockSwitch({
+  block,
+  index,
+  cardLayout,
+}: {
+  block: AnyBlock;
+  index: number;
+  /** Page-level listing layout (Site Settings → Display) applied to listing blocks. */
+  cardLayout?: "vertical" | "horizontal";
+}) {
   switch (block.blockType) {
     case "hero":
       return <HeroView block={block} isFirst={index === 0} />;
@@ -38,9 +47,9 @@ function BlockSwitch({ block, index }: { block: AnyBlock; index: number }) {
     case "statsCounters":
       return <StatsCountersView block={block} />;
     case "servicesGrid":
-      return <ServicesGridView block={block} />;
+      return <ServicesGridView block={block} cardLayout={cardLayout} />;
     case "sectorTiles":
-      return <SectorTilesView block={block} />;
+      return <SectorTilesView block={block} cardLayout={cardLayout} />;
     case "projectsList":
       return <ProjectsListView block={block} />;
     case "imageGallery":
@@ -87,14 +96,21 @@ function gapClassFor(block: AnyBlock): string {
   return gapBelowClass[key];
 }
 
-export function RenderBlocks({ blocks }: { blocks?: Page["layout"] | null }) {
+export function RenderBlocks({
+  blocks,
+  cardLayout,
+}: {
+  blocks?: Page["layout"] | null;
+  /** Optional page-level listing layout, applied to listing blocks (servicesGrid, sectorTiles). */
+  cardLayout?: "vertical" | "horizontal";
+}) {
   if (!blocks?.length) return null;
   return (
     <>
       {(blocks as AnyBlock[]).map((block, i) => {
         const gap = gapClassFor(block);
         const key = (block as { id?: string }).id ?? i;
-        const view = <BlockSwitch block={block} index={i} />;
+        const view = <BlockSwitch block={block} index={i} cardLayout={cardLayout} />;
         // Only introduce a wrapper when a non-default gap is requested, to avoid
         // changing the layout of existing content.
         return gap ? (

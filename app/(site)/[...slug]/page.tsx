@@ -3,6 +3,7 @@ import { draftMode } from "next/headers";
 import { notFound } from "next/navigation";
 import { RenderBlocks } from "@/components/blocks/render-blocks";
 import { getPageBySlug, getPublishedPageSlugs, getSiteSettings } from "@/lib/payload";
+import { layoutFor, type LayoutSurface } from "@/lib/content-layout";
 import { pageMetadata } from "@/lib/seo";
 
 export const revalidate = 3600;
@@ -25,7 +26,12 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 export default async function CatchAllPage({ params }: { params: Promise<Params> }) {
   const { slug } = await params;
   const { isEnabled } = await draftMode();
-  const page = await getPageBySlug(slug.join("/"), isEnabled);
+  const joined = slug.join("/");
+  const [page, settings] = await Promise.all([getPageBySlug(joined, isEnabled), getSiteSettings()]);
   if (!page) notFound();
-  return <RenderBlocks blocks={page.layout} />;
+  // If this page's slug matches a configured listing surface (e.g. "capabilities"),
+  // apply the admin-chosen card layout to its listing blocks. Unknown slugs resolve
+  // to "vertical" (the default), so other CMS pages are unaffected.
+  const cardLayout = layoutFor(settings, joined as LayoutSurface);
+  return <RenderBlocks blocks={page.layout} cardLayout={cardLayout} />;
 }

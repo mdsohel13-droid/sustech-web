@@ -43,6 +43,12 @@ async function main(): Promise<void> {
         '"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL, ' +
         '"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL)',
     );
+
+    // Remove the dev-push marker (batch = -1). If present, Payload's migrate()
+    // shows an interactive "you've run in dev mode" prompt that auto-cancels in a
+    // non-interactive deploy → migrations silently never apply. Our migrations are
+    // idempotent/guarded, so clearing it and applying them is safe.
+    await payload.db.pool.query('DELETE FROM "payload_migrations" WHERE "batch" = -1');
   }
 
   await payload.db.migrate();

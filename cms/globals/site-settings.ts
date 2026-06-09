@@ -13,6 +13,7 @@ export const LAYOUT_SURFACES = [
   { label: "Projects / case studies", value: "projects" },
   { label: "Services (all-services page)", value: "services" },
   { label: "Solutions / Sectors (all)", value: "sectors" },
+  { label: "Capabilities (CMS page)", value: "capabilities" },
 ] as const;
 
 /**

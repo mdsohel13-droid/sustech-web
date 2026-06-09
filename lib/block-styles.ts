@@ -220,16 +220,18 @@ export function resolveBlockStyle(
   const colourScheme = safe(rawScheme, COLOUR_SCHEMES, "default");
 
   const width = safe(style?.width, BLOCK_WIDTHS, "default");
-  const padding = safe(style?.paddingSize, PADDING_SIZES, "standard");
+  // Defaults below mirror the field defaults in cms/blocks/style-fields.ts, so a
+  // block with an unset style value renders the same as a freshly-created one.
+  const padding = safe(style?.paddingSize, PADDING_SIZES, "compact");
   const align = safe(style?.textAlign, TEXT_ALIGNS, "left");
   const hSize = safe(style?.headingSize, HEADING_SIZES, "default");
   const hFont = safe(style?.headingFont, HEADING_FONTS, "display");
   const anim = safe(style?.animationStyle, ANIMATION_STYLES, "fade-rise");
-  const delay = safe(style?.animationDelay, ANIMATION_DELAYS, "none");
+  const delay = safe(style?.animationDelay, ANIMATION_DELAYS, "medium");
   const accent = safe(style?.accentColour, ACCENT_COLOURS, "brand");
-  const bFont = safe(style?.bodyFont, BODY_FONTS, "sans");
+  const bFont = safe(style?.bodyFont, BODY_FONTS, "display");
   const bSize = safe(style?.bodySize, BODY_SIZES, "base");
-  const gap = safe(style?.gapBelow, GAP_BELOWS, "default");
+  const gap = safe(style?.gapBelow, GAP_BELOWS, "small");
 
   // Map colourScheme → SectionTone (default → light for Section's existing API)
   const tone: SectionTone = colourScheme === "default" ? "light" : colourScheme;
@@ -244,7 +246,8 @@ export function resolveBlockStyle(
     animationStyle: anim,
     delayMs: DELAY_MS[delay],
     accentColour: accent,
-    withBorder: Boolean(style?.withBorder),
+    // Default ON (matches the field default); an explicit false is respected.
+    withBorder: style?.withBorder ?? true,
     isDark: tone === "dark",
     bodyFont: bFont,
     bodySize: bSize,

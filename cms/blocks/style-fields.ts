@@ -92,7 +92,7 @@ export const blockStyleGroup: Field = {
           name: "paddingSize",
           type: "select",
           label: "Vertical padding",
-          defaultValue: "standard",
+          defaultValue: "compact",
           admin: {
             width: "33%",
             description: "Top and bottom spacing of this block.",
@@ -162,7 +162,7 @@ export const blockStyleGroup: Field = {
           name: "bodyFont",
           type: "select",
           label: "Body text font",
-          defaultValue: "sans",
+          defaultValue: "display",
           admin: {
             width: "50%",
             description: "Typeface for paragraph and body text in this block.",
@@ -218,7 +218,7 @@ export const blockStyleGroup: Field = {
           name: "animationDelay",
           type: "select",
           label: "Animation delay",
-          defaultValue: "none",
+          defaultValue: "medium",
           admin: {
             width: "50%",
             description: "Pause before this block's entrance animation begins.",
@@ -241,7 +241,7 @@ export const blockStyleGroup: Field = {
           name: "withBorder",
           type: "checkbox",
           label: "Card border + 3D shadow",
-          defaultValue: false,
+          defaultValue: true,
           admin: {
             width: "50%",
             description:
@@ -252,7 +252,7 @@ export const blockStyleGroup: Field = {
           name: "gapBelow",
           type: "select",
           label: "Gap below this block",
-          defaultValue: "default",
+          defaultValue: "small",
           admin: {
             width: "50%",
             description: "Vertical space after this block, before the next one.",

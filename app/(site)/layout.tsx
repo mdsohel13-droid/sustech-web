@@ -43,9 +43,18 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
   const { items, cta } = buildHeaderNav(nav);
   const columns = buildFooterColumns(nav);
 
+  // CMS-switchable visual theme: "classic" (default) or "pro" (glass + gradients).
+  // Applied as data-design on <html>; the pro layer in styles/theme-pro.css is a
+  // pure-CSS overlay (no JS), so content stays SSR-visible and crawlable either way.
+  const design = settings.designVersion === "pro" ? "pro" : "classic";
+
   return (
     // Font CSS variables applied on <html> so they cascade to all site content.
-    <html lang="en" className={`${cabinet.variable} ${switzer.variable} ${jetbrains.variable}`}>
+    <html
+      lang="en"
+      data-design={design}
+      className={`${cabinet.variable} ${switzer.variable} ${jetbrains.variable}`}
+    >
       <body>
         <a
           href="#main"

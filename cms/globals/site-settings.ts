@@ -235,6 +235,22 @@ export const SiteSettings: GlobalConfig = {
           description: "Visual layout options that apply across content listings.",
           fields: [
             {
+              name: "designVersion",
+              type: "select",
+              label: "Design version (whole site)",
+              defaultValue: "classic",
+              options: [
+                { label: "Classic (current look)", value: "classic" },
+                { label: "Pro — glassmorphism + gradients", value: "pro" },
+              ],
+              admin: {
+                description:
+                  "Switch the entire site's visual style. Classic is the standard look; Pro layers " +
+                  "frosted-glass surfaces, subtle brand gradients and richer motion on top — same " +
+                  "content, fully reversible. Flip back to Classic anytime.",
+              },
+            },
+            {
               name: "contentLayouts",
               type: "array",
               label: "Content listing layouts",

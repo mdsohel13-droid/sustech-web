@@ -4,6 +4,7 @@ import * as migration_20260609_054000_page_intros_and_chat_config from "./202606
 import * as migration_20260609_055000_emails_array from "./20260609_055000_emails_array";
 import * as migration_20260609_056000_capabilities_surface from "./20260609_056000_capabilities_surface";
 import * as migration_20260609_057000_block_style_defaults from "./20260609_057000_block_style_defaults";
+import * as migration_20260609_058000_design_version from "./20260609_058000_design_version";
 
 export const migrations = [
   {
@@ -35,5 +36,10 @@ export const migrations = [
     up: migration_20260609_057000_block_style_defaults.up,
     down: migration_20260609_057000_block_style_defaults.down,
     name: "20260609_057000_block_style_defaults",
+  },
+  {
+    up: migration_20260609_058000_design_version.up,
+    down: migration_20260609_058000_design_version.down,
+    name: "20260609_058000_design_version",
   },
 ];

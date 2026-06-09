@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./motion.css";
+@import "./theme-pro.css";
 
 @theme {
   /* color */

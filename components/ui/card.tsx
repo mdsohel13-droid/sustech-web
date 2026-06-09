@@ -11,6 +11,8 @@ interface CardProps {
 export function Card({ children, className, interactive = false }: CardProps) {
   return (
     <div
+      data-card=""
+      data-interactive={interactive ? "" : undefined}
       className={cn(
         "border-border bg-surface rounded-lg border shadow-sm",
         interactive &&

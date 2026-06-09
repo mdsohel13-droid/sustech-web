@@ -4412,6 +4412,10 @@ export interface SiteSetting {
    */
   ogImage?: (number | null) | Media;
   /**
+   * Switch the entire site's visual style. Classic is the standard look; Pro layers frosted-glass surfaces, subtle brand gradients and richer motion on top — same content, fully reversible. Flip back to Classic anytime.
+   */
+  designVersion?: ('classic' | 'pro') | null;
+  /**
    * Add a rule per listing you want to control. Pick the surface and the card style. Any surface without a rule uses the default (vertical grid). Horizontal rows reveal the description on hover — the same interaction as About → Our Team.
    */
   contentLayouts?:
@@ -4671,6 +4675,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   titleTemplate?: T;
   defaultDescription?: T;
   ogImage?: T;
+  designVersion?: T;
   contentLayouts?:
     | T
     | {

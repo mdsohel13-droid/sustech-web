@@ -19,15 +19,27 @@
   --pro-glass-fill: color-mix(in oklab, var(--color-surface), transparent 16%);
   --pro-glass-border: color-mix(in oklab, var(--color-brand) 24%, white);
   --pro-glass-blur: 14px;
-  /* Layered elevation: inset top highlight + soft brand-tinted drop shadow */
+  /* Beveled glass rim (bright top-left + faint brand bottom-right inset, the
+     premium frosted-edge trick) layered over a soft brand-tinted drop shadow. */
   --pro-shadow:
-    inset 0 1px 0 0 rgb(255 255 255 / 0.55),
+    inset 1px 1px 0 0 rgb(255 255 255 / 0.6),
+    inset -1px -1px 1px 0 color-mix(in oklab, var(--color-brand), transparent 90%),
     0 1px 2px -1px color-mix(in oklab, var(--color-ink-900), transparent 86%),
-    0 14px 34px -16px color-mix(in oklab, var(--color-ink-900), transparent 72%);
+    0 16px 40px -18px color-mix(in oklab, var(--color-ink-900), transparent 70%);
   --pro-shadow-hover:
-    inset 0 1px 0 0 rgb(255 255 255 / 0.6),
+    inset 1px 1px 0 0 rgb(255 255 255 / 0.7),
+    inset -1px -1px 1px 0 color-mix(in oklab, var(--color-brand), transparent 84%),
     0 2px 4px -1px color-mix(in oklab, var(--color-ink-900), transparent 82%),
-    0 22px 48px -18px color-mix(in oklab, var(--color-brand), transparent 64%);
+    0 26px 56px -20px color-mix(in oklab, var(--color-brand), transparent 60%);
+  /* Internal corner light source — a brand radial laid into the surface itself,
+     so no extra element is needed and overflow stays clean. */
+  --pro-glass-surface:
+    radial-gradient(
+      26rem 20rem at 100% 0%,
+      color-mix(in oklab, var(--color-brand), transparent 92%),
+      transparent 46%
+    ),
+    var(--pro-glass-fill);
 }
 
 /* ── Page backdrop: a very subtle brand gradient wash ─────────────────────── */
@@ -56,7 +68,7 @@
 [data-design="pro"]
   [data-card]:not([class*="bg-ink"]):not([class*="bg-surface-2"]):not([class*="bg-surface-3"]),
 [data-design="pro"] section:is(.rounded-2xl, .rounded-3xl).border:not([class*="bg-ink"]) {
-  background: var(--pro-glass-fill);
+  background: var(--pro-glass-surface);
   -webkit-backdrop-filter: blur(var(--pro-glass-blur)) saturate(1.18);
   backdrop-filter: blur(var(--pro-glass-blur)) saturate(1.18);
   border-color: var(--pro-glass-border);
@@ -105,7 +117,7 @@
     );
 }
 
-/* ── Primary CTAs: subtle gradient + glow (brand + solar buttons) ─────────── */
+/* ── Primary CTAs: gradient + stacked colored halo (brand + solar buttons) ── */
 [data-design="pro"] a:is(.bg-brand, .bg-solar),
 [data-design="pro"] button:is(.bg-brand, .bg-solar) {
   background-image: linear-gradient(
@@ -113,7 +125,10 @@
     color-mix(in oklab, var(--color-brand), white 14%),
     var(--color-brand)
   );
-  box-shadow: 0 10px 24px -12px color-mix(in oklab, var(--color-brand), transparent 50%);
+  /* colored halo + grounding drop shadow stacked = a lifted, glowing CTA */
+  box-shadow:
+    0 8px 20px -8px color-mix(in oklab, var(--color-brand), transparent 45%),
+    0 0 28px -6px color-mix(in oklab, var(--color-brand), transparent 62%);
 }
 [data-design="pro"] a.bg-solar,
 [data-design="pro"] button.bg-solar {
@@ -122,7 +137,15 @@
     color-mix(in oklab, var(--color-solar), white 16%),
     var(--color-solar)
   );
-  box-shadow: 0 10px 24px -12px color-mix(in oklab, var(--color-solar), transparent 48%);
+  box-shadow:
+    0 8px 20px -8px color-mix(in oklab, var(--color-solar), transparent 42%),
+    0 0 28px -6px color-mix(in oklab, var(--color-solar), transparent 58%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  [data-design="pro"] a:is(.bg-brand, .bg-solar):hover,
+  [data-design="pro"] button:is(.bg-brand, .bg-solar):hover {
+    transform: translateY(-1px);
+  }
 }
 
 /* ── A touch more depth on the page-enter under pro ───────────────────────── */

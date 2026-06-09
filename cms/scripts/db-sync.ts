@@ -18,11 +18,20 @@ import { getPayload } from "payload";
 import config from "../../payload.config";
 
 const payload = await getPayload({ config });
-// A read on the global + each collection forces the reconciled schema to be hit,
-// surfacing any problem immediately rather than at first request.
+// Use find (limit 1), NOT count: count(*) ignores most columns, so it would pass
+// even when a recently-added column is missing. find SELECTs every column, so a
+// schema gap (e.g. a missing knowledge_resources.open_mode) throws HERE instead
+// of silently surfacing later as an empty page.
 await payload.findGlobal({ slug: "site-settings" });
-for (const c of ["knowledge-resources", "awards", "partners", "job-openings"] as const) {
-  await payload.count({ collection: c });
+for (const c of [
+  "knowledge-resources",
+  "awards",
+  "partners",
+  "job-openings",
+  "team",
+  "projects",
+] as const) {
+  await payload.find({ collection: c, limit: 1, depth: 0 });
 }
-process.stdout.write("✓ Schema sync complete — site-settings + collections reachable.\n");
+process.stdout.write("✓ Schema sync complete — globals + collections fully readable.\n");
 process.exit(0);

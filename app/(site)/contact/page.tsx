@@ -10,6 +10,7 @@ import { Eyebrow } from "@/components/ui/eyebrow";
 import { GridMotif } from "@/components/ui/grid-motif";
 import { Section } from "@/components/ui/section";
 import { getSiteSettings } from "@/lib/payload";
+import { pageIntro } from "@/lib/page-intro";
 import { serverUrl } from "@/lib/seo";
 
 export const revalidate = 3600;
@@ -59,6 +60,7 @@ function Detail({
 
 export default async function ContactPage() {
   const settings = await getSiteSettings();
+  const intro = pageIntro(settings, "contact");
   const phones = (settings.phones ?? []).map((p) => p.number).filter(Boolean);
   const email = settings.email ?? null;
   const address = formatAddress(settings.address);
@@ -102,9 +104,11 @@ export default async function ContactPage() {
       <section className="bg-ink-900 text-text-invert relative isolate overflow-hidden">
         <GridMotif tone="dark" />
         <Container className="relative py-20 md:py-28">
-          <Eyebrow onDark>Contact</Eyebrow>
-          <h1 className="text-display mt-4 max-w-3xl font-bold text-balance">{TITLE}</h1>
-          <p className="text-lede text-text-invert-soft mt-4 max-w-2xl">{LEDE}</p>
+          <Eyebrow onDark>{intro.eyebrow ?? "Contact"}</Eyebrow>
+          <h1 className="text-display mt-4 max-w-3xl font-bold text-balance">
+            {intro.heading ?? TITLE}
+          </h1>
+          <p className="text-lede text-text-invert-soft mt-4 max-w-2xl">{intro.lede ?? LEDE}</p>
         </Container>
       </section>
 

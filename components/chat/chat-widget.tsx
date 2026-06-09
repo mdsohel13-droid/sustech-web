@@ -36,10 +36,10 @@ async function compressImage(file: File): Promise<string> {
   return canvas.toDataURL("image/jpeg", 0.82);
 }
 
-const SCALES = ["< 10 Lakh", "10–50 Lakh", "50 Lakh – 1 Crore", "1 Crore+", "Not sure"];
+const DEFAULT_SCALES = ["< 10 Lakh", "10–50 Lakh", "50 Lakh – 1 Crore", "1 Crore+", "Not sure"];
 const GREETING =
   "Hi! I’m Sustech’s assistant. Ask me anything about our solar, electrical, lightning-protection or safety work — or pick a quick option below.";
-const SUGGESTIONS = [
+const DEFAULT_SUGGESTIONS = [
   "Get a quote",
   "Solar for my factory",
   "What is lightning protection?",
@@ -65,7 +65,19 @@ function useUserRef() {
   return ref;
 }
 
-export function ChatWidget({ services, phone }: { services: string[]; phone?: string | null }) {
+export function ChatWidget({
+  services,
+  phone,
+  suggestions,
+  scales,
+}: {
+  services: string[];
+  phone?: string | null;
+  suggestions?: string[];
+  scales?: string[];
+}) {
+  const SUGGESTIONS = suggestions?.length ? suggestions : DEFAULT_SUGGESTIONS;
+  const SCALES = scales?.length ? scales : DEFAULT_SCALES;
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<Mode>("chat");
   const [messages, setMessages] = useState<Msg[]>([{ role: "assistant", text: GREETING }]);

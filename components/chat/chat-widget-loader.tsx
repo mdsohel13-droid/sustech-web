@@ -17,8 +17,13 @@ const ChatWidgetLazy = dynamic(
 interface ChatWidgetLoaderProps {
   services: string[];
   phone?: string;
+  /** CMS-driven starter chips + quote-scale options (fall back to defaults if empty). */
+  suggestions?: string[];
+  scales?: string[];
 }
 
-export function ChatWidgetLoader({ services, phone }: ChatWidgetLoaderProps) {
-  return <ChatWidgetLazy services={services} phone={phone} />;
+export function ChatWidgetLoader({ services, phone, suggestions, scales }: ChatWidgetLoaderProps) {
+  return (
+    <ChatWidgetLazy services={services} phone={phone} suggestions={suggestions} scales={scales} />
+  );
 }

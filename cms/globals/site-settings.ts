@@ -15,6 +15,20 @@ export const LAYOUT_SURFACES = [
   { label: "Solutions / Sectors (all)", value: "sectors" },
 ] as const;
 
+/**
+ * Index pages whose hero copy (eyebrow / heading / lede) can be overridden from
+ * the CMS. A page with no intro row keeps its built-in default copy, so this is
+ * purely additive — read via pageIntro() in lib/page-intro.ts.
+ */
+export const INTRO_PAGES = [
+  { label: "Services (index)", value: "services" },
+  { label: "Solutions / Sectors (index)", value: "solutions" },
+  { label: "Projects (index)", value: "projects" },
+  { label: "Knowledge Hub", value: "knowledge" },
+  { label: "Contact", value: "contact" },
+  { label: "Request a Consultation", value: "request-quote" },
+] as const;
+
 export const SiteSettings: GlobalConfig = {
   slug: "site-settings",
   label: "Site Settings",
@@ -239,6 +253,49 @@ export const SiteSettings: GlobalConfig = {
             },
           ],
         },
+        /* ── Page intros (hero copy for index pages) ─────────────────── */
+        {
+          label: "Page intros",
+          description:
+            "Override the hero eyebrow / heading / lede on the built-in index pages. " +
+            "Leave a field blank to keep that page's default copy.",
+          fields: [
+            {
+              name: "pageIntros",
+              type: "array",
+              label: "Page intro overrides",
+              labels: { singular: "Page intro", plural: "Page intros" },
+              admin: {
+                description: "Add a row for each index page you want to customise.",
+                initCollapsed: false,
+              },
+              fields: [
+                {
+                  name: "page",
+                  type: "select",
+                  label: "Page",
+                  required: true,
+                  options: [...INTRO_PAGES],
+                },
+                {
+                  name: "eyebrow",
+                  type: "text",
+                  admin: { description: "Small label above the heading." },
+                },
+                {
+                  name: "heading",
+                  type: "text",
+                  admin: { description: "Main hero heading (H1)." },
+                },
+                {
+                  name: "lede",
+                  type: "textarea",
+                  admin: { description: "Intro paragraph under the heading." },
+                },
+              ],
+            },
+          ],
+        },
         /* ── GEO / AEO (AI engine optimisation) ──────────────────────── */
         {
           label: "GEO / AEO",
@@ -440,6 +497,31 @@ export const SiteSettings: GlobalConfig = {
                   ],
                 },
               ],
+            },
+            /* Chatbot quick-reply config (used by the AI chat widget) */
+            {
+              name: "chatSuggestions",
+              type: "array",
+              label: "Chat starter suggestions",
+              labels: { singular: "Suggestion", plural: "Suggestions" },
+              admin: {
+                description:
+                  "Quick-reply chips shown when the chat opens. Leave empty to use the built-in " +
+                  'defaults. "Get a quote" opens the quote form; others are sent as questions.',
+              },
+              fields: [{ name: "text", type: "text", required: true }],
+            },
+            {
+              name: "quoteScales",
+              type: "array",
+              label: "Quote — project scale options",
+              labels: { singular: "Scale", plural: "Scales" },
+              admin: {
+                description:
+                  'Options in the chat quote form\'s "Project scale" dropdown. Leave empty to use ' +
+                  "the built-in defaults.",
+              },
+              fields: [{ name: "text", type: "text", required: true }],
             },
           ],
         },

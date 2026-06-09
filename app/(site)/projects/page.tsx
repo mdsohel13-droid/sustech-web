@@ -14,6 +14,7 @@ import { Section } from "@/components/ui/section";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getProjects, getSiteSettings } from "@/lib/payload";
 import { isHorizontal } from "@/lib/content-layout";
+import { pageIntro } from "@/lib/page-intro";
 import { ProofCounter } from "@/components/ui/proof-counter";
 import { serverUrl } from "@/lib/seo";
 import { cn } from "@/lib/utils";
@@ -116,6 +117,7 @@ export default async function ProjectsIndexPage({
   const current = await searchParams;
   const { sector: activeSector, service: activeService, year: activeYear } = current;
   const [all, settings] = await Promise.all([getProjects(), getSiteSettings()]);
+  const intro = pageIntro(settings, "projects");
 
   // CMS-driven layout: vertical grid (default) or horizontal hover-reveal rows.
   const horizontal = isHorizontal(settings, "projects");
@@ -194,9 +196,11 @@ export default async function ProjectsIndexPage({
       <section className="bg-ink-900 text-text-invert relative isolate overflow-hidden">
         <GridMotif tone="dark" />
         <Container className="relative py-20 md:py-28">
-          <Eyebrow onDark>Our work</Eyebrow>
-          <h1 className="text-display mt-4 max-w-3xl font-bold text-balance">{TITLE}</h1>
-          <p className="text-lede text-text-invert-soft mt-4 max-w-2xl">{LEDE}</p>
+          <Eyebrow onDark>{intro.eyebrow ?? "Our work"}</Eyebrow>
+          <h1 className="text-display mt-4 max-w-3xl font-bold text-balance">
+            {intro.heading ?? TITLE}
+          </h1>
+          <p className="text-lede text-text-invert-soft mt-4 max-w-2xl">{intro.lede ?? LEDE}</p>
         </Container>
       </section>
 

@@ -23,6 +23,7 @@ import type { Article, KnowledgeResource } from "@/payload-types";
 import { CALCULATOR_REGISTRY } from "@/components/calculators/calculator-registry";
 import { getArticles, getKnowledgeResources, getSiteSettings } from "@/lib/payload";
 import { isHorizontal } from "@/lib/content-layout";
+import { pageIntro } from "@/lib/page-intro";
 import { serverUrl } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 
@@ -239,6 +240,8 @@ export default async function KnowledgeIndexPage({
   const calculators = resources.filter((r) => r.type === "calculator");
   const downloads = resources.filter((r) => r.type === "sample");
 
+  const intro = pageIntro(settings, "knowledge");
+
   // CMS-driven layout: vertical grid (default) or horizontal hover-reveal rows.
   const horizontal = isHorizontal(settings, "knowledge");
   const listCls = horizontal ? "flex flex-col gap-3" : "grid gap-6 sm:grid-cols-2 lg:grid-cols-3";
@@ -289,9 +292,11 @@ export default async function KnowledgeIndexPage({
       <section className="bg-ink-900 text-text-invert relative isolate overflow-hidden">
         <GridMotif tone="dark" />
         <Container className="relative py-20 md:py-28">
-          <Eyebrow onDark>Insights</Eyebrow>
-          <h1 className="text-display mt-4 max-w-3xl font-bold text-balance">{TITLE}</h1>
-          <p className="text-lede text-text-invert-soft mt-4 max-w-2xl">{LEDE}</p>
+          <Eyebrow onDark>{intro.eyebrow ?? "Insights"}</Eyebrow>
+          <h1 className="text-display mt-4 max-w-3xl font-bold text-balance">
+            {intro.heading ?? TITLE}
+          </h1>
+          <p className="text-lede text-text-invert-soft mt-4 max-w-2xl">{intro.lede ?? LEDE}</p>
         </Container>
       </section>
 

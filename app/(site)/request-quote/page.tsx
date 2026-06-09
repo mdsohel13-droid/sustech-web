@@ -6,7 +6,8 @@ import { Card } from "@/components/ui/card";
 import { Container } from "@/components/ui/container";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { GridMotif } from "@/components/ui/grid-motif";
-import { getServices } from "@/lib/payload";
+import { getServices, getSiteSettings } from "@/lib/payload";
+import { pageIntro } from "@/lib/page-intro";
 import { serverUrl } from "@/lib/seo";
 
 export const revalidate = 3600;
@@ -33,8 +34,12 @@ const ASSURANCES = [
 ];
 
 export default async function RequestQuotePage() {
-  const services = await getServices().catch(() => []);
+  const [services, settings] = await Promise.all([
+    getServices().catch(() => []),
+    getSiteSettings(),
+  ]);
   const serviceTitles = services.map((s) => s.title);
+  const intro = pageIntro(settings, "request-quote");
 
   return (
     <>
@@ -56,9 +61,11 @@ export default async function RequestQuotePage() {
       <section className="bg-ink-900 text-text-invert relative isolate overflow-hidden">
         <GridMotif tone="dark" />
         <Container className="relative py-16 md:py-20">
-          <Eyebrow onDark>Get started</Eyebrow>
-          <h1 className="text-display mt-3 max-w-3xl font-bold text-balance">{TITLE}</h1>
-          <p className="text-lede text-text-invert-soft mt-4 max-w-2xl">{LEDE}</p>
+          <Eyebrow onDark>{intro.eyebrow ?? "Get started"}</Eyebrow>
+          <h1 className="text-display mt-3 max-w-3xl font-bold text-balance">
+            {intro.heading ?? TITLE}
+          </h1>
+          <p className="text-lede text-text-invert-soft mt-4 max-w-2xl">{intro.lede ?? LEDE}</p>
         </Container>
       </section>
 

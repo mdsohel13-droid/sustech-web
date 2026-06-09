@@ -4415,6 +4415,27 @@ export interface SiteSetting {
       }[]
     | null;
   /**
+   * Add a row for each index page you want to customise.
+   */
+  pageIntros?:
+    | {
+        page: 'services' | 'solutions' | 'projects' | 'knowledge' | 'contact' | 'request-quote';
+        /**
+         * Small label above the heading.
+         */
+        eyebrow?: string | null;
+        /**
+         * Main hero heading (H1).
+         */
+        heading?: string | null;
+        /**
+         * Intro paragraph under the heading.
+         */
+        lede?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
    * One authoritative paragraph describing Sustech for AI engines. Facts only — this becomes the lead context AI assistants cite when asked about the company.
    */
   aiOverview?: string | null;
@@ -4476,6 +4497,24 @@ export interface SiteSetting {
     customScript?: string | null;
     chatPosition?: ('bottom-right' | 'bottom-left') | null;
   };
+  /**
+   * Quick-reply chips shown when the chat opens. Leave empty to use the built-in defaults. "Get a quote" opens the quote form; others are sent as questions.
+   */
+  chatSuggestions?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Options in the chat quote form's "Project scale" dropdown. Leave empty to use the built-in defaults.
+   */
+  quoteScales?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -4626,6 +4665,15 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         style?: T;
         id?: T;
       };
+  pageIntros?:
+    | T
+    | {
+        page?: T;
+        eyebrow?: T;
+        heading?: T;
+        lede?: T;
+        id?: T;
+      };
   aiOverview?: T;
   keyFacts?:
     | T
@@ -4658,6 +4706,18 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         crispWebsiteId?: T;
         customScript?: T;
         chatPosition?: T;
+      };
+  chatSuggestions?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  quoteScales?:
+    | T
+    | {
+        text?: T;
+        id?: T;
       };
   updatedAt?: T;
   createdAt?: T;

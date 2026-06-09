@@ -80,6 +80,12 @@ export async function EngagementWidgets() {
             <ChatWidgetLoader
               services={services.map((sv) => sv.title)}
               phone={settings.phones?.[0]?.number}
+              suggestions={(settings.chatSuggestions ?? [])
+                .map((s) => s?.text?.trim())
+                .filter((t): t is string => Boolean(t))}
+              scales={(settings.quoteScales ?? [])
+                .map((s) => s?.text?.trim())
+                .filter((t): t is string => Boolean(t))}
             />
           )}
 

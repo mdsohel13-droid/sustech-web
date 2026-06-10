@@ -1,5 +1,5 @@
-import { Mail, MapPin, Phone, Clock } from "lucide-react";
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -34,6 +34,11 @@ function formatAddress(
 ): string {
   if (!a) return "";
   return [a.street, a.city, a.region, a.postalCode, a.country].filter(Boolean).join(", ");
+}
+
+/** Small decorative 3D icon (static, MIT-licensed Fluent set in /public/icons-3d). */
+function Icon3d({ src }: { src: string }) {
+  return <Image src={src} alt="" width={40} height={40} className="h-5 w-5 object-contain" />;
 }
 
 function Detail({
@@ -122,7 +127,7 @@ export default async function ContactPage() {
             {hasDetails ? (
               <div className="mt-6 space-y-5">
                 {phones.length > 0 && (
-                  <Detail icon={<Phone className="h-4 w-4" aria-hidden />} label="Phone">
+                  <Detail icon={<Icon3d src="/icons-3d/telephone_receiver.webp" />} label="Phone">
                     {phones.map((p) => (
                       <a
                         key={p}
@@ -135,7 +140,7 @@ export default async function ContactPage() {
                   </Detail>
                 )}
                 {emails.length > 0 && (
-                  <Detail icon={<Mail className="h-4 w-4" aria-hidden />} label="Email">
+                  <Detail icon={<Icon3d src="/icons-3d/envelope.webp" />} label="Email">
                     <span className="flex flex-col gap-1">
                       {emails.map((e) => (
                         <a
@@ -151,12 +156,12 @@ export default async function ContactPage() {
                   </Detail>
                 )}
                 {address && (
-                  <Detail icon={<MapPin className="h-4 w-4" aria-hidden />} label="Office">
+                  <Detail icon={<Icon3d src="/icons-3d/round_pushpin.webp" />} label="Office">
                     {address}
                   </Detail>
                 )}
                 {hours && (
-                  <Detail icon={<Clock className="h-4 w-4" aria-hidden />} label="Hours">
+                  <Detail icon={<Icon3d src="/icons-3d/alarm_clock.webp" />} label="Hours">
                     {hours}
                   </Detail>
                 )}

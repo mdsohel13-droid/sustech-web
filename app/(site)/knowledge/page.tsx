@@ -11,6 +11,7 @@
  */
 
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { JsonLd } from "@/components/seo/json-ld";
 import { Card } from "@/components/ui/card";
@@ -117,6 +118,7 @@ function ArticleCard({ a, horizontal }: { a: Article; horizontal: boolean }) {
 
 function CalculatorCard({ c, horizontal }: { c: KnowledgeResource; horizontal: boolean }) {
   const regMeta = c.calcType ? CALCULATOR_REGISTRY[c.calcType] : null;
+  const iconSrc = regMeta?.iconSrc ?? null;
   const icon = regMeta?.icon ?? "⚙️";
   const standards = regMeta?.standards ?? [];
   const href = `/knowledge/calculators/${c.calcType ?? ""}`;
@@ -130,7 +132,17 @@ function CalculatorCard({ c, horizontal }: { c: KnowledgeResource; horizontal: b
         )}
       >
         <div className={cn("text-3xl", horizontal ? "shrink-0" : "mb-3")} aria-hidden>
-          {icon}
+          {iconSrc ? (
+            <Image
+              src={iconSrc}
+              alt=""
+              width={64}
+              height={64}
+              className="h-10 w-10 object-contain"
+            />
+          ) : (
+            icon
+          )}
         </div>
         <div className={horizontal ? "min-w-0 flex-1" : "flex flex-1 flex-col"}>
           <h3 className="text-h3 text-ink-900 font-semibold">{c.title}</h3>

@@ -1,5 +1,6 @@
 import { RichText } from "@payloadcms/richtext-lexical/react";
-import { ArrowRight, Calculator, Check, Quote } from "lucide-react";
+import { ArrowRight, Check, Quote } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import type { ComponentProps } from "react";
 import { sectorIcons, serviceIcons } from "@/components/icons";
@@ -1511,7 +1512,13 @@ export function CalculatorEmbedView({ block }: { block: CalculatorEmbedBlock }) 
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div className="max-w-2xl">
               <span className="bg-brand/10 text-brand inline-flex h-11 w-11 items-center justify-center rounded-md">
-                <Calculator className="h-6 w-6" aria-hidden />
+                <Image
+                  src="/icons-3d/abacus.webp"
+                  alt=""
+                  width={48}
+                  height={48}
+                  className="h-7 w-7 object-contain"
+                />
               </span>
               <h2 className="text-h2 text-ink-900 mt-5 font-semibold text-balance">
                 {block.heading ?? "Engineering calculators"}

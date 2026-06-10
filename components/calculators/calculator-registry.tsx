@@ -23,7 +23,8 @@ import { SolarYieldCalculator } from "./solar-yield-calculator";
 export interface CalcMeta {
   title: string;
   description: string;
-  icon: string; // emoji or short SVG symbol
+  icon: string; // emoji fallback (text contexts)
+  iconSrc: string; // static 3D icon (public/icons-3d, MIT Fluent set)
   category: string;
   component: ComponentType;
   standards?: string[]; // relevant codes
@@ -36,6 +37,7 @@ export const CALCULATOR_REGISTRY: Record<CalcType, CalcMeta> = {
       "Estimate the financial return on a commercial or industrial solar installation. " +
       "Uses Bangladesh BPDB tariffs and local irradiance data.",
     icon: "☀️",
+    iconSrc: "/icons-3d/sun.webp",
     category: "Solar & Energy",
     component: SolarRoiCalculator,
     standards: ["IEC 62548", "SREDA net metering"],
@@ -46,6 +48,7 @@ export const CALCULATOR_REGISTRY: Record<CalcType, CalcMeta> = {
       "Calculate the ground resistance of a single vertical rod using Dwight's formula. " +
       "Includes IEC 60364 / IEC 62305 compliance check.",
     icon: "⚡",
+    iconSrc: "/icons-3d/high_voltage.webp",
     category: "Grounding & Lightning",
     component: EarthingResistanceCalculator,
     standards: ["IEC 60364-5-54", "IEC 62305", "BNBC"],
@@ -56,6 +59,7 @@ export const CALCULATOR_REGISTRY: Record<CalcType, CalcMeta> = {
       "Find the minimum cable cross-section to meet voltage drop limits " +
       "for copper and aluminium conductors per IEC 60228.",
     icon: "🔌",
+    iconSrc: "/icons-3d/electric_plug.webp",
     category: "Electrical EPC",
     component: CableSizingCalculator,
     standards: ["IEC 60228", "IEC 60364-5-52"],
@@ -66,6 +70,7 @@ export const CALCULATOR_REGISTRY: Record<CalcType, CalcMeta> = {
       "Determine the protection radius of an air termination using the IEC 62305 " +
       "Rolling Sphere Method. Includes LPL selection guide.",
     icon: "🌩️",
+    iconSrc: "/icons-3d/cloud_with_lightning.webp",
     category: "Grounding & Lightning",
     component: LightningZoneCalculator,
     standards: ["IEC 62305-3", "IEC 62305-2"],
@@ -76,6 +81,7 @@ export const CALCULATOR_REGISTRY: Record<CalcType, CalcMeta> = {
       "Estimate annual electricity generation for any city in Bangladesh using " +
       "NASA POWER irradiance data and IEC performance ratio standards.",
     icon: "📊",
+    iconSrc: "/icons-3d/chart_increasing.webp",
     category: "Solar & Energy",
     component: SolarYieldCalculator,
     standards: ["IEC 61724", "IEC 61853"],

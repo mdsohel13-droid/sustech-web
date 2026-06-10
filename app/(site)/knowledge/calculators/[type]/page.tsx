@@ -11,6 +11,7 @@
  */
 
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -126,8 +127,15 @@ export default async function CalculatorPage({ params }: { params: Promise<{ typ
             </ol>
           </nav>
           <Eyebrow onDark>{meta.category}</Eyebrow>
-          <h1 className="text-h1 mt-3 font-bold">
-            {meta.icon} {meta.title}
+          <h1 className="text-h1 mt-3 flex items-center gap-3 font-bold">
+            <Image
+              src={meta.iconSrc}
+              alt=""
+              width={64}
+              height={64}
+              className="h-10 w-10 object-contain"
+            />
+            {meta.title}
           </h1>
           <p className="text-text-invert-soft mt-3 max-w-2xl text-[0.9375rem]">
             {meta.description}

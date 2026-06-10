@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { Check, ChevronDown } from "lucide-react";
 import type { ReactNode } from "react";
@@ -127,7 +128,10 @@ export default async function ProjectsIndexPage({
   const stats = settings.stats ?? [];
 
   // Derive filter options + counts across the full published set.
-  const sectorCounts = new Map<string, { title: string; icon: SectorRef["icon"]; count: number }>();
+  const sectorCounts = new Map<
+    string,
+    { title: string; icon: SectorRef["icon"]; iconUrl: string | null; count: number }
+  >();
   const serviceCounts = new Map<string, { title: string; count: number }>();
   const yearCounts = new Map<number, number>();
   for (const p of all) {
@@ -135,7 +139,16 @@ export default async function ProjectsIndexPage({
     if (sec) {
       const e = sectorCounts.get(sec.slug);
       if (e) e.count += 1;
-      else sectorCounts.set(sec.slug, { title: sec.title, icon: sec.icon, count: 1 });
+      else
+        sectorCounts.set(sec.slug, {
+          title: sec.title,
+          icon: sec.icon,
+          iconUrl:
+            sec.customIcon && typeof sec.customIcon === "object" && sec.customIcon.url
+              ? sec.customIcon.url.replace(/^https?:\/\/[^/]+/, "")
+              : null,
+          count: 1,
+        });
     }
     for (const svc of projectServices(p)) {
       const e = serviceCounts.get(svc.slug);
@@ -247,7 +260,19 @@ export default async function ProjectsIndexPage({
                       href={hrefWith(current, "sector", slug)}
                       active={activeSector === slug}
                       label={`${f.title} (${f.count})`}
-                      icon={<Icon className="h-4 w-4" aria-hidden />}
+                      icon={
+                        f.iconUrl ? (
+                          <Image
+                            src={f.iconUrl}
+                            alt=""
+                            width={32}
+                            height={32}
+                            className="h-4 w-4 object-contain"
+                          />
+                        ) : (
+                          <Icon className="h-4 w-4" aria-hidden />
+                        )
+                      }
                     />
                   );
                 })}

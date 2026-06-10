@@ -22,28 +22,9 @@ import { useEffect, useRef, useState } from "react";
 import { Logo } from "@/components/layout/logo";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
-import type { NavItem, NavLeaf } from "@/lib/nav";
+import { isNavActive, toTopLevelLinks, type NavItem, type NavLeaf } from "@/lib/nav";
 import type { SiteSetting } from "@/payload-types";
 import { cn } from "@/lib/utils";
-
-interface PillLink {
-  label: string;
-  href: string;
-}
-
-function toPillLinks(items: NavItem[]): PillLink[] {
-  return items
-    .map((it) => {
-      const href = it.href ?? it.children?.[0]?.href;
-      return href ? { label: it.label, href } : null;
-    })
-    .filter((x): x is PillLink => x !== null);
-}
-
-function isActive(pathname: string, href: string): boolean {
-  if (href === "/") return pathname === "/";
-  return pathname === href || pathname.startsWith(href + "/");
-}
 
 export function AdaptivePillNav({
   items,
@@ -54,14 +35,14 @@ export function AdaptivePillNav({
   cta: NavLeaf | null;
   logo?: SiteSetting["logo"];
 }) {
-  const links = toPillLinks(items);
+  const links = toTopLevelLinks(items);
   const pathname = usePathname();
   const reduced = useReducedMotion();
   const [expanded, setExpanded] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navRef = useRef<HTMLElement>(null);
 
-  const active = links.find((l) => isActive(pathname, l.href)) ?? null;
+  const active = links.find((l) => isNavActive(pathname, l.href)) ?? null;
 
   // Close on Escape and on outside click.
   useEffect(() => {

@@ -3,9 +3,11 @@ import type { ReactNode } from "react";
 import "@/styles/globals.css";
 import { cabinet, jetbrains, switzer } from "@/app/fonts";
 import { AdaptivePillNav } from "@/components/layout/adaptive-pill-nav";
+import { DockNav } from "@/components/layout/dock-nav";
 import { EngagementWidgets } from "@/components/layout/engagement-widgets";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
+import { TabBarNav } from "@/components/layout/tab-bar-nav";
 import { JsonLd } from "@/components/seo/json-ld";
 import { RevealFallback } from "@/components/ui/reveal-fallback";
 import { buildFooterColumns, buildHeaderNav } from "@/lib/nav";
@@ -67,6 +69,10 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
         <JsonLd data={siteJsonLd(settings)} />
         {settings.navStyle === "pill" ? (
           <AdaptivePillNav items={items} cta={cta} logo={settings.logo} />
+        ) : settings.navStyle === "tabs" ? (
+          <TabBarNav items={items} cta={cta} logo={settings.logo} />
+        ) : settings.navStyle === "dock" ? (
+          <DockNav items={items} cta={cta} logo={settings.logo} />
         ) : (
           <Header items={items} cta={cta} logo={settings.logo} />
         )}

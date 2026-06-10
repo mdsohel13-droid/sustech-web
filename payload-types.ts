@@ -4431,9 +4431,9 @@ export interface SiteSetting {
    */
   designVersion?: ('classic' | 'pro') | null;
   /**
-   * Classic shows the full menu bar with Solutions/Services dropdowns. Adaptive pill is a compact glass pill that shows the current page and expands on hover/tap to reveal all top-level links (no dropdowns — parents link to their first item). Fully reversible.
+   * Classic = full menu bar with Solutions/Services dropdowns. The other three are compact, top-level-only styles (parents link to their first item, no dropdowns), all brand-tuned and fully reversible: Adaptive pill = glass pill that expands on hover/tap; Tab bar = segmented bordered tabs; Floating dock = bottom-centre bar with a sliding active indicator (logo + CTA stay in a slim top bar; the dock coexists with the WhatsApp button).
    */
-  navStyle?: ('classic' | 'pill') | null;
+  navStyle?: ('classic' | 'pill' | 'tabs' | 'dock') | null;
   /**
    * Add a rule per listing you want to control. Pick the surface and the card style. Any surface without a rule uses the default (vertical grid). Horizontal rows reveal the description on hover — the same interaction as About → Our Team.
    */

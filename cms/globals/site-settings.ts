@@ -251,6 +251,23 @@ export const SiteSettings: GlobalConfig = {
               },
             },
             {
+              name: "navStyle",
+              type: "select",
+              label: "Navigation style (header)",
+              defaultValue: "classic",
+              options: [
+                { label: "Classic (mega-menu with dropdowns)", value: "classic" },
+                { label: "Adaptive pill (collapses to current page)", value: "pill" },
+              ],
+              admin: {
+                description:
+                  "Classic shows the full menu bar with Solutions/Services dropdowns. Adaptive pill " +
+                  "is a compact glass pill that shows the current page and expands on hover/tap to " +
+                  "reveal all top-level links (no dropdowns — parents link to their first item). " +
+                  "Fully reversible.",
+              },
+            },
+            {
               name: "contentLayouts",
               type: "array",
               label: "Content listing layouts",

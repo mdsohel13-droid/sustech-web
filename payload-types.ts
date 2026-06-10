@@ -4431,6 +4431,10 @@ export interface SiteSetting {
    */
   designVersion?: ('classic' | 'pro') | null;
   /**
+   * Classic shows the full menu bar with Solutions/Services dropdowns. Adaptive pill is a compact glass pill that shows the current page and expands on hover/tap to reveal all top-level links (no dropdowns — parents link to their first item). Fully reversible.
+   */
+  navStyle?: ('classic' | 'pill') | null;
+  /**
    * Add a rule per listing you want to control. Pick the surface and the card style. Any surface without a rule uses the default (vertical grid). Horizontal rows reveal the description on hover — the same interaction as About → Our Team.
    */
   contentLayouts?:
@@ -4691,6 +4695,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   defaultDescription?: T;
   ogImage?: T;
   designVersion?: T;
+  navStyle?: T;
   contentLayouts?:
     | T
     | {

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import "@/styles/globals.css";
 import { cabinet, jetbrains, switzer } from "@/app/fonts";
+import { AdaptivePillNav } from "@/components/layout/adaptive-pill-nav";
 import { EngagementWidgets } from "@/components/layout/engagement-widgets";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
@@ -64,7 +65,11 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
         </a>
         {/* Organization JSON-LD emitted once here; individual pages add page-type schemas */}
         <JsonLd data={siteJsonLd(settings)} />
-        <Header items={items} cta={cta} logo={settings.logo} />
+        {settings.navStyle === "pill" ? (
+          <AdaptivePillNav items={items} cta={cta} logo={settings.logo} />
+        ) : (
+          <Header items={items} cta={cta} logo={settings.logo} />
+        )}
         <main id="main">{children}</main>
         {/* CMS-driven WhatsApp + chatbot widgets (enabled/configured in Settings) */}
         <EngagementWidgets />

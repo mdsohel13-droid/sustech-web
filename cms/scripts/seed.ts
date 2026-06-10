@@ -936,26 +936,37 @@ async function main(): Promise<void> {
       logo: logoMediaId,
       companyName: "Sustech Technology Ltd",
       shortName: "Sustech",
-      tagline: "Smart Energy. Strong Engineering. Sustainable Solution.",
+      // Brand + contact values mirror the official company brief (10 June 2026).
+      // cms/scripts/sync-brief-content.ts applies the same data to an existing DB.
+      tagline: "Renewable Energy & Electrical Engineering Solutions — Complete EPC",
       description:
-        "Sustech Technology Ltd is a Chattogram-based integrated engineering and energy company, " +
-        "founded in 2017 — delivering solar & renewable EPC, battery energy storage, electrical & " +
-        "EPC works, lightning protection & earthing, substation & HV works, and inspection, testing " +
-        "& compliance for industrial, government, NGO/UN and commercial clients across Bangladesh.",
+        "Sustech Technology Ltd is a Bangladesh-based renewable energy and electrical engineering " +
+        "company delivering complete EPC solutions — solar power, lithium energy storage (ESS), " +
+        "substations & switchgear, industrial lighting, energy-efficient fans, fire & PA systems, " +
+        "lightning protection and certified safety training — for industrial, commercial and " +
+        "institutional clients across Bangladesh.",
       foundingYear: 2017,
       areaServed: "Bangladesh",
-      phones: [{ number: "+880 1867 655 599" }, { number: "+880 1722 002 125" }],
-      emails: [{ address: "info@sustechltd.com" }],
+      phones: [{ number: "+880 1722-002125" }, { number: "+880 1867-655599" }],
+      emails: [
+        { address: "info@sustechltd.com", label: "Primary" },
+        { address: "sustechltd@gmail.com", label: "General" },
+        { address: "sohel@sustechltd.com", label: "Direct" },
+      ],
       address: {
-        street: "House #98, Road #08, O.R. Nizam Road R/A, GEC, Nasirabad",
+        street: "House #1834 (SH Homes), Shantidhara R/A (Bata-goli), GEC, Nasirabad",
         city: "Chattogram",
         region: "Chattogram",
         postalCode: "4000",
         country: "BD",
       },
       geo: { latitude: 22.3709, longitude: 91.8317 },
-      hours: "Sunday–Thursday 9:00 AM–6:00 PM (BST)",
-      social: [{ label: "Facebook", url: "https://www.facebook.com/sustechltd" }],
+      // Bangladesh weekend is Friday — Sat–Thu per the brief/chatbot KB.
+      hours: "Saturday–Thursday, 9:00 AM–6:00 PM · Friday & govt holidays closed",
+      social: [
+        { label: "Facebook", url: "https://www.facebook.com/sustechltd" },
+        { label: "LinkedIn", url: "https://www.linkedin.com/company/71629589" },
+      ],
       defaultTitle:
         "Sustech Technology Ltd — Solar EPC, BESS & Electrical Engineering in Chattogram, Bangladesh",
       titleTemplate: "%s · Sustech Technology Ltd",

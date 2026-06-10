@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Container } from "@/components/ui/container";
 import { Eyebrow } from "@/components/ui/eyebrow";
+import { EntityIcon } from "@/components/ui/entity-icon";
 import { GridMotif } from "@/components/ui/grid-motif";
 import { HoverRevealText } from "@/components/ui/hover-reveal-text";
 import { ProofCounter } from "@/components/ui/proof-counter";
@@ -609,7 +610,7 @@ export async function ServicesGridView({
                   )}
                 >
                   <span className="bg-brand/10 text-brand inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md">
-                    <Icon className="h-6 w-6" aria-hidden />
+                    <EntityIcon customIcon={svc.customIcon} Fallback={Icon} />
                   </span>
                   <div className={horizontal ? "min-w-0 flex-1" : "contents"}>
                     <h3
@@ -697,7 +698,7 @@ export async function SectorTilesView({
                   )}
                 >
                   <span className="bg-ink-900/[0.06] text-ink-900 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md">
-                    <Icon className="h-6 w-6" aria-hidden />
+                    <EntityIcon customIcon={sec.customIcon} Fallback={Icon} />
                   </span>
                   <div className={horizontal ? "min-w-0 flex-1" : "contents"}>
                     <h3

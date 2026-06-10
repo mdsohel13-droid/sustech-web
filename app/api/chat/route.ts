@@ -42,6 +42,12 @@ function rateLimited(ip: string): boolean {
 const FALLBACK =
   "I’m having trouble right now. Please try again, or reach us via the Contact page.";
 
+// Shown when the upstream AI provider is rate-limited or erroring — actionable
+// and on-brand (the WhatsApp button is on every page), never a raw error dump.
+const BUSY =
+  "Our assistant is in high demand right now and needs a few minutes to catch up. " +
+  "Please try again shortly — or tap the green WhatsApp button to reach our team instantly.";
+
 // ── Image attachment limits ──────────────────────────────────────────────────
 // Accept only the common web-safe raster types as base64 data URLs. The browser
 // already downscales/compresses, so a generous-but-bounded cap protects the
@@ -108,9 +114,28 @@ export async function POST(req: NextRequest) {
     });
     clearTimeout(timeout);
 
-    const data = (await upstream.json().catch(() => ({}))) as { answer?: unknown; reply?: unknown };
+    const data = (await upstream.json().catch(() => ({}))) as {
+      answer?: unknown;
+      reply?: unknown;
+      error?: unknown;
+    };
+
+    // Upstream trouble (LLM provider rate limit, workflow error, …) must never
+    // leak raw error payloads to visitors. Three leak paths are covered:
+    // a non-2xx status, an { error } body, and an error blob INSIDE the reply
+    // text (n8n workflows sometimes pass the provider error through as output).
     const raw = data.answer ?? data.reply;
-    const answer = typeof raw === "string" && raw.trim() ? raw.trim().slice(0, 4000) : FALLBACK;
+    const text = typeof raw === "string" ? raw.trim() : "";
+    const looksLikeProviderError =
+      /rate_limit_exceeded|"error"\s*:|^HTTP \d{3}\b|tokens per (day|minute) \(TP[DM]\)/i.test(
+        text.slice(0, 400),
+      );
+
+    if (!upstream.ok || data.error != null || looksLikeProviderError) {
+      return NextResponse.json({ answer: BUSY }, { status: 200 });
+    }
+
+    const answer = text ? text.slice(0, 4000) : FALLBACK;
     return NextResponse.json({ answer });
   } catch {
     return NextResponse.json({ answer: FALLBACK }, { status: 200 });

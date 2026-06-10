@@ -703,6 +703,10 @@ export interface Service {
     | 'consultancy';
   order?: number | null;
   /**
+   * Optional uploaded icon (e.g. a 3D PNG with transparent background) shown on service cards instead of the built-in line icon. Leave empty to keep the standard SVG. `pnpm icons:3d` pre-loads an MIT-licensed 3D set.
+   */
+  customIcon?: (number | null) | Media;
+  /**
    * One-line outcome shown on cards and grids.
    */
   summary: string;
@@ -883,6 +887,10 @@ export interface Sector {
     | 'commercial'
     | 'heritage';
   order?: number | null;
+  /**
+   * Optional uploaded icon (e.g. a 3D PNG with transparent background) shown on sector tiles instead of the built-in line icon. Leave empty to keep the standard SVG.
+   */
+  customIcon?: (number | null) | Media;
   summary: string;
   /**
    * Sector challenges → how Sustech solves them.
@@ -3879,6 +3887,7 @@ export interface ServicesSelect<T extends boolean = true> {
   slug?: T;
   icon?: T;
   order?: T;
+  customIcon?: T;
   summary?: T;
   heroImage?: T;
   explainerVideo?: T;
@@ -3913,6 +3922,7 @@ export interface SectorsSelect<T extends boolean = true> {
   slug?: T;
   icon?: T;
   order?: T;
+  customIcon?: T;
   summary?: T;
   challenges?: T;
   services?: T;

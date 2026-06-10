@@ -47,6 +47,17 @@ export const Sectors: CollectionConfig = {
         { name: "order", type: "number", admin: { width: "50%", step: 1 } },
       ],
     },
+    {
+      name: "customIcon",
+      type: "upload",
+      relationTo: "media",
+      label: "Custom icon (image)",
+      admin: {
+        description:
+          "Optional uploaded icon (e.g. a 3D PNG with transparent background) shown on sector " +
+          "tiles instead of the built-in line icon. Leave empty to keep the standard SVG.",
+      },
+    },
     { name: "summary", type: "textarea", required: true },
     {
       name: "challenges",

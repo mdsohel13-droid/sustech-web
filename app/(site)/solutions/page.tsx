@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { sectorIcons } from "@/components/icons";
 import { JsonLd } from "@/components/seo/json-ld";
 import { Card } from "@/components/ui/card";
+import { EntityIcon } from "@/components/ui/entity-icon";
 import { Container } from "@/components/ui/container";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { GridMotif } from "@/components/ui/grid-motif";
@@ -100,7 +101,7 @@ export default async function SolutionsIndexPage() {
                     )}
                   >
                     <span className="bg-ink-900/[0.06] text-ink-900 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md">
-                      <Icon className="h-6 w-6" aria-hidden />
+                      <EntityIcon customIcon={sec.customIcon} Fallback={Icon} />
                     </span>
                     <div className={horizontal ? "min-w-0 flex-1" : "contents"}>
                       <h2

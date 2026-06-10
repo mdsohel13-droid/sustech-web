@@ -48,6 +48,18 @@ export const Services: CollectionConfig = {
       ],
     },
     {
+      name: "customIcon",
+      type: "upload",
+      relationTo: "media",
+      label: "Custom icon (image)",
+      admin: {
+        description:
+          "Optional uploaded icon (e.g. a 3D PNG with transparent background) shown on service " +
+          "cards instead of the built-in line icon. Leave empty to keep the standard SVG. " +
+          "`pnpm icons:3d` pre-loads an MIT-licensed 3D set.",
+      },
+    },
+    {
       name: "summary",
       type: "textarea",
       required: true,

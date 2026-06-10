@@ -19,6 +19,7 @@
     "migrate:create": "payload migrate:create",
     "db:sync": "node --import jiti/register cms/scripts/db-sync.ts",
     "sync:brief": "node --import jiti/register cms/scripts/sync-brief-content.ts",
+    "icons:3d": "node --import jiti/register cms/scripts/fetch-3d-icons.ts",
     "health": "node scripts/healthcheck.mjs",
     "seed": "node --import jiti/register cms/scripts/seed.ts",
     "import:projects": "node --import jiti/register cms/scripts/import-projects.ts",

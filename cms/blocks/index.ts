@@ -107,13 +107,17 @@ const Hero: Block = {
       defaultValue: "none",
       options: [
         { label: "None (standard gradient)", value: "none" },
-        { label: "Aurora — animated engineering lines (WebGL)", value: "aurora" },
+        { label: "Aurora — flowing plasma lines (WebGL)", value: "aurora" },
+        { label: "Particle field — rising motes", value: "particles" },
+        { label: "Engineering grid — perspective sweep", value: "retro" },
+        { label: "Circuit traces — pulsing lines", value: "tracing" },
       ],
       admin: {
         description:
-          "Live animated background for DARK heroes — flowing True-Blue plasma lines over a " +
-          "subtle grid. Loads lazily, honours reduced motion (static gradient fallback) and " +
-          "pairs beautifully with the Pro design version.",
+          "Live animated background for DARK heroes — all brand-tuned (True Blue). Each loads " +
+          "lazily, honours reduced motion (static gradient fallback) and pairs well with the Pro " +
+          "design version. Aurora = WebGL plasma; Particle field = drifting motes; Engineering " +
+          "grid = CAD perspective sweep; Circuit traces = pulsing rules.",
         condition: (_data, siblingData) => siblingData?.tone !== "light",
       },
     },

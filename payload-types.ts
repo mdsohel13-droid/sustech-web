@@ -256,9 +256,9 @@ export interface HeroBlock {
    */
   backgroundVideo?: (number | null) | Media;
   /**
-   * Live animated background for DARK heroes — flowing True-Blue plasma lines over a subtle grid. Loads lazily, honours reduced motion (static gradient fallback) and pairs beautifully with the Pro design version.
+   * Live animated background for DARK heroes — all brand-tuned (True Blue). Each loads lazily, honours reduced motion (static gradient fallback) and pairs well with the Pro design version. Aurora = WebGL plasma; Particle field = drifting motes; Engineering grid = CAD perspective sweep; Circuit traces = pulsing rules.
    */
-  backgroundFx?: ('none' | 'aurora') | null;
+  backgroundFx?: ('none' | 'aurora' | 'particles' | 'retro' | 'tracing') | null;
   /**
    * Single: one background image/video. Carousel: cycle through multiple media items automatically.
    */

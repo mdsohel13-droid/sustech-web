@@ -222,10 +222,10 @@ export async function HeroView({ block, isFirst }: { block: HeroBlock; isFirst: 
     >
       {dark && (
         <>
-          {/* Background: either the admin-chosen animated effect (Aurora WebGL,
-              lazy + reduced-motion safe) or the standard vertical depth gradient. */}
-          {block.backgroundFx === "aurora" ? (
-            <HeroFx fx="aurora" />
+          {/* Background: either the admin-chosen animated effect (lazy +
+              reduced-motion safe) or the standard vertical depth gradient. */}
+          {block.backgroundFx && block.backgroundFx !== "none" ? (
+            <HeroFx fx={block.backgroundFx} />
           ) : (
             <div
               aria-hidden

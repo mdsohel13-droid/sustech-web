@@ -100,6 +100,23 @@ const Hero: Block = {
         condition: (_data, siblingData) => siblingData?.heroMode !== "carousel",
       },
     },
+    {
+      name: "backgroundFx",
+      type: "select",
+      label: "Background effect",
+      defaultValue: "none",
+      options: [
+        { label: "None (standard gradient)", value: "none" },
+        { label: "Aurora — animated engineering lines (WebGL)", value: "aurora" },
+      ],
+      admin: {
+        description:
+          "Live animated background for DARK heroes — flowing True-Blue plasma lines over a " +
+          "subtle grid. Loads lazily, honours reduced motion (static gradient fallback) and " +
+          "pairs beautifully with the Pro design version.",
+        condition: (_data, siblingData) => siblingData?.tone !== "light",
+      },
+    },
     /* ── Carousel mode ─────────────────────────────────────────────── */
     {
       name: "heroMode",

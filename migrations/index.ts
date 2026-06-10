@@ -6,6 +6,7 @@ import * as migration_20260609_056000_capabilities_surface from "./20260609_0560
 import * as migration_20260609_057000_block_style_defaults from "./20260609_057000_block_style_defaults";
 import * as migration_20260609_058000_design_version from "./20260609_058000_design_version";
 import * as migration_20260610_060000_custom_icons from "./20260610_060000_custom_icons";
+import * as migration_20260610_061000_hero_background_fx from "./20260610_061000_hero_background_fx";
 
 export const migrations = [
   {
@@ -47,5 +48,10 @@ export const migrations = [
     up: migration_20260610_060000_custom_icons.up,
     down: migration_20260610_060000_custom_icons.down,
     name: "20260610_060000_custom_icons",
+  },
+  {
+    up: migration_20260610_061000_hero_background_fx.up,
+    down: migration_20260610_061000_hero_background_fx.down,
+    name: "20260610_061000_hero_background_fx",
   },
 ];

@@ -256,6 +256,10 @@ export interface HeroBlock {
    */
   backgroundVideo?: (number | null) | Media;
   /**
+   * Live animated background for DARK heroes — flowing True-Blue plasma lines over a subtle grid. Loads lazily, honours reduced motion (static gradient fallback) and pairs beautifully with the Pro design version.
+   */
+  backgroundFx?: ('none' | 'aurora') | null;
+  /**
    * Single: one background image/video. Carousel: cycle through multiple media items automatically.
    */
   heroMode?: ('single' | 'carousel') | null;
@@ -3130,6 +3134,7 @@ export interface HeroBlockSelect<T extends boolean = true> {
   tone?: T;
   backgroundImage?: T;
   backgroundVideo?: T;
+  backgroundFx?: T;
   heroMode?: T;
   carouselItems?:
     | T

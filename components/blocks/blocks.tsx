@@ -58,6 +58,7 @@ import type {
   VideoShowcaseBlock,
 } from "@/payload-types";
 import { HeroCarousel } from "./hero-carousel";
+import { HeroFx } from "./hero-fx";
 import { HeroMediaPanel, type HeroPanelItem } from "./hero-media-panel";
 import { PhotoStripClient } from "./photo-strip";
 import { CtaButtons, type Cta } from "./shared";
@@ -221,11 +222,16 @@ export async function HeroView({ block, isFirst }: { block: HeroBlock; isFirst: 
     >
       {dark && (
         <>
-          {/* Vertical depth gradient — softens the band instead of a flat fill. */}
-          <div
-            aria-hidden
-            className="from-ink-950 via-ink-900 to-ink-950 absolute inset-0 bg-gradient-to-b"
-          />
+          {/* Background: either the admin-chosen animated effect (Aurora WebGL,
+              lazy + reduced-motion safe) or the standard vertical depth gradient. */}
+          {block.backgroundFx === "aurora" ? (
+            <HeroFx fx="aurora" />
+          ) : (
+            <div
+              aria-hidden
+              className="from-ink-950 via-ink-900 to-ink-950 absolute inset-0 bg-gradient-to-b"
+            />
+          )}
           <div
             aria-hidden
             className="absolute inset-0 bg-[radial-gradient(60%_55%_at_18%_-5%,rgba(14,95,216,0.28),transparent_60%),radial-gradient(45%_40%_at_92%_8%,rgba(245,158,11,0.12),transparent_55%)]"

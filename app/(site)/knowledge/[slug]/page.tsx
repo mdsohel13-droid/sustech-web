@@ -3,11 +3,13 @@ import type { Metadata } from "next";
 import { draftMode } from "next/headers";
 import { notFound } from "next/navigation";
 import type { ComponentProps } from "react";
+import { CitedRichText } from "@/components/sections/cited-rich-text";
+import { SourcesReferences } from "@/components/sections/sources-references";
 import { JsonLd } from "@/components/seo/json-ld";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { Section } from "@/components/ui/section";
 import { getArticleBySlug } from "@/lib/payload";
-import { serverUrl } from "@/lib/seo";
+import { articleJsonLd } from "@/lib/seo";
 
 type RichData = ComponentProps<typeof RichText>["data"];
 
@@ -42,17 +44,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
   return (
     <>
-      <JsonLd
-        data={{
-          "@context": "https://schema.org",
-          "@type": "Article",
-          headline: a.title,
-          description: a.excerpt ?? undefined,
-          author: a.author ? { "@type": "Person", name: a.author } : undefined,
-          datePublished: a.publishedDate ?? undefined,
-          url: `${serverUrl}/knowledge/${a.slug}`,
-        }}
-      />
+      <JsonLd data={articleJsonLd(a, "/knowledge")} />
       <Section containerSize="default">
         <article className="mx-auto max-w-3xl">
           <Eyebrow>Knowledge</Eyebrow>
@@ -69,8 +61,10 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           )}
           {a.excerpt && <p className="text-lede text-text-soft mt-6">{a.excerpt}</p>}
           <div className="richtext mt-8">
-            <RichText data={a.body as RichData} />
+            <CitedRichText data={a.body as RichData} />
           </div>
+
+          <SourcesReferences citations={a.citations} />
 
           {faq.length > 0 && (
             <section className="mt-12">

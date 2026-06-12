@@ -11,6 +11,7 @@ import * as migration_20260610_062000_hero_fx_options from "./20260610_062000_he
 import * as migration_20260610_063000_nav_style from "./20260610_063000_nav_style";
 import * as migration_20260610_064000_nav_style_options from "./20260610_064000_nav_style_options";
 import * as migration_20260613_050000_leads_collection from "./20260613_050000_leads_collection";
+import * as migration_20260613_060000_citations_and_sources from "./20260613_060000_citations_and_sources";
 
 export const migrations = [
   {
@@ -77,5 +78,10 @@ export const migrations = [
     up: migration_20260613_050000_leads_collection.up,
     down: migration_20260613_050000_leads_collection.down,
     name: "20260613_050000_leads_collection",
+  },
+  {
+    up: migration_20260613_060000_citations_and_sources.up,
+    down: migration_20260613_060000_citations_and_sources.down,
+    name: "20260613_060000_citations_and_sources",
   },
 ];

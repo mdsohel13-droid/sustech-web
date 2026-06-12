@@ -23,8 +23,10 @@
  */
 import type { CollectionConfig } from "payload";
 import { isAdminOrEditor, isContentWriter, readPublished } from "../access";
+import { citationsField, claimsField } from "../fields/citations";
 import { seoField } from "../fields/seo";
 import { slugField } from "../fields/slug";
+import { citationGuard } from "../hooks/citation-guard";
 import { denyHermesPublish } from "../hooks/deny-hermes-publish";
 import { revalidateCollectionRoute, revalidateHomeAfterDelete } from "../hooks/revalidate";
 
@@ -56,6 +58,7 @@ export const NewsItems: CollectionConfig = {
   },
   versions: { drafts: { autosave: { interval: 375 } }, maxPerDoc: 20 },
   hooks: {
+    beforeValidate: [citationGuard],
     beforeChange: [denyHermesPublish],
     afterChange: [revalidateCollectionRoute("/news")],
     afterDelete: [revalidateHomeAfterDelete],
@@ -147,6 +150,10 @@ export const NewsItems: CollectionConfig = {
       admin: { description: "Keywords: solar, earthing, BESS, Bangladesh, etc." },
       fields: [{ name: "tag", type: "text", required: true }],
     },
+
+    // ── Citations (structured sources behind any numbers) ─────────────
+    citationsField,
+    claimsField,
 
     // ── GEO/AEO: FAQ (generates FAQPage schema) ───────────────────────
     {

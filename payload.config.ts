@@ -21,6 +21,7 @@ import { Projects } from "./cms/collections/projects";
 import { RfqRequests } from "./cms/collections/rfq-requests";
 import { Sectors } from "./cms/collections/sectors";
 import { Services } from "./cms/collections/services";
+import { Sources } from "./cms/collections/sources";
 import { Team } from "./cms/collections/team";
 import { Testimonials } from "./cms/collections/testimonials";
 import { Users } from "./cms/collections/Users";
@@ -58,6 +59,7 @@ export default buildConfig({
     Icons,
     RfqRequests,
     Leads,
+    Sources,
     Users,
   ],
   globals: [SiteSettings, Navigation],

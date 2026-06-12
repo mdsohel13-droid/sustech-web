@@ -85,6 +85,7 @@ export interface Config {
     icons: Icon;
     'rfq-requests': RfqRequest;
     leads: Lead;
+    sources: Source;
     users: User;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
@@ -112,6 +113,7 @@ export interface Config {
     icons: IconsSelect<false> | IconsSelect<true>;
     'rfq-requests': RfqRequestsSelect<false> | RfqRequestsSelect<true>;
     leads: LeadsSelect<false> | LeadsSelect<true>;
+    sources: SourcesSelect<false> | SourcesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
@@ -2459,6 +2461,52 @@ export interface Article {
     };
     [k: string]: unknown;
   };
+  /**
+   * Bibliography. Reference the nth entry in body copy with [cite:n]. Required for market-data / tariffs / policy / finance / calculations.
+   */
+  citations?:
+    | {
+        source: number | Source;
+        /**
+         * The exact claim in THIS document the source backs.
+         */
+        quotedClaim: string;
+        /**
+         * Deep link to the specific page/document.
+         */
+        url: string;
+        title?: string | null;
+        accessedDate: string;
+        sourcePublishedDate?: string | null;
+        /**
+         * e.g. "p. 14", "SRO No. 155", "Circular No. 02/2024".
+         */
+        locator?: string | null;
+        /**
+         * Refreshed by approved revisions.
+         */
+        lastVerifiedAt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Numbers stated in this document and where each comes from. Powers the claim-diff guard before auto-publish.
+   */
+  claims?:
+    | {
+        claimText?: string | null;
+        value?: string | null;
+        unit?: string | null;
+        sourceType?: ('registry-source' | 'company-catalog') | null;
+        /**
+         * 1-based index into citations[]. Empty only when sourceType = company-catalog.
+         */
+        citationIndex?: number | null;
+        hedge?: ('as-of-date' | 'up-to' | 'approx' | 'exact-verified') | null;
+        retrievedAt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   faq?:
     | {
         question: string;
@@ -2466,6 +2514,19 @@ export interface Article {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Drives citation enforcement (market-data / tariffs / policy / finance / calculations require ≥1 citation) and the nightly auto-update whitelist.
+   */
+  category:
+    | 'knowledge-explainer'
+    | 'market-data'
+    | 'tariffs'
+    | 'policy'
+    | 'finance'
+    | 'calculations'
+    | 'industry-news-roundup'
+    | 'glossary'
+    | 'company-update';
   /**
    * Search & social. Leave blank to use the site defaults.
    */
@@ -2491,6 +2552,57 @@ export interface Article {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * Authoritative sources behind every cited number. Seed with `pnpm seed:sources`. Not shown on the public site.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sources".
+ */
+export interface Source {
+  id: number;
+  name: string;
+  /**
+   * Canonical homepage.
+   */
+  url: string;
+  /**
+   * Specific page the nightly job hashes (tariff page, circular index).
+   */
+  checkUrl?: string | null;
+  tier: 'tier1-gov' | 'tier1-multilateral' | 'tier2-analyst' | 'tier3-press';
+  fetchMethod?: ('rss' | 'html' | 'pdf-link') | null;
+  /**
+   * Auto-flips to manual-only if robots.txt disallows.
+   */
+  fetchPolicy?: ('auto' | 'manual-only') | null;
+  checkFrequency?: ('daily' | 'weekly' | 'monthly' | 'quarterly') | null;
+  /**
+   * CSS selector isolating meaningful content (kills false diffs).
+   */
+  contentSelector?: string | null;
+  language?: ('en' | 'bn' | 'both') | null;
+  /**
+   * Cite headline + link only; never quote body.
+   */
+  paywalled?: boolean | null;
+  /**
+   * Per-source kill switch.
+   */
+  active?: boolean | null;
+  notes?: string | null;
+  lastContentHash?: string | null;
+  etag?: string | null;
+  lastModified?: string | null;
+  /**
+   * Alert at 3, auto-deactivate at 10.
+   */
+  consecutiveFailures?: number | null;
+  lastCheckedAt?: string | null;
+  lastChangedAt?: string | null;
+  robotsCheckedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * Calculators and sample documents shown in the Knowledge Hub. Toggle enabled/disabled without a code deploy.
@@ -2607,6 +2719,52 @@ export interface NewsItem {
   tags?:
     | {
         tag: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Bibliography. Reference the nth entry in body copy with [cite:n]. Required for market-data / tariffs / policy / finance / calculations.
+   */
+  citations?:
+    | {
+        source: number | Source;
+        /**
+         * The exact claim in THIS document the source backs.
+         */
+        quotedClaim: string;
+        /**
+         * Deep link to the specific page/document.
+         */
+        url: string;
+        title?: string | null;
+        accessedDate: string;
+        sourcePublishedDate?: string | null;
+        /**
+         * e.g. "p. 14", "SRO No. 155", "Circular No. 02/2024".
+         */
+        locator?: string | null;
+        /**
+         * Refreshed by approved revisions.
+         */
+        lastVerifiedAt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Numbers stated in this document and where each comes from. Powers the claim-diff guard before auto-publish.
+   */
+  claims?:
+    | {
+        claimText?: string | null;
+        value?: string | null;
+        unit?: string | null;
+        sourceType?: ('registry-source' | 'company-catalog') | null;
+        /**
+         * 1-based index into citations[]. Empty only when sourceType = company-catalog.
+         */
+        citationIndex?: number | null;
+        hedge?: ('as-of-date' | 'up-to' | 'approx' | 'exact-verified') | null;
+        retrievedAt?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -3098,6 +3256,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'leads';
         value: number | Lead;
+      } | null)
+    | ({
+        relationTo: 'sources';
+        value: number | Source;
       } | null)
     | ({
         relationTo: 'users';
@@ -4063,6 +4225,31 @@ export interface ArticlesSelect<T extends boolean = true> {
   publishedDate?: T;
   excerpt?: T;
   body?: T;
+  citations?:
+    | T
+    | {
+        source?: T;
+        quotedClaim?: T;
+        url?: T;
+        title?: T;
+        accessedDate?: T;
+        sourcePublishedDate?: T;
+        locator?: T;
+        lastVerifiedAt?: T;
+        id?: T;
+      };
+  claims?:
+    | T
+    | {
+        claimText?: T;
+        value?: T;
+        unit?: T;
+        sourceType?: T;
+        citationIndex?: T;
+        hedge?: T;
+        retrievedAt?: T;
+        id?: T;
+      };
   faq?:
     | T
     | {
@@ -4070,6 +4257,7 @@ export interface ArticlesSelect<T extends boolean = true> {
         answer?: T;
         id?: T;
       };
+  category?: T;
   seo?:
     | T
     | {
@@ -4122,6 +4310,31 @@ export interface NewsItemsSelect<T extends boolean = true> {
     | T
     | {
         tag?: T;
+        id?: T;
+      };
+  citations?:
+    | T
+    | {
+        source?: T;
+        quotedClaim?: T;
+        url?: T;
+        title?: T;
+        accessedDate?: T;
+        sourcePublishedDate?: T;
+        locator?: T;
+        lastVerifiedAt?: T;
+        id?: T;
+      };
+  claims?:
+    | T
+    | {
+        claimText?: T;
+        value?: T;
+        unit?: T;
+        sourceType?: T;
+        citationIndex?: T;
+        hedge?: T;
+        retrievedAt?: T;
         id?: T;
       };
   faq?:
@@ -4334,6 +4547,33 @@ export interface LeadsSelect<T extends boolean = true> {
         id?: T;
       };
   notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sources_select".
+ */
+export interface SourcesSelect<T extends boolean = true> {
+  name?: T;
+  url?: T;
+  checkUrl?: T;
+  tier?: T;
+  fetchMethod?: T;
+  fetchPolicy?: T;
+  checkFrequency?: T;
+  contentSelector?: T;
+  language?: T;
+  paywalled?: T;
+  active?: T;
+  notes?: T;
+  lastContentHash?: T;
+  etag?: T;
+  lastModified?: T;
+  consecutiveFailures?: T;
+  lastCheckedAt?: T;
+  lastChangedAt?: T;
+  robotsCheckedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }

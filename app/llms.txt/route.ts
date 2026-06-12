@@ -140,6 +140,11 @@ export async function GET() {
   if (articles.length > 0) {
     lines.push(`## Knowledge`);
     lines.push(``);
+    lines.push(
+      `> Articles cite authoritative sources (SREDA, BERC, Bangladesh Bank, World Bank, IEA, ` +
+        `et al.); each page carries a "Sources & references" section and Schema.org citation markup.`,
+    );
+    lines.push(``);
     for (const a of articles) {
       lines.push(mdLink(a.title, `/knowledge/${a.slug}`, a.excerpt));
     }

@@ -212,3 +212,42 @@ Website phases 0–7 keep their numbers; GrowthOS phases are **G0–G4** and run
 ---
 
 **Critique disposition:** fixes #1–#12 all applied (#1→§4.2/G0, #2→§5 G4/§6.1/§8.17, #3→§5 1b/§3 row 21, #4→§5 G3 gate, #5→§1.5/§3 rows 2·8·13·34/§8.23, #6→§3 rows 7·9/§5/§7.6, #7→§3 row 22/§8.24, #8→§4.2/§7.5/§8.22, #9→§4.1/§5 1b, #10→§4.2, #11→§3 row 25/§4.1/§6.5, #12→§3 rows 14·20·22/§4.3/§5 G4). None rejected; one upstream design reversed (chat backend remains on WebVPS, per #11).
+---
+
+## 9. Addendum (v1.1, 2026-06-12) — GrowthOS is a real platform; the track maps onto it
+
+**Discovery.** After v1.0 was written, the owner clarified that **GrowthOS is an existing, in-progress
+product**: Sustech's AI marketing/branding/sales platform — pnpm monorepo (`apps/api` Express+TS+Drizzle,
+`apps/web` React+Vite+Tailwind+shadcn, `packages/db`, `packages/shared`), deployed at
+**growth.sustechltd.com** on VPS-2 via GitHub push → webhook → n8n → `/opt/growthos/deploy.sh`. It has its
+own governance: `docs/02_schema.sql` is the DB source of truth, build phases live in
+`docs/04_BUILD_RUNBOOK.md`, a Cowork agent builds it on the owner's PC, and approval gates already cover
+schema migrations, first deploys, **and anything that posts to Facebook/LinkedIn, modifies ads, or spends
+money**. The playbook file living in that folder was therefore not a misfile — it is GrowthOS domain spec.
+
+**Verdict upgrade (replaces "beside it" plumbing, keeps every boundary).** The G-track (G0–G4) is not an
+ad-hoc collection of n8n workflows + a bare Postgres + NocoDB. **It is GrowthOS's product roadmap.** All
+v1.0 security boundaries stand unchanged — WebVPS lean/public, VPS-2 private/credentialed, no cross-DB
+links, consent doors. What changes is *where the VPS-2 side lives*:
+
+1. **Prospect registry → GrowthOS DB.** The `prospects` schema (§3 matrix, §4.2) becomes a requirements
+   input to `docs/02_schema.sql` — implemented by the Cowork agent through GrowthOS's own migration gate
+   (owner approval), not a parallel `growthos` Postgres created by anyone else. The database already exists.
+2. **NocoDB viewer: cut.** `apps/web` (Bangla labels, mobile-first) is the prospect/outreach/review UI.
+3. **n8n writes through GrowthOS API** (`apps/api`), never raw SQL — same app-routes-only rule both repos
+   already enforce. n8n keeps the cron clock (trigger scan, Sunday top-5, suppression sync, TTL purge).
+4. **Webhook contracts are now repo-to-repo:** sustech-web fires HMAC lead events → GrowthOS API;
+   GrowthOS/n8n calls sustech-web `POST /api/leads/ingest` (promotion door) and
+   `GET /api/leads/suppression-hashes`. Contracts in `docs/05_LEAD_ENGINE_INTEGRATION_BRIEF.md` (GrowthOS repo).
+5. **G4 ads + social posting are native GrowthOS territory** — its approval gate #3 already governs them.
+   Social campaigns (including the 3-day launch pack) execute through GrowthOS once those modules ship.
+6. **`hermes_locks` moves out of the product DB** → Hermes-owned store on VPS-2 (file-based lock + the
+   existing append-only journal), so server-ops coordination never depends on product-schema approvals.
+7. **Agent division hardened:** Claude Code never edits the GrowthOS repo; the GrowthOS Cowork agent never
+   edits sustech-web; Hermes never edits either (servers only). Handoff artifact between the two code
+   agents = the integration brief; the owner carries approvals both ways.
+8. **G-phase estimates (~8–12 ops/dev-days) stand** but are delivered as GrowthOS runbook phases under its
+   own acceptance criteria, evidence-in-STATE.md discipline, and phase approvals.
+
+**Net effect:** three engines, two codebases, one owner. sustech-web = Engine 2 (inbound surface);
+GrowthOS = Engines 1+3 (+ ads/social when gated on); n8n = the clock; Hermes = the floor they stand on.

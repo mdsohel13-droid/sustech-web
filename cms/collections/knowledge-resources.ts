@@ -22,6 +22,8 @@ export const CALC_TYPES = [
   { label: "Lightning Protection Zone (IEC 62305 Rolling Sphere)", value: "lightning-zone" },
   { label: "Solar Energy Yield Estimate", value: "solar-yield" },
   { label: "Diesel vs Lithium BESS — running cost", value: "diesel-vs-bess" },
+  { label: "ATM / branch UPS sizing", value: "atm-ups-sizing" },
+  { label: "Cost of power outages", value: "outage-cost" },
 ] as const;
 
 export type CalcType = (typeof CALC_TYPES)[number]["value"];
@@ -195,6 +197,25 @@ export const KnowledgeResources: CollectionConfig = {
       admin: {
         condition: (data) => data?.type === "sample",
         description: 'Text on the download button. Default: "Download".',
+      },
+    },
+
+    // ── Lead gate (master plan §3.3) ──────────────────────────────────────────
+    {
+      name: "gateLevel",
+      type: "select",
+      label: "Lead gate",
+      defaultValue: "open",
+      options: [
+        { label: "Open — no form (indexable)", value: "open" },
+        { label: "Email required", value: "email" },
+        { label: "Email + company required", value: "email-company" },
+      ],
+      admin: {
+        condition: (data) => data?.type === "sample",
+        description:
+          "Gated assets stay open & indexable (summary visible); only the file download is behind " +
+          "a short form that captures a consented lead and a signed 24-hour link.",
       },
     },
   ],

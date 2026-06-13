@@ -26,6 +26,7 @@ import { Team } from "./cms/collections/team";
 import { Testimonials } from "./cms/collections/testimonials";
 import { Users } from "./cms/collections/Users";
 import { Navigation } from "./cms/globals/navigation";
+import { NextBestActions } from "./cms/globals/next-best-actions";
 import { SiteSettings } from "./cms/globals/site-settings";
 import { TariffRates } from "./cms/globals/tariff-rates";
 
@@ -63,7 +64,7 @@ export default buildConfig({
     Sources,
     Users,
   ],
-  globals: [SiteSettings, Navigation, TariffRates],
+  globals: [SiteSettings, Navigation, TariffRates, NextBestActions],
   db: postgresAdapter({
     pool: { connectionString: process.env.DATABASE_URI },
     // `push` auto-syncs the DB schema from the collection configs — on by default

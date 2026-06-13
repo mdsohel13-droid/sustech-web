@@ -129,11 +129,13 @@ export interface Config {
     'site-settings': SiteSetting;
     navigation: Navigation;
     'tariff-rates': TariffRate;
+    'next-best-actions': NextBestAction;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     navigation: NavigationSelect<false> | NavigationSelect<true>;
     'tariff-rates': TariffRatesSelect<false> | TariffRatesSelect<true>;
+    'next-best-actions': NextBestActionsSelect<false> | NextBestActionsSelect<true>;
   };
   locale: null;
   widgets: {
@@ -203,6 +205,10 @@ export interface Page {
         | CTABandBlock
         | FAQBlock
         | CalculatorEmbedBlock
+        | GatedAssetBlock
+        | ProofStripBlock
+        | RelatedContentBlock
+        | NextBestActionBlock
         | ContactRFQBlock
         | SpacerBlock
       )[]
@@ -233,6 +239,12 @@ export interface Page {
    * Hint only — the live menu is controlled by Settings → Navigation.
    */
   showInNav?: boolean | null;
+  /**
+   * Tags this as a segment landing page. Powers next-best-action targeting and lead attribution.
+   */
+  segment?:
+    | ('none' | 'foreign-investor' | 'rmg-factory' | 'real-estate' | 'commercial-building' | 'bank-financial')
+    | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -2287,7 +2299,16 @@ export interface CalculatorEmbedBlock {
    * Embed a live, interactive calculator inline (it captures leads via the report gate). Leave empty to show a CTA card linking to /tools instead.
    */
   calcType?:
-    | ('solar-roi' | 'earthing-resistance' | 'cable-sizing' | 'lightning-zone' | 'solar-yield' | 'diesel-vs-bess')
+    | (
+        | 'solar-roi'
+        | 'earthing-resistance'
+        | 'cable-sizing'
+        | 'lightning-zone'
+        | 'solar-yield'
+        | 'diesel-vs-bess'
+        | 'atm-ups-sizing'
+        | 'outage-cost'
+      )
     | null;
   /**
    * CTA-card mode only (used when no inline calculator is selected).
@@ -2357,15 +2378,22 @@ export interface CalculatorEmbedBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ContactRFQBlock".
+ * via the `definition` "GatedAssetBlock".
  */
-export interface ContactRFQBlock {
+export interface GatedAssetBlock {
   heading?: string | null;
   /**
    * Quick colour override. Use 'Style & Animation' below for full control.
    */
   appearance?: ('default' | 'muted' | 'dark') | null;
-  subhead?: string | null;
+  /**
+   * Open, indexable description of the asset (AI engines cite this — make it substantive). Only the file download is gated.
+   */
+  summary?: string | null;
+  /**
+   * The downloadable asset (a 'sample document' resource with a gate level).
+   */
+  resource: number | KnowledgeResource;
   /**
    * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
    */
@@ -2425,18 +2453,240 @@ export interface ContactRFQBlock {
   };
   id?: string | null;
   blockName?: string | null;
-  blockType: 'contactRFQ';
+  blockType: 'gatedAsset';
+}
+/**
+ * Calculators and sample documents shown in the Knowledge Hub. Toggle enabled/disabled without a code deploy.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "knowledge-resources".
+ */
+export interface KnowledgeResource {
+  id: number;
+  title: string;
+  /**
+   * The URL path segment. Auto-filled from the title — edit only if you must.
+   */
+  slug: string;
+  /**
+   * Calculator = built-in interactive tool. Sample = downloadable document or link.
+   */
+  type: 'calculator' | 'sample';
+  /**
+   * Short description shown on the resource card (1–2 sentences).
+   */
+  description?: string | null;
+  /**
+   * Display order within the tab. Lower numbers appear first.
+   */
+  order?: number | null;
+  /**
+   * Tick to show in the Knowledge Hub. Untick to hide without deleting.
+   */
+  enabled?: boolean | null;
+  /**
+   * Which built-in calculator to render. New calc types require a developer deploy.
+   */
+  calcType?:
+    | (
+        | 'solar-roi'
+        | 'earthing-resistance'
+        | 'cable-sizing'
+        | 'lightning-zone'
+        | 'solar-yield'
+        | 'diesel-vs-bess'
+        | 'atm-ups-sizing'
+        | 'outage-cost'
+      )
+    | null;
+  /**
+   * Upload PDF, DOCX, or XLSX directly. If the file is large or already hosted elsewhere, use the External URL field below instead.
+   */
+  fileUpload?: (number | null) | Media;
+  /**
+   * Google Drive link, SharePoint URL, or any direct download link. Leave blank if you uploaded the file above.
+   */
+  fileUrl?: string | null;
+  /**
+   * Human-readable size, e.g. "420 KB" or "1.2 MB".
+   */
+  fileSize?: string | null;
+  fileFormat?: ('pdf' | 'docx' | 'xlsx' | 'image' | 'zip' | 'other') | null;
+  /**
+   * View opens the file in the browser (PDFs and images render inline); Download saves it to the visitor's device. Choose one or both.
+   */
+  openMode?: ('both' | 'view' | 'download') | null;
+  /**
+   * Text on the download button. Default: "Download".
+   */
+  downloadLabel?: string | null;
+  /**
+   * Gated assets stay open & indexable (summary visible); only the file download is behind a short form that captures a consented lead and a signed 24-hour link.
+   */
+  gateLevel?: ('open' | 'email' | 'email-company') | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "SpacerBlock".
+ * via the `definition` "ProofStripBlock".
  */
-export interface SpacerBlock {
-  size?: ('sm' | 'md' | 'lg') | null;
-  divider?: boolean | null;
+export interface ProofStripBlock {
+  heading?: string | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
+  appearance?: ('default' | 'muted' | 'dark') | null;
+  /**
+   * Optional — scope the proof (testimonial, client logos) to one sector for a segment page.
+   */
+  sector?: (number | null) | Sector;
+  /**
+   * Show the headline stats band (from Site Settings).
+   */
+  showStats?: boolean | null;
+  /**
+   * Show a client logo row.
+   */
+  showClients?: boolean | null;
+  /**
+   * Optional — feature one testimonial.
+   */
+  testimonial?: (number | null) | Testimonial;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
+     */
+    withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
+  };
   id?: string | null;
   blockName?: string | null;
-  blockType: 'spacer';
+  blockType: 'proofStrip';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "RelatedContentBlock".
+ */
+export interface RelatedContentBlock {
+  heading?: string | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
+  appearance?: ('default' | 'muted' | 'dark') | null;
+  mode?: ('auto' | 'manual') | null;
+  articles?: (number | Article)[] | null;
+  limit?: number | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
+     */
+    withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'relatedContent';
 }
 /**
  * Knowledge hub. Lives at /knowledge/[slug].
@@ -2616,63 +2866,163 @@ export interface Source {
   createdAt: string;
 }
 /**
- * Calculators and sample documents shown in the Knowledge Hub. Toggle enabled/disabled without a code deploy.
- *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "knowledge-resources".
+ * via the `definition` "NextBestActionBlock".
  */
-export interface KnowledgeResource {
-  id: number;
-  title: string;
+export interface NextBestActionBlock {
   /**
-   * The URL path segment. Auto-filled from the title — edit only if you must.
+   * Which rule to use from Lead Engine → Next-best actions.
    */
-  slug: string;
-  /**
-   * Calculator = built-in interactive tool. Sample = downloadable document or link.
-   */
-  type: 'calculator' | 'sample';
-  /**
-   * Short description shown on the resource card (1–2 sentences).
-   */
-  description?: string | null;
-  /**
-   * Display order within the tab. Lower numbers appear first.
-   */
-  order?: number | null;
-  /**
-   * Tick to show in the Knowledge Hub. Untick to hide without deleting.
-   */
-  enabled?: boolean | null;
-  /**
-   * Which built-in calculator to render. New calc types require a developer deploy.
-   */
-  calcType?:
-    | ('solar-roi' | 'earthing-resistance' | 'cable-sizing' | 'lightning-zone' | 'solar-yield' | 'diesel-vs-bess')
+  segment?:
+    | ('auto' | 'foreign-investor' | 'rmg-factory' | 'real-estate' | 'commercial-building' | 'bank-financial')
     | null;
   /**
-   * Upload PDF, DOCX, or XLSX directly. If the file is large or already hosted elsewhere, use the External URL field below instead.
+   * Quick colour override. Use 'Style & Animation' below for full control.
    */
-  fileUpload?: (number | null) | Media;
+  appearance?: ('default' | 'muted' | 'dark') | null;
   /**
-   * Google Drive link, SharePoint URL, or any direct download link. Leave blank if you uploaded the file above.
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
    */
-  fileUrl?: string | null;
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
+     */
+    withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'nextBestAction';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContactRFQBlock".
+ */
+export interface ContactRFQBlock {
+  heading?: string | null;
   /**
-   * Human-readable size, e.g. "420 KB" or "1.2 MB".
+   * Quick colour override. Use 'Style & Animation' below for full control.
    */
-  fileSize?: string | null;
-  fileFormat?: ('pdf' | 'docx' | 'xlsx' | 'image' | 'zip' | 'other') | null;
+  appearance?: ('default' | 'muted' | 'dark') | null;
+  subhead?: string | null;
   /**
-   * View opens the file in the browser (PDFs and images render inline); Download saves it to the visitor's device. Choose one or both.
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
    */
-  openMode?: ('both' | 'view' | 'download') | null;
-  /**
-   * Text on the download button. Default: "Download".
-   */
-  downloadLabel?: string | null;
-  updatedAt: string;
-  createdAt: string;
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
+     */
+    withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'contactRFQ';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SpacerBlock".
+ */
+export interface SpacerBlock {
+  size?: ('sm' | 'md' | 'lg') | null;
+  divider?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'spacer';
 }
 /**
  * Daily news feed — updated by the Hermes AI agent and/or editorial team. Lives at /news/[slug].
@@ -3361,6 +3711,10 @@ export interface PagesSelect<T extends boolean = true> {
         ctaBand?: T | CTABandBlockSelect<T>;
         faq?: T | FAQBlockSelect<T>;
         calculatorEmbed?: T | CalculatorEmbedBlockSelect<T>;
+        gatedAsset?: T | GatedAssetBlockSelect<T>;
+        proofStrip?: T | ProofStripBlockSelect<T>;
+        relatedContent?: T | RelatedContentBlockSelect<T>;
+        nextBestAction?: T | NextBestActionBlockSelect<T>;
         contactRFQ?: T | ContactRFQBlockSelect<T>;
         spacer?: T | SpacerBlockSelect<T>;
       };
@@ -3374,6 +3728,7 @@ export interface PagesSelect<T extends boolean = true> {
         noindex?: T;
       };
   showInNav?: T;
+  segment?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -4034,6 +4389,123 @@ export interface CalculatorEmbedBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GatedAssetBlock_select".
+ */
+export interface GatedAssetBlockSelect<T extends boolean = true> {
+  heading?: T;
+  appearance?: T;
+  summary?: T;
+  resource?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+        gapBelow?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProofStripBlock_select".
+ */
+export interface ProofStripBlockSelect<T extends boolean = true> {
+  heading?: T;
+  appearance?: T;
+  sector?: T;
+  showStats?: T;
+  showClients?: T;
+  testimonial?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+        gapBelow?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "RelatedContentBlock_select".
+ */
+export interface RelatedContentBlockSelect<T extends boolean = true> {
+  heading?: T;
+  appearance?: T;
+  mode?: T;
+  articles?: T;
+  limit?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+        gapBelow?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "NextBestActionBlock_select".
+ */
+export interface NextBestActionBlockSelect<T extends boolean = true> {
+  segment?: T;
+  appearance?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+        gapBelow?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ContactRFQBlock_select".
  */
 export interface ContactRFQBlockSelect<T extends boolean = true> {
@@ -4315,6 +4787,7 @@ export interface KnowledgeResourcesSelect<T extends boolean = true> {
   fileFormat?: T;
   openMode?: T;
   downloadLabel?: T;
+  gateLevel?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -5049,6 +5522,32 @@ export interface TariffRate {
   createdAt?: string | null;
 }
 /**
+ * Per-segment call-to-action rules used by the Next-best-action block.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "next-best-actions".
+ */
+export interface NextBestAction {
+  id: number;
+  rules?:
+    | {
+        segment: 'foreign-investor' | 'rmg-factory' | 'real-estate' | 'commercial-building' | 'bank-financial';
+        /**
+         * Short line above the button.
+         */
+        note?: string | null;
+        ctaLabel: string;
+        ctaHref: string;
+        id?: string | null;
+      }[]
+    | null;
+  fallbackLabel?: string | null;
+  fallbackHref?: string | null;
+  fallbackNote?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings_select".
  */
@@ -5249,6 +5748,27 @@ export interface TariffRatesSelect<T extends boolean = true> {
   dieselVerifiedAt?: T;
   bessRoundTripEfficiency?: T;
   solarYieldKwhPerKwpDay?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "next-best-actions_select".
+ */
+export interface NextBestActionsSelect<T extends boolean = true> {
+  rules?:
+    | T
+    | {
+        segment?: T;
+        note?: T;
+        ctaLabel?: T;
+        ctaHref?: T;
+        id?: T;
+      };
+  fallbackLabel?: T;
+  fallbackHref?: T;
+  fallbackNote?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

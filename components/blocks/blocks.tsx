@@ -34,23 +34,32 @@ import {
   getTestimonials,
 } from "@/lib/payload";
 import { getCalcMeta } from "@/components/calculators/calculator-registry";
+import { GatedAssetForm } from "@/components/sections/gated-asset";
 import { toTariffSnapshot } from "@/lib/tariffs";
+import { getCompanyStats, type CompanyStat } from "@/lib/company-facts";
+import { getRelatedArticles } from "@/lib/related-content";
+import { getNextBestActions } from "@/lib/payload";
 import { pagePath } from "@/cms/utils/preview";
 import type {
+  Article,
   ArticlesListBlock,
   CalculatorEmbedBlock,
   Client,
   ContactRFQBlock,
   CTABandBlock,
   FAQBlock,
+  GatedAssetBlock,
   HeroBlock,
   ImageGalleryBlock,
   LogoWallBlock,
   Media,
+  NextBestActionBlock,
   PartnerBarBlock,
   Product,
   ProductShowcaseBlock,
   Project,
+  ProofStripBlock,
+  RelatedContentBlock,
   Sector,
   Service,
   SpacerBlock,
@@ -1577,6 +1586,247 @@ export async function CalculatorEmbedView({ block }: { block: CalculatorEmbedBlo
               </Link>
             </Button>
           </div>
+        </div>
+      </Reveal>
+    </Section>
+  );
+}
+
+// --- GatedAsset (open summary + gated download form) ------------------------
+
+export function GatedAssetView({ block }: { block: GatedAssetBlock }) {
+  const bs = resolveBlockStyle(getBlockStyle(block), block.appearance);
+  const resource = block.resource && typeof block.resource === "object" ? block.resource : null;
+  const gateLevel = (resource?.gateLevel ?? "open") as "open" | "email" | "email-company";
+  const openHref =
+    (resource?.fileUpload && typeof resource.fileUpload === "object"
+      ? resource.fileUpload.url
+      : null) ||
+    resource?.fileUrl ||
+    "#";
+
+  return (
+    <Section
+      tone={bs.tone}
+      width={bs.width}
+      paddingSize={bs.paddingSize}
+      align={bs.textAlign}
+      headingSize={bs.headingSize}
+      headingFont={bs.headingFont}
+      eyebrowAccent={bs.accentColour}
+      withBorder={bs.withBorder}
+      headerAnimation={bs.animationStyle}
+    >
+      <Reveal animation={bs.animationStyle} delay={bs.delayMs}>
+        <div className="grid gap-8 md:grid-cols-[1fr_22rem] md:items-start">
+          <div>
+            {block.heading && (
+              <h2 className="text-h2 text-ink-900 font-semibold text-balance">{block.heading}</h2>
+            )}
+            {block.summary && (
+              <p className="text-text-soft mt-3 text-[1.0625rem] whitespace-pre-line">
+                {block.summary}
+              </p>
+            )}
+          </div>
+          <div>
+            {resource && gateLevel !== "open" ? (
+              <GatedAssetForm
+                resourceId={resource.id}
+                gateLevel={gateLevel}
+                downloadLabel={resource.downloadLabel}
+                fileFormat={resource.fileFormat}
+                fileSize={resource.fileSize}
+              />
+            ) : (
+              resource && (
+                <Button asChild>
+                  <Link href={openHref} prefetch={false} target="_blank" rel="noopener">
+                    {resource.downloadLabel ?? "Download"}{" "}
+                    <ArrowRight className="h-4 w-4" aria-hidden />
+                  </Link>
+                </Button>
+              )
+            )}
+          </div>
+        </div>
+      </Reveal>
+    </Section>
+  );
+}
+
+// --- ProofStrip (trust band for segment pages) ------------------------------
+
+export async function ProofStripView({ block }: { block: ProofStripBlock }) {
+  const bs = resolveBlockStyle(getBlockStyle(block), block.appearance);
+  const sectorId =
+    block.sector && typeof block.sector === "object" ? block.sector.id : (block.sector ?? null);
+
+  const [stats, clients] = await Promise.all([
+    block.showStats !== false
+      ? getCompanyStats()
+      : Promise.resolve({} as Record<string, CompanyStat>),
+    block.showClients !== false ? getClients() : Promise.resolve([] as Client[]),
+  ]);
+
+  const statList = Object.values(stats);
+  const clientLogos = clients
+    .filter((c) => {
+      if (!sectorId) return true;
+      const secs = (c.sectors ?? []).map((s) => (typeof s === "object" ? s.id : s));
+      return secs.includes(sectorId);
+    })
+    .map((c) => ({ name: c.name, logo: mediaUrl(c.logo) }))
+    .filter((c) => c.logo)
+    .slice(0, 8);
+
+  const testimonial =
+    block.testimonial && typeof block.testimonial === "object" ? block.testimonial : null;
+
+  return (
+    <Section
+      tone={bs.tone}
+      width={bs.width}
+      paddingSize={bs.paddingSize}
+      align={bs.textAlign}
+      headingSize={bs.headingSize}
+      headingFont={bs.headingFont}
+      eyebrowAccent={bs.accentColour}
+      withBorder={bs.withBorder}
+      headerAnimation={bs.animationStyle}
+    >
+      <Reveal animation={bs.animationStyle} delay={bs.delayMs}>
+        {block.heading && (
+          <h2 className="text-h3 text-ink-900 mb-6 text-center font-semibold">{block.heading}</h2>
+        )}
+
+        {statList.length > 0 && (
+          <dl className="grid grid-cols-2 gap-6 sm:grid-cols-4">
+            {statList.map((s) => (
+              <div key={s.key} className="text-center">
+                <dt className="text-brand text-h2 font-bold">{s.display}</dt>
+                <dd className="text-text-soft mt-1 text-sm">{s.label}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+
+        {clientLogos.length > 0 && (
+          <ul className="mt-10 flex flex-wrap items-center justify-center gap-x-10 gap-y-6">
+            {clientLogos.map((c) => (
+              <li key={c.name} className="opacity-70 transition-opacity hover:opacity-100">
+                <Image
+                  src={c.logo!.url}
+                  alt={c.name}
+                  width={120}
+                  height={44}
+                  className="h-9 w-auto object-contain"
+                />
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {testimonial && (
+          <figure className="mx-auto mt-10 max-w-2xl text-center">
+            <Quote className="text-brand/30 mx-auto h-8 w-8" aria-hidden />
+            <blockquote className="text-ink-900 mt-3 text-lg font-medium text-balance">
+              “{testimonial.quote}”
+            </blockquote>
+            <figcaption className="text-text-soft mt-3 text-sm">
+              <span className="text-ink-900 font-semibold">{testimonial.person}</span>
+              {testimonial.role ? `, ${testimonial.role}` : ""} · {testimonial.company}
+            </figcaption>
+          </figure>
+        )}
+      </Reveal>
+    </Section>
+  );
+}
+
+// --- RelatedContent (rule-based internal links) -----------------------------
+
+export async function RelatedContentView({ block }: { block: RelatedContentBlock }) {
+  const bs = resolveBlockStyle(getBlockStyle(block), block.appearance);
+  const articles =
+    block.mode === "manual"
+      ? objs<Article>(block.articles)
+      : await getRelatedArticles({ limit: block.limit ?? 3 });
+  if (articles.length === 0) return null;
+
+  return (
+    <Section
+      tone={bs.tone}
+      width={bs.width}
+      paddingSize={bs.paddingSize}
+      align={bs.textAlign}
+      headingSize={bs.headingSize}
+      headingFont={bs.headingFont}
+      eyebrowAccent={bs.accentColour}
+      withBorder={bs.withBorder}
+      headerAnimation={bs.animationStyle}
+    >
+      <Reveal animation={bs.animationStyle} delay={bs.delayMs}>
+        <h2 className="text-h3 text-ink-900 mb-5 font-semibold">
+          {block.heading ?? "Related reading"}
+        </h2>
+        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {articles.map((a) => (
+            <li key={a.id}>
+              <Link
+                href={`/knowledge/${a.slug}`}
+                prefetch={false}
+                className="group border-border bg-surface hover:border-brand/40 block h-full rounded-xl border p-5 transition-colors"
+              >
+                <span className="text-ink-900 group-hover:text-brand block font-semibold text-balance">
+                  {a.title}
+                </span>
+                {a.excerpt && (
+                  <span className="text-text-soft mt-2 line-clamp-3 block text-sm">
+                    {a.excerpt}
+                  </span>
+                )}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </Reveal>
+    </Section>
+  );
+}
+
+// --- NextBestAction (per-segment CTA) ---------------------------------------
+
+export async function NextBestActionView({ block }: { block: NextBestActionBlock }) {
+  const bs = resolveBlockStyle(getBlockStyle(block), block.appearance);
+  const nba = await getNextBestActions();
+  const wanted = block.segment && block.segment !== "auto" ? block.segment : null;
+  const rule = wanted ? (nba.rules ?? []).find((r) => r.segment === wanted) : null;
+
+  const note = rule?.note ?? nba.fallbackNote ?? "Not sure where to start?";
+  const label = rule?.ctaLabel ?? nba.fallbackLabel ?? "Request a free assessment";
+  const href = rule?.ctaHref ?? nba.fallbackHref ?? "/request-quote";
+
+  return (
+    <Section
+      tone={bs.tone}
+      width={bs.width}
+      paddingSize={bs.paddingSize}
+      align={bs.textAlign}
+      headingSize={bs.headingSize}
+      headingFont={bs.headingFont}
+      eyebrowAccent={bs.accentColour}
+      withBorder={bs.withBorder}
+      headerAnimation={bs.animationStyle}
+    >
+      <Reveal animation={bs.animationStyle} delay={bs.delayMs}>
+        <div className="border-border bg-surface-2 flex flex-col items-center gap-4 rounded-xl border p-8 text-center">
+          {note && <p className="text-text-soft text-[1.0625rem]">{note}</p>}
+          <Button asChild size="lg">
+            <Link href={href} prefetch={false}>
+              {label} <ArrowRight className="h-4 w-4" aria-hidden />
+            </Link>
+          </Button>
         </div>
       </Reveal>
     </Section>

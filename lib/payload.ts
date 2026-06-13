@@ -10,6 +10,7 @@ import type {
   Media,
   Navigation,
   NewsItem,
+  NextBestAction,
   Page,
   Product,
   Project,
@@ -443,4 +444,14 @@ export const getTariffRates = unstable_cache(
   },
   ["tariff-rates"],
   { revalidate: 3600, tags: ["tariff-rates"] },
+);
+
+/** Next-best-action rules — cached; flush via revalidateTag('next-best-actions'). */
+export const getNextBestActions = unstable_cache(
+  async (): Promise<NextBestAction> => {
+    const payload = await getPayloadClient();
+    return payload.findGlobal({ slug: "next-best-actions", depth: 0 });
+  },
+  ["next-best-actions"],
+  { revalidate: 3600, tags: ["next-best-actions"] },
 );

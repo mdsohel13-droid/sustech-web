@@ -7,13 +7,17 @@ import {
   CTABandView,
   ContactRFQView,
   FAQView,
+  GatedAssetView,
   HeroView,
+  NextBestActionView,
+  RelatedContentView,
   ImageGalleryView,
   LogoWallView,
   PartnerBarView,
   PhotoStripView,
   ProductShowcaseView,
   ProjectsListView,
+  ProofStripView,
   RichTextView,
   SectorTilesView,
   ServicesGridView,
@@ -78,6 +82,14 @@ function BlockSwitch({
       return <FAQView block={block} />;
     case "calculatorEmbed":
       return <CalculatorEmbedView block={block} />;
+    case "gatedAsset":
+      return <GatedAssetView block={block} />;
+    case "proofStrip":
+      return <ProofStripView block={block} />;
+    case "relatedContent":
+      return <RelatedContentView block={block} />;
+    case "nextBestAction":
+      return <NextBestActionView block={block} />;
     case "contactRFQ":
       return <ContactRFQView block={block} />;
     case "spacer":

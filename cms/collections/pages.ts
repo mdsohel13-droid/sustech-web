@@ -53,5 +53,23 @@ export const Pages: CollectionConfig = {
         description: "Hint only — the live menu is controlled by Settings → Navigation.",
       },
     },
+    {
+      name: "segment",
+      type: "select",
+      options: [
+        { label: "— none —", value: "none" },
+        { label: "Foreign investor", value: "foreign-investor" },
+        { label: "RMG factory", value: "rmg-factory" },
+        { label: "Real estate developer", value: "real-estate" },
+        { label: "Commercial building", value: "commercial-building" },
+        { label: "Bank / financial", value: "bank-financial" },
+      ],
+      defaultValue: "none",
+      admin: {
+        position: "sidebar",
+        description:
+          "Tags this as a segment landing page. Powers next-best-action targeting and lead attribution.",
+      },
+    },
   ],
 };

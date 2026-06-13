@@ -540,6 +540,143 @@ const CalculatorEmbed: Block = {
   ],
 };
 
+const RelatedContent: Block = {
+  slug: "relatedContent",
+  interfaceName: "RelatedContentBlock",
+  labels: { singular: "Related content", plural: "Related content" },
+  fields: [
+    { type: "row", fields: [{ name: "heading", type: "text" }, appearance] },
+    {
+      name: "mode",
+      type: "radio",
+      defaultValue: "auto",
+      options: [
+        { label: "Auto (recent articles)", value: "auto" },
+        { label: "Choose manually", value: "manual" },
+      ],
+      admin: { layout: "horizontal" },
+    },
+    {
+      name: "articles",
+      type: "relationship",
+      relationTo: "articles",
+      hasMany: true,
+      admin: { condition: (_d, s) => s?.mode === "manual" },
+    },
+    {
+      name: "limit",
+      type: "number",
+      defaultValue: 3,
+      min: 1,
+      max: 6,
+      admin: { condition: (_d, s) => s?.mode !== "manual" },
+    },
+    blockStyleGroup,
+  ],
+};
+
+const NextBestAction: Block = {
+  slug: "nextBestAction",
+  interfaceName: "NextBestActionBlock",
+  labels: { singular: "Next-best action", plural: "Next-best actions" },
+  fields: [
+    {
+      type: "row",
+      fields: [
+        {
+          name: "segment",
+          type: "select",
+          options: [
+            { label: "Use page segment / fallback", value: "auto" },
+            { label: "Foreign investor", value: "foreign-investor" },
+            { label: "RMG factory", value: "rmg-factory" },
+            { label: "Real estate developer", value: "real-estate" },
+            { label: "Commercial building", value: "commercial-building" },
+            { label: "Bank / financial", value: "bank-financial" },
+          ],
+          defaultValue: "auto",
+          admin: { description: "Which rule to use from Lead Engine → Next-best actions." },
+        },
+        appearance,
+      ],
+    },
+    blockStyleGroup,
+  ],
+};
+
+const GatedAsset: Block = {
+  slug: "gatedAsset",
+  interfaceName: "GatedAssetBlock",
+  labels: { singular: "Gated asset", plural: "Gated assets" },
+  fields: [
+    { type: "row", fields: [{ name: "heading", type: "text" }, appearance] },
+    {
+      name: "summary",
+      type: "textarea",
+      admin: {
+        description:
+          "Open, indexable description of the asset (AI engines cite this — make it substantive). " +
+          "Only the file download is gated.",
+      },
+    },
+    {
+      name: "resource",
+      type: "relationship",
+      relationTo: "knowledge-resources",
+      required: true,
+      admin: {
+        description: "The downloadable asset (a 'sample document' resource with a gate level).",
+      },
+    },
+    blockStyleGroup,
+  ],
+};
+
+const ProofStrip: Block = {
+  slug: "proofStrip",
+  interfaceName: "ProofStripBlock",
+  labels: { singular: "Proof strip", plural: "Proof strips" },
+  fields: [
+    { type: "row", fields: [{ name: "heading", type: "text" }, appearance] },
+    {
+      name: "sector",
+      type: "relationship",
+      relationTo: "sectors",
+      admin: {
+        description:
+          "Optional — scope the proof (testimonial, client logos) to one sector for a segment page.",
+      },
+    },
+    {
+      type: "row",
+      fields: [
+        {
+          name: "showStats",
+          type: "checkbox",
+          defaultValue: true,
+          admin: {
+            width: "50%",
+            description: "Show the headline stats band (from Site Settings).",
+          },
+        },
+        {
+          name: "showClients",
+          type: "checkbox",
+          defaultValue: true,
+          admin: { width: "50%", description: "Show a client logo row." },
+        },
+      ],
+    },
+    {
+      name: "testimonial",
+      type: "relationship",
+      relationTo: "testimonials",
+      admin: { description: "Optional — feature one testimonial." },
+    },
+    blockStyleGroup,
+  ],
+};
+
 const ContactRFQ: Block = {
   slug: "contactRFQ",
   interfaceName: "ContactRFQBlock",
@@ -883,6 +1020,10 @@ export const layoutBlocks: Block[] = [
   CTABand,
   FAQ,
   CalculatorEmbed,
+  GatedAsset,
+  ProofStrip,
+  RelatedContent,
+  NextBestAction,
   ContactRFQ,
   Spacer,
 ];

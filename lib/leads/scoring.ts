@@ -85,3 +85,7 @@ export function scoreLead(input: ScoringInput): number {
 }
 
 export const isHot = (score: number): boolean => score >= HOT_THRESHOLD;
+
+/** Bucket a score into hot (≥60) / warm (30–59) / cold (<30). */
+export const temperatureOf = (score: number): "hot" | "warm" | "cold" =>
+  score >= HOT_THRESHOLD ? "hot" : score >= 30 ? "warm" : "cold";

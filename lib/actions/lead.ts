@@ -2,8 +2,8 @@
 
 import { headers } from "next/headers";
 import { serverCapture } from "@/lib/analytics/server";
-import { isHot } from "@/lib/leads/scoring";
-import { notifyLeadEvent } from "@/lib/leads/notify";
+import { isHot, temperatureOf } from "@/lib/leads/scoring";
+import { notifyLeadEvent, notifyOwnerLead } from "@/lib/leads/notify";
 import { upsertLead, type LeadTouch } from "@/lib/leads/upsert-lead";
 import { reportPath } from "@/lib/report-token";
 
@@ -63,6 +63,21 @@ export async function captureLead(
     source: touch.source,
     score: result.score,
     hot: isHot(result.score),
+    utm: touch.utm,
+  });
+  // Owner-facing alert (email + ERP forward) with full contact details.
+  notifyOwnerLead({
+    leadId: result.id,
+    name: touch.name,
+    email: touch.email,
+    phone: touch.phone,
+    company: touch.company,
+    segment: touch.segment,
+    source: touch.source,
+    score: result.score,
+    temperature: temperatureOf(result.score),
+    sourcePath: touch.sourcePath,
+    message: touch.message,
     utm: touch.utm,
   });
   serverCapture("lead_captured", {

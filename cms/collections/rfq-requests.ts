@@ -19,8 +19,8 @@ export const RfqRequests: CollectionConfig = {
         try {
           // Dynamic import avoids a config-load cycle (lib/payload imports the config).
           const { upsertLead } = await import("../../lib/leads/upsert-lead");
-          const { notifyLeadEvent } = await import("../../lib/leads/notify");
-          const { isHot } = await import("../../lib/leads/scoring");
+          const { notifyLeadEvent, notifyOwnerLead } = await import("../../lib/leads/notify");
+          const { isHot, temperatureOf } = await import("../../lib/leads/scoring");
           const result = await upsertLead({
             source: "rfq",
             name: doc.name,
@@ -37,6 +37,18 @@ export const RfqRequests: CollectionConfig = {
               source: "rfq",
               score: result.score,
               hot: isHot(result.score),
+            });
+            notifyOwnerLead({
+              leadId: result.id,
+              name: doc.name,
+              email: doc.email ?? undefined,
+              phone: doc.phone ?? undefined,
+              company: doc.company ?? undefined,
+              source: "rfq",
+              score: result.score,
+              temperature: temperatureOf(result.score),
+              sourcePath: doc.sourcePath ?? undefined,
+              message: doc.message,
             });
           }
         } catch (err) {

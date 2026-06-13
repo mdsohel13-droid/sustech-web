@@ -1,24 +1,36 @@
 # n8n — Lead → ERP consumer
 
 Ready-to-import workflow that turns the website's `LEAD_FORWARD_URL` posts into
-ERP/CRM records. **ERP credentials live only here, never on the website** — this
-is the boundary CLAUDE.md §9 requires.
+ERP/CRM records. It **verifies the website's HMAC signature**, then forwards the
+verified lead to one thin route inside the ERP — `POST /api/leads/from-web` —
+which owns the mapping into contact/opportunity/task. **ERP credentials live only
+inside the ERP**; n8n holds just a Bearer key; the website holds neither. This is
+the boundary CLAUDE.md §9 requires.
+
+> The thin ERP route (paste-ready reference + contract) is in
+> [`erp-thin-route.md`](erp-thin-route.md). Build that first, then wire n8n below.
+
+## Three secrets in play (don't mix them up)
+| Secret | Between | Set in |
+|---|---|---|
+| `LEAD_FORWARD_SECRET` | Website ↔ n8n (HMAC) | web `.env` **and** n8n Variables (must match) |
+| `ERP_WEB_INGEST_KEY` | n8n ↔ ERP (Bearer) | ERP `.env` **and** n8n credential (must match) |
+| (ERP's own DB/tRPC creds) | inside ERP only | ERP `.env` — **never** leaves the ERP |
 
 ## Import (2 minutes)
 
 1. n8n → **Workflows → Import from File** → `lead-to-erp.workflow.json`.
 2. Open the **Webhook** node, copy its **Production URL**
    (e.g. `https://n8n.sustechltd.com/webhook/lead-to-erp`).
-3. Set the shared secret so the workflow can verify signatures. Either:
+3. Set the HMAC secret so Verify HMAC can check signatures. Either:
    - n8n **Settings → Variables** → add `LEAD_FORWARD_SECRET` = the same random
      value you'll put on the web server, **or**
    - open the **Verify HMAC** node and replace `PASTE_LEAD_FORWARD_SECRET_HERE`.
-4. Open **ERP upsert** → point the URL at your ERP endpoint (or set env
-   `ERP_LEAD_UPSERT_URL`) and attach your ERP API-key credential
-   (Header Auth). This is the only node tied to your specific ERP.
-5. Open **Map → ERP shape** → rename `contact`/`opportunity`/`task` fields to
-   match your ERP's API. Nothing else needs editing.
-6. **Activate** the workflow.
+4. Open **ERP /from-web** → set the URL to the ERP route (or set n8n variable
+   `ERP_LEAD_INGEST_URL`), and attach a **Header Auth** credential:
+   name `Authorization`, value `Bearer <ERP_WEB_INGEST_KEY>`. This is the only
+   node tied to your ERP — no field mapping here; the ERP route does that.
+5. **Activate** the workflow.
 
 ## Then on the web server
 
@@ -31,8 +43,8 @@ LEAD_FORWARD_SECRET=<the same value you set in step 3>   # openssl rand -hex 32
 ## Flow
 
 ```
-Website (HMAC sign) ──POST──▶ Webhook ─▶ Verify HMAC ─▶ Map → ERP ─▶ ERP upsert ─▶ 200 OK
-                                            │ 401 if signature invalid (rejects forgery/replay)
+Website (HMAC sign) ─POST→ Webhook ─▶ Verify HMAC ─Bearer→ ERP /api/leads/from-web ─→ contact+opp+task
+                                         │ 401 if signature invalid (rejects forgery/replay)
 ```
 
 ## Test it
@@ -46,6 +58,8 @@ SIG=$(printf '%s' "$BODY" | openssl dgst -sha256 -hmac "$SECRET" | sed 's/^.* //
 curl -s -X POST "$URL" -H "Content-Type: application/json" -H "X-Signature: $SIG" -d "$BODY"
 # → {"ok":true}  and a record in the ERP. A wrong secret → execution fails at Verify HMAC.
 ```
+To test the ERP route by itself (before wiring n8n), see the `curl` at the bottom
+of [`erp-thin-route.md`](erp-thin-route.md).
 
 ## Notes
 - The Verify node reads the **raw body** before parsing — never re-stringify the
@@ -54,3 +68,5 @@ curl -s -X POST "$URL" -H "Content-Type: application/json" -H "X-Signature: $SIG
 - `neverError: true` on the ERP call means a transient ERP hiccup still returns
   200 to the website (the lead is already saved in `/admin → Leads`); add a
   retry / error-trigger branch if you want hard delivery guarantees.
+- **Idempotency lives in the ERP route**, not n8n — it upserts by email so repeat
+  submissions don't create duplicate contacts.

@@ -19,7 +19,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Verify the HMAC-SHA256 signature the website sends in X-Signature.\n// The secret MUST equal LEAD_FORWARD_SECRET set on the web server.\n// Set it in n8n → Credentials/Variables, or paste it below (less safe).\nconst crypto = require('crypto');\nconst SECRET = $env.LEAD_FORWARD_SECRET || 'PASTE_LEAD_FORWARD_SECRET_HERE';\n\nconst item = $input.first();\n// rawBody is the exact bytes the site signed — never re-stringify the parsed JSON.\nconst raw = item.binary && item.binary.data\n  ? Buffer.from(item.binary.data.data, 'base64').toString('utf8')\n  : (item.json.rawBody || JSON.stringify(item.json.body));\nconst headers = item.json.headers || {};\nconst sig = headers['x-signature'] || headers['X-Signature'] || '';\n\nconst expected = crypto.createHmac('sha256', SECRET).update(raw).digest('hex');\nconst a = Buffer.from(sig);\nconst b = Buffer.from(expected);\nconst ok = a.length === b.length && crypto.timingSafeEqual(a, b);\n\nif (!ok) {\n  // 401 — reject forged/replayed posts.\n  throw new Error('Invalid X-Signature');\n}\n\nconst lead = JSON.parse(raw);\nreturn [{ json: lead }];"
+        "jsCode": "// Verify the HMAC-SHA256 signature the website sends in X-Signature.\n// The secret MUST equal LEAD_FORWARD_SECRET set on the web server.\n// Set it in n8n → Settings → Variables, or paste it below (less safe).\nconst crypto = require('crypto');\nconst SECRET = $env.LEAD_FORWARD_SECRET || 'PASTE_LEAD_FORWARD_SECRET_HERE';\n\nconst item = $input.first();\n// rawBody is the exact bytes the site signed — never re-stringify the parsed JSON.\nconst raw = item.binary && item.binary.data\n  ? Buffer.from(item.binary.data.data, 'base64').toString('utf8')\n  : (item.json.rawBody || JSON.stringify(item.json.body));\nconst headers = item.json.headers || {};\nconst sig = headers['x-signature'] || headers['X-Signature'] || '';\n\nconst expected = crypto.createHmac('sha256', SECRET).update(raw).digest('hex');\nconst a = Buffer.from(sig);\nconst b = Buffer.from(expected);\nconst ok = a.length === b.length && crypto.timingSafeEqual(a, b);\n\nif (!ok) {\n  // 401 — reject forged/replayed posts.\n  throw new Error('Invalid X-Signature');\n}\n\n// Forward the verified lead AS-IS. The ERP's thin /from-web route owns the\n// mapping into contact/opportunity/task — keeping ERP logic in the ERP.\nconst lead = JSON.parse(raw);\nreturn [{ json: lead }];"
       },
       "id": "verify-hmac",
       "name": "Verify HMAC",
@@ -29,18 +29,8 @@
     },
     {
       "parameters": {
-        "jsCode": "// Map the website lead payload → your ERP/CRM contact + opportunity shape.\n// Adjust field names to match your ERP API. This is the ONLY node you must\n// customise; everything above is fixed by the website contract.\nconst d = $json;\n\nconst temp = d.temperature || 'cold';\nconst stage = temp === 'hot' ? 'qualified' : temp === 'warm' ? 'new' : 'lead';\n\nreturn [{\n  json: {\n    // — Contact —\n    contact: {\n      name: d.name || d.company || d.email,\n      email: d.email,\n      phone: d.phone || null,\n      company: d.company || null,\n      tags: ['website', d.segment, d.source].filter(Boolean)\n    },\n    // — Opportunity / deal —\n    opportunity: {\n      title: `${d.company || d.name || 'Web lead'} — ${d.segment || 'general'}`,\n      stage,\n      score: d.score ?? 0,\n      temperature: temp,\n      source: d.source || 'website',\n      sourcePage: d.sourcePath || null,\n      campaign: d.utm && d.utm.campaign ? d.utm.campaign : null,\n      note: d.message || null,\n      webLeadId: d.leadId ?? null,\n      capturedAt: d.ts || null\n    },\n    // — Follow-up task (hot leads = same-day) —\n    task: {\n      title: `Follow up: ${d.company || d.name || d.email}`,\n      priority: temp === 'hot' ? 'high' : 'normal',\n      dueInHours: temp === 'hot' ? 4 : 24\n    }\n  }\n}];"
-      },
-      "id": "map-to-erp",
-      "name": "Map → ERP shape",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [720, 320]
-    },
-    {
-      "parameters": {
         "method": "POST",
-        "url": "={{ $env.ERP_LEAD_UPSERT_URL || 'https://erp.sustechltd.com/api/leads/upsert' }}",
+        "url": "={{ $env.ERP_LEAD_INGEST_URL || 'http://localhost:3010/api/leads/from-web' }}",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendHeaders": true,
@@ -55,15 +45,15 @@
           "response": { "response": { "neverError": true } }
         }
       },
-      "id": "erp-upsert",
-      "name": "ERP upsert",
+      "id": "erp-ingest",
+      "name": "ERP /from-web",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [960, 320],
+      "position": [720, 320],
       "credentials": {
         "httpHeaderAuth": {
           "id": "REPLACE_WITH_ERP_CREDENTIAL_ID",
-          "name": "ERP API key"
+          "name": "ERP web-ingest key"
         }
       }
     },
@@ -77,7 +67,7 @@
       "name": "200 OK",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [1200, 320]
+      "position": [960, 320]
     }
   ],
   "connections": {
@@ -85,12 +75,9 @@
       "main": [[{ "node": "Verify HMAC", "type": "main", "index": 0 }]]
     },
     "Verify HMAC": {
-      "main": [[{ "node": "Map → ERP shape", "type": "main", "index": 0 }]]
+      "main": [[{ "node": "ERP /from-web", "type": "main", "index": 0 }]]
     },
-    "Map → ERP shape": {
-      "main": [[{ "node": "ERP upsert", "type": "main", "index": 0 }]]
-    },
-    "ERP upsert": {
+    "ERP /from-web": {
       "main": [[{ "node": "200 OK", "type": "main", "index": 0 }]]
     }
   },
@@ -100,6 +87,6 @@
   "pinData": {},
   "meta": {
     "templateId": "sustech-lead-to-erp",
-    "description": "Receives HMAC-signed leads from the Sustech website, verifies the signature, maps to the ERP contact/opportunity/task shape, and upserts. ERP credentials live ONLY in n8n — the website never holds them."
+    "description": "Receives HMAC-signed leads from the Sustech website, verifies the signature, and forwards the verified lead to the ERP's thin /api/leads/from-web route (Bearer auth). The ERP owns mapping into contact/opportunity/task. ERP credentials live ONLY in the ERP — n8n holds just the web-ingest Bearer key; the website holds neither."
   }
 }

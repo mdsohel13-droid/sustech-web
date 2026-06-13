@@ -5,6 +5,7 @@ import { serverCapture } from "@/lib/analytics/server";
 import { isHot } from "@/lib/leads/scoring";
 import { notifyLeadEvent } from "@/lib/leads/notify";
 import { upsertLead, type LeadTouch } from "@/lib/leads/upsert-lead";
+import { reportPath } from "@/lib/report-token";
 
 /**
  * captureLead — the one server action every first-party capture surface calls
@@ -38,7 +39,9 @@ function rateLimited(ip: string): boolean {
   return false;
 }
 
-export async function captureLead(input: CaptureLeadInput): Promise<{ ok: boolean }> {
+export async function captureLead(
+  input: CaptureLeadInput,
+): Promise<{ ok: boolean; reportPath?: string }> {
   if ((input.company_website ?? "").trim() !== "") return { ok: true }; // honeypot
 
   const allowedSources = new Set(["rfq", "chat", "calculator", "gated-asset"]);
@@ -69,5 +72,7 @@ export async function captureLead(input: CaptureLeadInput): Promise<{ ok: boolea
     created: result.created,
   });
 
-  return { ok: true };
+  // Calculator leads get a persistent, signed print-report link (master plan §3.3).
+  const path = touch.source === "calculator" && touch.calcPayload ? reportPath(result.id) : null;
+  return path ? { ok: true, reportPath: path } : { ok: true };
 }

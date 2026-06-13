@@ -1,0 +1,25 @@
+# Sustech Lead Engine — VPS crontab (Hermes installs on the web VPS)
+#
+# Set the timezone for cron to Asia/Dhaka, OR keep the system in UTC and use the
+# UTC equivalents shown in the comments (Dhaka = UTC+6, no DST).
+# Make the scripts executable: chmod +x scripts/ops/*.sh
+# Secrets come from the environment — source /var/www/sustechltd.com/.env.production
+# in a wrapper, or set them in the crontab's environment.
+#
+# These are the no-n8n stopgaps. The full nightly-source-watch (fetch + Anthropic
+# drafting) still needs n8n — see marketing/phase4-pipeline-ops.md.
+
+SHELL=/bin/bash
+APP=/var/www/sustechltd.com/app
+
+# Hourly: auto-publish sweep (shadow mode until enabled). Logs to a rotatable file.
+15 * * * *  set -a; . $APP/.env.production; set +a; $APP/scripts/ops/auto-publish-sweep.sh >> /var/log/sustech/sweep.log 2>&1
+
+# 08:00 Asia/Dhaka (= 02:00 UTC): daily owner report
+0 2 * * *   set -a; . $APP/.env.production; set +a; $APP/scripts/ops/daily-report.sh >> /var/log/sustech/daily-report.log 2>&1
+
+# 05:00 Asia/Dhaka (= 23:00 UTC): detect-only fallback if n8n missed the 04:00 run
+0 23 * * *  curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" "https://www.sustechltd.com/api/cron/nightly?mode=if-missed" >> /var/log/sustech/fallback.log 2>&1
+
+# Sunday 05:30 Asia/Dhaka (= Sun 23:30 UTC): weekly liveness heartbeat
+30 23 * * 0 curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" "https://www.sustechltd.com/api/cron/nightly?mode=heartbeat" >> /var/log/sustech/fallback.log 2>&1

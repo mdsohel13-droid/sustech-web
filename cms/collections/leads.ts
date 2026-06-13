@@ -192,5 +192,14 @@ export const Leads: CollectionConfig = {
       ],
     },
     { name: "notes", type: "textarea", admin: { description: "Free-form notes for follow-up." } },
+    {
+      name: "calcPayload",
+      type: "json",
+      admin: {
+        readOnly: true,
+        description:
+          "Calculator inputs/outputs captured with the lead (powers the emailed report). Set by code.",
+      },
+    },
   ],
 };

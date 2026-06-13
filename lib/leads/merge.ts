@@ -22,6 +22,8 @@ export interface LeadTouch {
    * unconditionally before calling here.
    */
   marketingOptIn?: boolean;
+  /** Calculator inputs/outputs captured with the lead (for the emailed report). */
+  calcPayload?: Record<string, unknown>;
 }
 
 export type LeadData = Partial<
@@ -42,6 +44,7 @@ export type LeadData = Partial<
     | "sourcePath"
     | "touches"
     | "notes"
+    | "calcPayload"
   >
 >;
 
@@ -80,7 +83,20 @@ export function sanitizeTouch(t: LeadTouch): LeadTouch {
         }
       : undefined,
     marketingOptIn: t.marketingOptIn === true,
+    calcPayload: boundedPayload(t.calcPayload),
   };
+}
+
+/** Keep only a small, JSON-serialisable calc payload (defensive size bound). */
+function boundedPayload(p: unknown): Record<string, unknown> | undefined {
+  if (!p || typeof p !== "object") return undefined;
+  try {
+    const json = JSON.stringify(p);
+    if (json.length > 8000) return undefined; // implausibly large → drop
+    return JSON.parse(json) as Record<string, unknown>;
+  } catch {
+    return undefined;
+  }
 }
 
 /**
@@ -109,6 +125,8 @@ export function mergeLead(existing: Lead | null, t: LeadTouch, now: Date): LeadD
     utmCampaign: existing?.utmCampaign ?? t.utm?.campaign ?? undefined,
     sourcePath: existing?.sourcePath ?? t.sourcePath ?? undefined,
     marketingOptIn: existing?.marketingOptIn || t.marketingOptIn === true,
+    // Latest calculator run wins (the emailed report reflects the most recent estimate).
+    calcPayload: t.calcPayload ?? existing?.calcPayload ?? undefined,
     touches,
   };
 

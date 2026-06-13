@@ -11,6 +11,11 @@ import * as migration_20260610_062000_hero_fx_options from "./20260610_062000_he
 import * as migration_20260610_063000_nav_style from "./20260610_063000_nav_style";
 import * as migration_20260610_064000_nav_style_options from "./20260610_064000_nav_style_options";
 import * as migration_20260613_050000_leads_collection from "./20260613_050000_leads_collection";
+import * as migration_20260613_060000_citations_and_sources from "./20260613_060000_citations_and_sources";
+import * as migration_20260613_080000_tariff_rates_and_calc_payload from "./20260613_080000_tariff_rates_and_calc_payload";
+import * as migration_20260613_100000_segments_gated_suggestions from "./20260613_100000_segments_gated_suggestions";
+import * as migration_20260613_120000_pipeline_approval from "./20260613_120000_pipeline_approval";
+import * as migration_20260613_140000_daily_reports from "./20260613_140000_daily_reports";
 
 export const migrations = [
   {
@@ -77,5 +82,30 @@ export const migrations = [
     up: migration_20260613_050000_leads_collection.up,
     down: migration_20260613_050000_leads_collection.down,
     name: "20260613_050000_leads_collection",
+  },
+  {
+    up: migration_20260613_060000_citations_and_sources.up,
+    down: migration_20260613_060000_citations_and_sources.down,
+    name: "20260613_060000_citations_and_sources",
+  },
+  {
+    up: migration_20260613_080000_tariff_rates_and_calc_payload.up,
+    down: migration_20260613_080000_tariff_rates_and_calc_payload.down,
+    name: "20260613_080000_tariff_rates_and_calc_payload",
+  },
+  {
+    up: migration_20260613_100000_segments_gated_suggestions.up,
+    down: migration_20260613_100000_segments_gated_suggestions.down,
+    name: "20260613_100000_segments_gated_suggestions",
+  },
+  {
+    up: migration_20260613_120000_pipeline_approval.up,
+    down: migration_20260613_120000_pipeline_approval.down,
+    name: "20260613_120000_pipeline_approval",
+  },
+  {
+    up: migration_20260613_140000_daily_reports.up,
+    down: migration_20260613_140000_daily_reports.down,
+    name: "20260613_140000_daily_reports",
   },
 ];

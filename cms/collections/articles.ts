@@ -1,7 +1,10 @@
 import type { CollectionConfig } from "payload";
 import { isAdminOrEditor, isContentWriter, readPublished } from "../access";
+import { categoryField, citationsField, claimsField } from "../fields/citations";
+import { revisionMetaField } from "../fields/revision-meta";
 import { seoField } from "../fields/seo";
 import { slugField } from "../fields/slug";
+import { citationGuard } from "../hooks/citation-guard";
 import { denyHermesPublish } from "../hooks/deny-hermes-publish";
 import { revalidateCollectionRoute, revalidateHomeAfterDelete } from "../hooks/revalidate";
 
@@ -20,8 +23,9 @@ export const Articles: CollectionConfig = {
     update: isContentWriter,
     delete: isAdminOrEditor,
   },
-  versions: { drafts: { autosave: { interval: 375 } }, maxPerDoc: 20 },
+  versions: { drafts: { autosave: { interval: 375 } }, maxPerDoc: 50 },
   hooks: {
+    beforeValidate: [citationGuard],
     beforeChange: [denyHermesPublish],
     afterChange: [revalidateCollectionRoute("/knowledge")],
     afterDelete: [revalidateHomeAfterDelete],
@@ -42,6 +46,8 @@ export const Articles: CollectionConfig = {
       admin: { description: "TL;DR / answer shown up top and in listings." },
     },
     { name: "body", type: "richText", required: true },
+    citationsField,
+    claimsField,
     {
       name: "faq",
       type: "array",
@@ -51,6 +57,8 @@ export const Articles: CollectionConfig = {
         { name: "answer", type: "textarea", required: true },
       ],
     },
+    categoryField,
+    revisionMetaField,
     seoField,
   ],
 };

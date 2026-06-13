@@ -23,8 +23,11 @@
  */
 import type { CollectionConfig } from "payload";
 import { isAdminOrEditor, isContentWriter, readPublished } from "../access";
+import { citationsField, claimsField } from "../fields/citations";
+import { revisionMetaField } from "../fields/revision-meta";
 import { seoField } from "../fields/seo";
 import { slugField } from "../fields/slug";
+import { citationGuard } from "../hooks/citation-guard";
 import { denyHermesPublish } from "../hooks/deny-hermes-publish";
 import { revalidateCollectionRoute, revalidateHomeAfterDelete } from "../hooks/revalidate";
 
@@ -54,8 +57,9 @@ export const NewsItems: CollectionConfig = {
     update: isContentWriter,
     delete: isAdminOrEditor,
   },
-  versions: { drafts: { autosave: { interval: 375 } }, maxPerDoc: 20 },
+  versions: { drafts: { autosave: { interval: 375 } }, maxPerDoc: 50 },
   hooks: {
+    beforeValidate: [citationGuard],
     beforeChange: [denyHermesPublish],
     afterChange: [revalidateCollectionRoute("/news")],
     afterDelete: [revalidateHomeAfterDelete],
@@ -148,6 +152,10 @@ export const NewsItems: CollectionConfig = {
       fields: [{ name: "tag", type: "text", required: true }],
     },
 
+    // ── Citations (structured sources behind any numbers) ─────────────
+    citationsField,
+    claimsField,
+
     // ── GEO/AEO: FAQ (generates FAQPage schema) ───────────────────────
     {
       name: "faq",
@@ -166,6 +174,9 @@ export const NewsItems: CollectionConfig = {
 
     // ── SEO ───────────────────────────────────────────────────────────
     seoField,
+
+    // ── Pipeline / revision state ─────────────────────────────────────
+    revisionMetaField,
 
     // ── Hermes metadata (for audit trail) ────────────────────────────
     {

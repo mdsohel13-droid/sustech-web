@@ -21,11 +21,18 @@ import { Projects } from "./cms/collections/projects";
 import { RfqRequests } from "./cms/collections/rfq-requests";
 import { Sectors } from "./cms/collections/sectors";
 import { Services } from "./cms/collections/services";
+import { DailyReports } from "./cms/collections/daily-reports";
+import { PipelineRuns } from "./cms/collections/pipeline-runs";
+import { PublishAudit } from "./cms/collections/publish-audit";
+import { Sources } from "./cms/collections/sources";
 import { Team } from "./cms/collections/team";
 import { Testimonials } from "./cms/collections/testimonials";
 import { Users } from "./cms/collections/Users";
+import { AutomationSettings } from "./cms/globals/automation-settings";
 import { Navigation } from "./cms/globals/navigation";
+import { NextBestActions } from "./cms/globals/next-best-actions";
 import { SiteSettings } from "./cms/globals/site-settings";
+import { TariffRates } from "./cms/globals/tariff-rates";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const serverURL = process.env.NEXT_PUBLIC_SERVER_URL ?? "http://localhost:4123";
@@ -58,9 +65,13 @@ export default buildConfig({
     Icons,
     RfqRequests,
     Leads,
+    Sources,
+    PipelineRuns,
+    PublishAudit,
+    DailyReports,
     Users,
   ],
-  globals: [SiteSettings, Navigation],
+  globals: [SiteSettings, Navigation, TariffRates, NextBestActions, AutomationSettings],
   db: postgresAdapter({
     pool: { connectionString: process.env.DATABASE_URI },
     // `push` auto-syncs the DB schema from the collection configs — on by default

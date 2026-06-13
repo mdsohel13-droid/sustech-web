@@ -23,6 +23,7 @@
 
 import type { ReactNode } from "react";
 import { AlertTriangle, RefreshCw } from "lucide-react";
+import { EmailReportGate, type ReportPayload } from "./email-report-gate";
 
 interface CalculatorShellProps {
   title: string;
@@ -35,6 +36,12 @@ interface CalculatorShellProps {
   hasResults: boolean;
   /** Called when the Reset button is clicked */
   onReset: () => void;
+  /**
+   * When present and results are showing, renders the "email me this report"
+   * lead-capture gate below the results (master plan §3.3). Results stay fully
+   * visible regardless — the gate is the emailed report, not the answer.
+   */
+  reportPayload?: ReportPayload | null;
 }
 
 export function CalculatorShell({
@@ -44,6 +51,7 @@ export function CalculatorShell({
   results,
   hasResults,
   onReset,
+  reportPayload,
 }: CalculatorShellProps) {
   return (
     <div className="w-full">
@@ -86,6 +94,9 @@ export function CalculatorShell({
           )}
         </div>
       </div>
+
+      {/* ── Lead-capture gate (results stay visible above) ───────────────── */}
+      {hasResults && reportPayload && <EmailReportGate payload={reportPayload} />}
 
       {/* ── Disclaimer ─────────────────────────────────────────────────── */}
       <p className="text-text-soft border-border mt-8 flex items-start gap-2 border-t pt-4 text-xs">

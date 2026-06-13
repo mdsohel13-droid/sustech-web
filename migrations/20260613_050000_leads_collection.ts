@@ -65,12 +65,23 @@ export async function up({ db, payload }: MigrateUpArgs): Promise<void> {
     CREATE INDEX IF NOT EXISTS "leads_created_at_idx" ON "public"."leads" ("created_at");
     CREATE INDEX IF NOT EXISTS "leads_touches_order_idx" ON "public"."leads_touches" ("_order");
     CREATE INDEX IF NOT EXISTS "leads_touches_parent_id_idx" ON "public"."leads_touches" ("_parent_id");
+
+    -- Admin document-lock join for the new collection (Payload push adds this).
+    ALTER TABLE "public"."payload_locked_documents_rels" ADD COLUMN IF NOT EXISTS "leads_id" integer;
+    DO $$ BEGIN
+      ALTER TABLE "public"."payload_locked_documents_rels"
+        ADD CONSTRAINT "payload_locked_documents_rels_leads_fk"
+        FOREIGN KEY ("leads_id") REFERENCES "public"."leads"("id") ON DELETE CASCADE;
+    EXCEPTION WHEN duplicate_object THEN null; END $$;
+    CREATE INDEX IF NOT EXISTS "payload_locked_documents_rels_leads_id_idx"
+      ON "public"."payload_locked_documents_rels" ("leads_id");
   `);
   payload.logger.info("Created leads + leads_touches (Lead Engine Phase 1).");
 }
 
 export async function down({ db, payload }: MigrateDownArgs): Promise<void> {
   await db.execute(sql`
+    ALTER TABLE "public"."payload_locked_documents_rels" DROP COLUMN IF EXISTS "leads_id";
     DROP TABLE IF EXISTS "public"."leads_touches";
     DROP TABLE IF EXISTS "public"."leads";
     DROP TYPE IF EXISTS "public"."enum_leads_segment";

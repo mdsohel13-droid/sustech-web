@@ -10,12 +10,14 @@ import type {
   Media,
   Navigation,
   NewsItem,
+  NextBestAction,
   Page,
   Product,
   Project,
   Sector,
   Service,
   SiteSetting,
+  TariffRate,
   Team,
   Testimonial,
 } from "@/payload-types";
@@ -429,4 +431,27 @@ export const getNavigation = unstable_cache(
   },
   ["navigation"],
   { revalidate: 3600, tags: ["navigation"] },
+);
+
+/**
+ * Tariff rates — cited electricity/diesel prices used by the calculators.
+ * Cached across ISR cycles; flush via revalidateTag('tariff-rates').
+ */
+export const getTariffRates = unstable_cache(
+  async (): Promise<TariffRate> => {
+    const payload = await getPayloadClient();
+    return payload.findGlobal({ slug: "tariff-rates", depth: 0 });
+  },
+  ["tariff-rates"],
+  { revalidate: 3600, tags: ["tariff-rates"] },
+);
+
+/** Next-best-action rules — cached; flush via revalidateTag('next-best-actions'). */
+export const getNextBestActions = unstable_cache(
+  async (): Promise<NextBestAction> => {
+    const payload = await getPayloadClient();
+    return payload.findGlobal({ slug: "next-best-actions", depth: 0 });
+  },
+  ["next-best-actions"],
+  { revalidate: 3600, tags: ["next-best-actions"] },
 );

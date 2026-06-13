@@ -85,6 +85,10 @@ export interface Config {
     icons: Icon;
     'rfq-requests': RfqRequest;
     leads: Lead;
+    sources: Source;
+    'pipeline-runs': PipelineRun;
+    'publish-audit': PublishAudit;
+    'daily-reports': DailyReport;
     users: User;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
@@ -112,6 +116,10 @@ export interface Config {
     icons: IconsSelect<false> | IconsSelect<true>;
     'rfq-requests': RfqRequestsSelect<false> | RfqRequestsSelect<true>;
     leads: LeadsSelect<false> | LeadsSelect<true>;
+    sources: SourcesSelect<false> | SourcesSelect<true>;
+    'pipeline-runs': PipelineRunsSelect<false> | PipelineRunsSelect<true>;
+    'publish-audit': PublishAuditSelect<false> | PublishAuditSelect<true>;
+    'daily-reports': DailyReportsSelect<false> | DailyReportsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
@@ -126,10 +134,16 @@ export interface Config {
   globals: {
     'site-settings': SiteSetting;
     navigation: Navigation;
+    'tariff-rates': TariffRate;
+    'next-best-actions': NextBestAction;
+    'automation-settings': AutomationSetting;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     navigation: NavigationSelect<false> | NavigationSelect<true>;
+    'tariff-rates': TariffRatesSelect<false> | TariffRatesSelect<true>;
+    'next-best-actions': NextBestActionsSelect<false> | NextBestActionsSelect<true>;
+    'automation-settings': AutomationSettingsSelect<false> | AutomationSettingsSelect<true>;
   };
   locale: null;
   widgets: {
@@ -199,6 +213,10 @@ export interface Page {
         | CTABandBlock
         | FAQBlock
         | CalculatorEmbedBlock
+        | GatedAssetBlock
+        | ProofStripBlock
+        | RelatedContentBlock
+        | NextBestActionBlock
         | ContactRFQBlock
         | SpacerBlock
       )[]
@@ -229,6 +247,12 @@ export interface Page {
    * Hint only — the live menu is controlled by Settings → Navigation.
    */
   showInNav?: boolean | null;
+  /**
+   * Tags this as a segment landing page. Powers next-best-action targeting and lead attribution.
+   */
+  segment?:
+    | ('none' | 'foreign-investor' | 'rmg-factory' | 'real-estate' | 'commercial-building' | 'bank-financial')
+    | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -2279,6 +2303,24 @@ export interface CalculatorEmbedBlock {
    */
   appearance?: ('default' | 'muted' | 'dark') | null;
   body?: string | null;
+  /**
+   * Embed a live, interactive calculator inline (it captures leads via the report gate). Leave empty to show a CTA card linking to /tools instead.
+   */
+  calcType?:
+    | (
+        | 'solar-roi'
+        | 'earthing-resistance'
+        | 'cable-sizing'
+        | 'lightning-zone'
+        | 'solar-yield'
+        | 'diesel-vs-bess'
+        | 'atm-ups-sizing'
+        | 'outage-cost'
+      )
+    | null;
+  /**
+   * CTA-card mode only (used when no inline calculator is selected).
+   */
   tool?: ('solarcalc' | 'roi') | null;
   ctaLabel?: string | null;
   /**
@@ -2341,6 +2383,591 @@ export interface CalculatorEmbedBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'calculatorEmbed';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GatedAssetBlock".
+ */
+export interface GatedAssetBlock {
+  heading?: string | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
+  appearance?: ('default' | 'muted' | 'dark') | null;
+  /**
+   * Open, indexable description of the asset (AI engines cite this — make it substantive). Only the file download is gated.
+   */
+  summary?: string | null;
+  /**
+   * The downloadable asset (a 'sample document' resource with a gate level).
+   */
+  resource: number | KnowledgeResource;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
+     */
+    withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'gatedAsset';
+}
+/**
+ * Calculators and sample documents shown in the Knowledge Hub. Toggle enabled/disabled without a code deploy.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "knowledge-resources".
+ */
+export interface KnowledgeResource {
+  id: number;
+  title: string;
+  /**
+   * The URL path segment. Auto-filled from the title — edit only if you must.
+   */
+  slug: string;
+  /**
+   * Calculator = built-in interactive tool. Sample = downloadable document or link.
+   */
+  type: 'calculator' | 'sample';
+  /**
+   * Short description shown on the resource card (1–2 sentences).
+   */
+  description?: string | null;
+  /**
+   * Display order within the tab. Lower numbers appear first.
+   */
+  order?: number | null;
+  /**
+   * Tick to show in the Knowledge Hub. Untick to hide without deleting.
+   */
+  enabled?: boolean | null;
+  /**
+   * Which built-in calculator to render. New calc types require a developer deploy.
+   */
+  calcType?:
+    | (
+        | 'solar-roi'
+        | 'earthing-resistance'
+        | 'cable-sizing'
+        | 'lightning-zone'
+        | 'solar-yield'
+        | 'diesel-vs-bess'
+        | 'atm-ups-sizing'
+        | 'outage-cost'
+      )
+    | null;
+  /**
+   * Upload PDF, DOCX, or XLSX directly. If the file is large or already hosted elsewhere, use the External URL field below instead.
+   */
+  fileUpload?: (number | null) | Media;
+  /**
+   * Google Drive link, SharePoint URL, or any direct download link. Leave blank if you uploaded the file above.
+   */
+  fileUrl?: string | null;
+  /**
+   * Human-readable size, e.g. "420 KB" or "1.2 MB".
+   */
+  fileSize?: string | null;
+  fileFormat?: ('pdf' | 'docx' | 'xlsx' | 'image' | 'zip' | 'other') | null;
+  /**
+   * View opens the file in the browser (PDFs and images render inline); Download saves it to the visitor's device. Choose one or both.
+   */
+  openMode?: ('both' | 'view' | 'download') | null;
+  /**
+   * Text on the download button. Default: "Download".
+   */
+  downloadLabel?: string | null;
+  /**
+   * Gated assets stay open & indexable (summary visible); only the file download is behind a short form that captures a consented lead and a signed 24-hour link.
+   */
+  gateLevel?: ('open' | 'email' | 'email-company') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProofStripBlock".
+ */
+export interface ProofStripBlock {
+  heading?: string | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
+  appearance?: ('default' | 'muted' | 'dark') | null;
+  /**
+   * Optional — scope the proof (testimonial, client logos) to one sector for a segment page.
+   */
+  sector?: (number | null) | Sector;
+  /**
+   * Show the headline stats band (from Site Settings).
+   */
+  showStats?: boolean | null;
+  /**
+   * Show a client logo row.
+   */
+  showClients?: boolean | null;
+  /**
+   * Optional — feature one testimonial.
+   */
+  testimonial?: (number | null) | Testimonial;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
+     */
+    withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'proofStrip';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "RelatedContentBlock".
+ */
+export interface RelatedContentBlock {
+  heading?: string | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
+  appearance?: ('default' | 'muted' | 'dark') | null;
+  mode?: ('auto' | 'manual') | null;
+  articles?: (number | Article)[] | null;
+  limit?: number | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
+     */
+    withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'relatedContent';
+}
+/**
+ * Knowledge hub. Lives at /knowledge/[slug].
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "articles".
+ */
+export interface Article {
+  id: number;
+  title: string;
+  /**
+   * The URL path segment. Auto-filled from the title — edit only if you must.
+   */
+  slug: string;
+  author?: string | null;
+  publishedDate?: string | null;
+  /**
+   * TL;DR / answer shown up top and in listings.
+   */
+  excerpt?: string | null;
+  body: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Bibliography. Reference the nth entry in body copy with [cite:n]. Required for market-data / tariffs / policy / finance / calculations.
+   */
+  citations?:
+    | {
+        source: number | Source;
+        /**
+         * The exact claim in THIS document the source backs.
+         */
+        quotedClaim: string;
+        /**
+         * Deep link to the specific page/document.
+         */
+        url: string;
+        title?: string | null;
+        accessedDate: string;
+        sourcePublishedDate?: string | null;
+        /**
+         * e.g. "p. 14", "SRO No. 155", "Circular No. 02/2024".
+         */
+        locator?: string | null;
+        /**
+         * Refreshed by approved revisions.
+         */
+        lastVerifiedAt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Numbers stated in this document and where each comes from. Powers the claim-diff guard before auto-publish.
+   */
+  claims?:
+    | {
+        claimText?: string | null;
+        value?: string | null;
+        unit?: string | null;
+        sourceType?: ('registry-source' | 'company-catalog') | null;
+        /**
+         * 1-based index into citations[]. Empty only when sourceType = company-catalog.
+         */
+        citationIndex?: number | null;
+        hedge?: ('as-of-date' | 'up-to' | 'approx' | 'exact-verified') | null;
+        retrievedAt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  faq?:
+    | {
+        question: string;
+        answer: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Drives citation enforcement (market-data / tariffs / policy / finance / calculations require ≥1 citation) and the nightly auto-update whitelist.
+   */
+  category:
+    | 'knowledge-explainer'
+    | 'market-data'
+    | 'tariffs'
+    | 'policy'
+    | 'finance'
+    | 'calculations'
+    | 'industry-news-roundup'
+    | 'glossary'
+    | 'company-update';
+  /**
+   * Set by the content pipeline. Read-only.
+   */
+  revisionMeta?: {
+    approvalState?: ('none' | 'pending' | 'approved' | 'rejected' | 'auto-published') | null;
+    triggeredBySource?: (number | null) | Source;
+    changeSummary?: string | null;
+    riskFlags?: ('pricing' | 'legal' | 'stat-claim' | 'tariff' | 'third-party-name')[] | null;
+    /**
+     * Set only when the approval email is DELIVERED — starts the 24 h clock.
+     */
+    pendingSince?: string | null;
+    /**
+     * A cited source changed; excluded from auto-publish until reviewed.
+     */
+    staleSource?: boolean | null;
+    tokenJti?: string | null;
+    decidedBy?: string | null;
+    decidedAt?: string | null;
+  };
+  /**
+   * Search & social. Leave blank to use the site defaults.
+   */
+  seo?: {
+    /**
+     * Overrides the page/site title.
+     */
+    title?: string | null;
+    /**
+     * Canonical URL (advanced; usually leave blank).
+     */
+    canonical?: string | null;
+    /**
+     * ~150–160 characters. Shown in search results and link previews.
+     */
+    description?: string | null;
+    /**
+     * Social share image (Open Graph), 1200×630.
+     */
+    image?: (number | null) | Media;
+    noindex?: boolean | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Authoritative sources behind every cited number. Seed with `pnpm seed:sources`. Not shown on the public site.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sources".
+ */
+export interface Source {
+  id: number;
+  name: string;
+  /**
+   * Canonical homepage.
+   */
+  url: string;
+  /**
+   * Specific page the nightly job hashes (tariff page, circular index).
+   */
+  checkUrl?: string | null;
+  tier: 'tier1-gov' | 'tier1-multilateral' | 'tier2-analyst' | 'tier3-press';
+  fetchMethod?: ('rss' | 'html' | 'pdf-link') | null;
+  /**
+   * Auto-flips to manual-only if robots.txt disallows.
+   */
+  fetchPolicy?: ('auto' | 'manual-only') | null;
+  checkFrequency?: ('daily' | 'weekly' | 'monthly' | 'quarterly') | null;
+  /**
+   * CSS selector isolating meaningful content (kills false diffs).
+   */
+  contentSelector?: string | null;
+  language?: ('en' | 'bn' | 'both') | null;
+  /**
+   * Cite headline + link only; never quote body.
+   */
+  paywalled?: boolean | null;
+  /**
+   * Per-source kill switch.
+   */
+  active?: boolean | null;
+  notes?: string | null;
+  lastContentHash?: string | null;
+  etag?: string | null;
+  lastModified?: string | null;
+  /**
+   * Alert at 3, auto-deactivate at 10.
+   */
+  consecutiveFailures?: number | null;
+  lastCheckedAt?: string | null;
+  lastChangedAt?: string | null;
+  robotsCheckedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "NextBestActionBlock".
+ */
+export interface NextBestActionBlock {
+  /**
+   * Which rule to use from Lead Engine → Next-best actions.
+   */
+  segment?:
+    | ('auto' | 'foreign-investor' | 'rmg-factory' | 'real-estate' | 'commercial-building' | 'bank-financial')
+    | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
+  appearance?: ('default' | 'muted' | 'dark') | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
+     */
+    withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'nextBestAction';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2426,130 +3053,6 @@ export interface SpacerBlock {
   blockType: 'spacer';
 }
 /**
- * Knowledge hub. Lives at /knowledge/[slug].
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "articles".
- */
-export interface Article {
-  id: number;
-  title: string;
-  /**
-   * The URL path segment. Auto-filled from the title — edit only if you must.
-   */
-  slug: string;
-  author?: string | null;
-  publishedDate?: string | null;
-  /**
-   * TL;DR / answer shown up top and in listings.
-   */
-  excerpt?: string | null;
-  body: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  faq?:
-    | {
-        question: string;
-        answer: string;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Search & social. Leave blank to use the site defaults.
-   */
-  seo?: {
-    /**
-     * Overrides the page/site title.
-     */
-    title?: string | null;
-    /**
-     * Canonical URL (advanced; usually leave blank).
-     */
-    canonical?: string | null;
-    /**
-     * ~150–160 characters. Shown in search results and link previews.
-     */
-    description?: string | null;
-    /**
-     * Social share image (Open Graph), 1200×630.
-     */
-    image?: (number | null) | Media;
-    noindex?: boolean | null;
-  };
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * Calculators and sample documents shown in the Knowledge Hub. Toggle enabled/disabled without a code deploy.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "knowledge-resources".
- */
-export interface KnowledgeResource {
-  id: number;
-  title: string;
-  /**
-   * The URL path segment. Auto-filled from the title — edit only if you must.
-   */
-  slug: string;
-  /**
-   * Calculator = built-in interactive tool. Sample = downloadable document or link.
-   */
-  type: 'calculator' | 'sample';
-  /**
-   * Short description shown on the resource card (1–2 sentences).
-   */
-  description?: string | null;
-  /**
-   * Display order within the tab. Lower numbers appear first.
-   */
-  order?: number | null;
-  /**
-   * Tick to show in the Knowledge Hub. Untick to hide without deleting.
-   */
-  enabled?: boolean | null;
-  /**
-   * Which built-in calculator to render. New calc types require a developer deploy.
-   */
-  calcType?: ('solar-roi' | 'earthing-resistance' | 'cable-sizing' | 'lightning-zone' | 'solar-yield') | null;
-  /**
-   * Upload PDF, DOCX, or XLSX directly. If the file is large or already hosted elsewhere, use the External URL field below instead.
-   */
-  fileUpload?: (number | null) | Media;
-  /**
-   * Google Drive link, SharePoint URL, or any direct download link. Leave blank if you uploaded the file above.
-   */
-  fileUrl?: string | null;
-  /**
-   * Human-readable size, e.g. "420 KB" or "1.2 MB".
-   */
-  fileSize?: string | null;
-  fileFormat?: ('pdf' | 'docx' | 'xlsx' | 'image' | 'zip' | 'other') | null;
-  /**
-   * View opens the file in the browser (PDFs and images render inline); Download saves it to the visitor's device. Choose one or both.
-   */
-  openMode?: ('both' | 'view' | 'download') | null;
-  /**
-   * Text on the download button. Default: "Download".
-   */
-  downloadLabel?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
  * Daily news feed — updated by the Hermes AI agent and/or editorial team. Lives at /news/[slug].
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2611,6 +3114,52 @@ export interface NewsItem {
       }[]
     | null;
   /**
+   * Bibliography. Reference the nth entry in body copy with [cite:n]. Required for market-data / tariffs / policy / finance / calculations.
+   */
+  citations?:
+    | {
+        source: number | Source;
+        /**
+         * The exact claim in THIS document the source backs.
+         */
+        quotedClaim: string;
+        /**
+         * Deep link to the specific page/document.
+         */
+        url: string;
+        title?: string | null;
+        accessedDate: string;
+        sourcePublishedDate?: string | null;
+        /**
+         * e.g. "p. 14", "SRO No. 155", "Circular No. 02/2024".
+         */
+        locator?: string | null;
+        /**
+         * Refreshed by approved revisions.
+         */
+        lastVerifiedAt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Numbers stated in this document and where each comes from. Powers the claim-diff guard before auto-publish.
+   */
+  claims?:
+    | {
+        claimText?: string | null;
+        value?: string | null;
+        unit?: string | null;
+        sourceType?: ('registry-source' | 'company-catalog') | null;
+        /**
+         * 1-based index into citations[]. Empty only when sourceType = company-catalog.
+         */
+        citationIndex?: number | null;
+        hedge?: ('as-of-date' | 'up-to' | 'approx' | 'exact-verified') | null;
+        retrievedAt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
    * Questions & answers related to this news. Each Q&A becomes FAQPage schema — the single highest-citability signal for AI engines. Add 2–5 per article.
    */
   faq?:
@@ -2641,6 +3190,26 @@ export interface NewsItem {
      */
     image?: (number | null) | Media;
     noindex?: boolean | null;
+  };
+  /**
+   * Set by the content pipeline. Read-only.
+   */
+  revisionMeta?: {
+    approvalState?: ('none' | 'pending' | 'approved' | 'rejected' | 'auto-published') | null;
+    triggeredBySource?: (number | null) | Source;
+    changeSummary?: string | null;
+    riskFlags?: ('pricing' | 'legal' | 'stat-claim' | 'tariff' | 'third-party-name')[] | null;
+    /**
+     * Set only when the approval email is DELIVERED — starts the 24 h clock.
+     */
+    pendingSince?: string | null;
+    /**
+     * A cited source changed; excluded from auto-publish until reviewed.
+     */
+    staleSource?: boolean | null;
+    tokenJti?: string | null;
+    decidedBy?: string | null;
+    decidedAt?: string | null;
   };
   /**
    * Set automatically by Hermes. Do not edit manually.
@@ -2876,6 +3445,113 @@ export interface Lead {
    * Free-form notes for follow-up.
    */
   notes?: string | null;
+  /**
+   * Calculator inputs/outputs captured with the lead (powers the emailed report). Set by code.
+   */
+  calcPayload?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Nightly source-watch runs (and fallback/heartbeat). Read-only.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pipeline-runs".
+ */
+export interface PipelineRun {
+  id: number;
+  runDate: string;
+  trigger: 'n8n' | 'fallback' | 'heartbeat';
+  sourcesChecked?: number | null;
+  sourcesChanged?: number | null;
+  draftsCreated?: number | null;
+  startedAt?: string | null;
+  finishedAt?: string | null;
+  errors?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Immutable publish/approval history. Cannot be edited or deleted.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publish-audit".
+ */
+export interface PublishAudit {
+  id: number;
+  at: string;
+  action:
+    | 'drafted'
+    | 'approval-email-sent'
+    | 'approval-email-delivered'
+    | 'approved-by-owner'
+    | 'rejected'
+    | 'auto-published-24h'
+    | 'killed'
+    | 'rolled-back';
+  docCollection?: string | null;
+  docId?: string | null;
+  versionIdFrom?: string | null;
+  versionIdTo?: string | null;
+  /**
+   * owner | pipeline | admin:<id> — auto-publish is never recorded as owner.
+   */
+  actor: string;
+  tokenJti?: string | null;
+  claimDiffSnapshot?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Archived morning reports (leads, traffic, approvals, pipeline). Read-only.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "daily-reports".
+ */
+export interface DailyReport {
+  id: number;
+  /**
+   * YYYY-MM-DD (Asia/Dhaka).
+   */
+  date: string;
+  generatedAt?: string | null;
+  /**
+   * Rendered report HTML (as emailed).
+   */
+  html?: string | null;
+  metrics?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -3100,6 +3776,22 @@ export interface PayloadLockedDocument {
         value: number | Lead;
       } | null)
     | ({
+        relationTo: 'sources';
+        value: number | Source;
+      } | null)
+    | ({
+        relationTo: 'pipeline-runs';
+        value: number | PipelineRun;
+      } | null)
+    | ({
+        relationTo: 'publish-audit';
+        value: number | PublishAudit;
+      } | null)
+    | ({
+        relationTo: 'daily-reports';
+        value: number | DailyReport;
+      } | null)
+    | ({
         relationTo: 'users';
         value: number | User;
       } | null);
@@ -3174,6 +3866,10 @@ export interface PagesSelect<T extends boolean = true> {
         ctaBand?: T | CTABandBlockSelect<T>;
         faq?: T | FAQBlockSelect<T>;
         calculatorEmbed?: T | CalculatorEmbedBlockSelect<T>;
+        gatedAsset?: T | GatedAssetBlockSelect<T>;
+        proofStrip?: T | ProofStripBlockSelect<T>;
+        relatedContent?: T | RelatedContentBlockSelect<T>;
+        nextBestAction?: T | NextBestActionBlockSelect<T>;
         contactRFQ?: T | ContactRFQBlockSelect<T>;
         spacer?: T | SpacerBlockSelect<T>;
       };
@@ -3187,6 +3883,7 @@ export interface PagesSelect<T extends boolean = true> {
         noindex?: T;
       };
   showInNav?: T;
+  segment?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -3822,8 +4519,126 @@ export interface CalculatorEmbedBlockSelect<T extends boolean = true> {
   heading?: T;
   appearance?: T;
   body?: T;
+  calcType?: T;
   tool?: T;
   ctaLabel?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+        gapBelow?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GatedAssetBlock_select".
+ */
+export interface GatedAssetBlockSelect<T extends boolean = true> {
+  heading?: T;
+  appearance?: T;
+  summary?: T;
+  resource?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+        gapBelow?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProofStripBlock_select".
+ */
+export interface ProofStripBlockSelect<T extends boolean = true> {
+  heading?: T;
+  appearance?: T;
+  sector?: T;
+  showStats?: T;
+  showClients?: T;
+  testimonial?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+        gapBelow?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "RelatedContentBlock_select".
+ */
+export interface RelatedContentBlockSelect<T extends boolean = true> {
+  heading?: T;
+  appearance?: T;
+  mode?: T;
+  articles?: T;
+  limit?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+        gapBelow?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "NextBestActionBlock_select".
+ */
+export interface NextBestActionBlockSelect<T extends boolean = true> {
+  segment?: T;
+  appearance?: T;
   style?:
     | T
     | {
@@ -4063,12 +4878,51 @@ export interface ArticlesSelect<T extends boolean = true> {
   publishedDate?: T;
   excerpt?: T;
   body?: T;
+  citations?:
+    | T
+    | {
+        source?: T;
+        quotedClaim?: T;
+        url?: T;
+        title?: T;
+        accessedDate?: T;
+        sourcePublishedDate?: T;
+        locator?: T;
+        lastVerifiedAt?: T;
+        id?: T;
+      };
+  claims?:
+    | T
+    | {
+        claimText?: T;
+        value?: T;
+        unit?: T;
+        sourceType?: T;
+        citationIndex?: T;
+        hedge?: T;
+        retrievedAt?: T;
+        id?: T;
+      };
   faq?:
     | T
     | {
         question?: T;
         answer?: T;
         id?: T;
+      };
+  category?: T;
+  revisionMeta?:
+    | T
+    | {
+        approvalState?: T;
+        triggeredBySource?: T;
+        changeSummary?: T;
+        riskFlags?: T;
+        pendingSince?: T;
+        staleSource?: T;
+        tokenJti?: T;
+        decidedBy?: T;
+        decidedAt?: T;
       };
   seo?:
     | T
@@ -4101,6 +4955,7 @@ export interface KnowledgeResourcesSelect<T extends boolean = true> {
   fileFormat?: T;
   openMode?: T;
   downloadLabel?: T;
+  gateLevel?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -4124,6 +4979,31 @@ export interface NewsItemsSelect<T extends boolean = true> {
         tag?: T;
         id?: T;
       };
+  citations?:
+    | T
+    | {
+        source?: T;
+        quotedClaim?: T;
+        url?: T;
+        title?: T;
+        accessedDate?: T;
+        sourcePublishedDate?: T;
+        locator?: T;
+        lastVerifiedAt?: T;
+        id?: T;
+      };
+  claims?:
+    | T
+    | {
+        claimText?: T;
+        value?: T;
+        unit?: T;
+        sourceType?: T;
+        citationIndex?: T;
+        hedge?: T;
+        retrievedAt?: T;
+        id?: T;
+      };
   faq?:
     | T
     | {
@@ -4139,6 +5019,19 @@ export interface NewsItemsSelect<T extends boolean = true> {
         description?: T;
         image?: T;
         noindex?: T;
+      };
+  revisionMeta?:
+    | T
+    | {
+        approvalState?: T;
+        triggeredBySource?: T;
+        changeSummary?: T;
+        riskFlags?: T;
+        pendingSince?: T;
+        staleSource?: T;
+        tokenJti?: T;
+        decidedBy?: T;
+        decidedAt?: T;
       };
   agentMeta?:
     | T
@@ -4334,6 +5227,79 @@ export interface LeadsSelect<T extends boolean = true> {
         id?: T;
       };
   notes?: T;
+  calcPayload?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sources_select".
+ */
+export interface SourcesSelect<T extends boolean = true> {
+  name?: T;
+  url?: T;
+  checkUrl?: T;
+  tier?: T;
+  fetchMethod?: T;
+  fetchPolicy?: T;
+  checkFrequency?: T;
+  contentSelector?: T;
+  language?: T;
+  paywalled?: T;
+  active?: T;
+  notes?: T;
+  lastContentHash?: T;
+  etag?: T;
+  lastModified?: T;
+  consecutiveFailures?: T;
+  lastCheckedAt?: T;
+  lastChangedAt?: T;
+  robotsCheckedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pipeline-runs_select".
+ */
+export interface PipelineRunsSelect<T extends boolean = true> {
+  runDate?: T;
+  trigger?: T;
+  sourcesChecked?: T;
+  sourcesChanged?: T;
+  draftsCreated?: T;
+  startedAt?: T;
+  finishedAt?: T;
+  errors?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publish-audit_select".
+ */
+export interface PublishAuditSelect<T extends boolean = true> {
+  at?: T;
+  action?: T;
+  docCollection?: T;
+  docId?: T;
+  versionIdFrom?: T;
+  versionIdTo?: T;
+  actor?: T;
+  tokenJti?: T;
+  claimDiffSnapshot?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "daily-reports_select".
+ */
+export interface DailyReportsSelect<T extends boolean = true> {
+  date?: T;
+  generatedAt?: T;
+  html?: T;
+  metrics?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -4737,6 +5703,96 @@ export interface Navigation {
   createdAt?: string | null;
 }
 /**
+ * Cited electricity & diesel prices used by the calculators. Update from the official BERC/utility notification and set the source URL + date. Human-edited only.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tariff-rates".
+ */
+export interface TariffRate {
+  id: number;
+  /**
+   * Indicative industrial flat rate.
+   */
+  industrialFlatBdtPerKwh: number;
+  commercialFlatBdtPerKwh: number;
+  /**
+   * e.g. "BERC Order No. … 2026".
+   */
+  electricitySourceLabel?: string | null;
+  electricitySourceUrl?: string | null;
+  /**
+   * Surfaced as "rates as of {date}".
+   */
+  electricityVerifiedAt?: string | null;
+  dieselPriceBdtPerLitre: number;
+  /**
+   * kWh produced per litre (typical 3.0–3.6).
+   */
+  dieselGenEfficiencyKwhPerLitre: number;
+  /**
+   * Servicing/oil per kWh.
+   */
+  dieselMaintenanceBdtPerKwh: number;
+  dieselSourceLabel?: string | null;
+  dieselSourceUrl?: string | null;
+  dieselVerifiedAt?: string | null;
+  /**
+   * Conservative LFP round-trip (0.90–0.95). Used as a floor, not the catalog ceiling.
+   */
+  bessRoundTripEfficiency: number;
+  /**
+   * Bangladesh avg daily yield per kWp (Global Solar Atlas).
+   */
+  solarYieldKwhPerKwpDay: number;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Per-segment call-to-action rules used by the Next-best-action block.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "next-best-actions".
+ */
+export interface NextBestAction {
+  id: number;
+  rules?:
+    | {
+        segment: 'foreign-investor' | 'rmg-factory' | 'real-estate' | 'commercial-building' | 'bank-financial';
+        /**
+         * Short line above the button.
+         */
+        note?: string | null;
+        ctaLabel: string;
+        ctaHref: string;
+        id?: string | null;
+      }[]
+    | null;
+  fallbackLabel?: string | null;
+  fallbackHref?: string | null;
+  fallbackNote?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Master switches for the nightly content pipeline. Auto-publish ships OFF — turn it on only after reviewing the shadow-mode logs.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "automation-settings".
+ */
+export interface AutomationSetting {
+  id: number;
+  /**
+   * When OFF, every draft waits for your explicit approval forever (recommended until trusted). When ON, low-risk prose-only edits in the whitelisted categories may publish 24 h after the approval email is delivered — still subject to the env switch, kill switch, claim-diff veto, category whitelist and daily cap.
+   */
+  autoPublishEnabled?: boolean | null;
+  /**
+   * Internal note (e.g. why auto-publish is on/off, who decided).
+   */
+  pipelineNote?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings_select".
  */
@@ -4915,6 +5971,60 @@ export interface NavigationSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tariff-rates_select".
+ */
+export interface TariffRatesSelect<T extends boolean = true> {
+  industrialFlatBdtPerKwh?: T;
+  commercialFlatBdtPerKwh?: T;
+  electricitySourceLabel?: T;
+  electricitySourceUrl?: T;
+  electricityVerifiedAt?: T;
+  dieselPriceBdtPerLitre?: T;
+  dieselGenEfficiencyKwhPerLitre?: T;
+  dieselMaintenanceBdtPerKwh?: T;
+  dieselSourceLabel?: T;
+  dieselSourceUrl?: T;
+  dieselVerifiedAt?: T;
+  bessRoundTripEfficiency?: T;
+  solarYieldKwhPerKwpDay?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "next-best-actions_select".
+ */
+export interface NextBestActionsSelect<T extends boolean = true> {
+  rules?:
+    | T
+    | {
+        segment?: T;
+        note?: T;
+        ctaLabel?: T;
+        ctaHref?: T;
+        id?: T;
+      };
+  fallbackLabel?: T;
+  fallbackHref?: T;
+  fallbackNote?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "automation-settings_select".
+ */
+export interface AutomationSettingsSelect<T extends boolean = true> {
+  autoPublishEnabled?: T;
+  pipelineNote?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

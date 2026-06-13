@@ -23,6 +23,7 @@
     "health": "node scripts/healthcheck.mjs",
     "seed": "node --import jiti/register cms/scripts/seed.ts",
     "seed:sources": "node --import jiti/register cms/scripts/seed-sources.ts",
+    "seed:leadengine": "node --import jiti/register cms/scripts/seed-leadengine.ts",
     "import:projects": "node --import jiti/register cms/scripts/import-projects.ts",
     "enrich:projects": "node --import jiti/register cms/scripts/enrich-projects.ts",
     "typecheck": "tsc --noEmit",

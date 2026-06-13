@@ -14,11 +14,18 @@
 
 import type { ComponentType } from "react";
 import type { CalcType } from "@/cms/collections/knowledge-resources";
+import type { TariffSnapshot } from "@/lib/tariffs";
 import { CableSizingCalculator } from "./cable-sizing-calculator";
+import { DieselVsBessCalculator } from "./diesel-vs-bess-calculator";
 import { EarthingResistanceCalculator } from "./earthing-resistance-calculator";
 import { LightningZoneCalculator } from "./lightning-zone-calculator";
 import { SolarRoiCalculator } from "./solar-roi-calculator";
 import { SolarYieldCalculator } from "./solar-yield-calculator";
+
+/** Props every calculator may receive. Rate-driven ones use `rates`; others ignore it. */
+export interface CalculatorProps {
+  rates?: TariffSnapshot;
+}
 
 export interface CalcMeta {
   title: string;
@@ -26,7 +33,7 @@ export interface CalcMeta {
   icon: string; // emoji fallback (text contexts)
   iconSrc: string; // static 3D icon (public/icons-3d, MIT Fluent set)
   category: string;
-  component: ComponentType;
+  component: ComponentType<CalculatorProps>;
   standards?: string[]; // relevant codes
 }
 
@@ -85,6 +92,17 @@ export const CALCULATOR_REGISTRY: Record<CalcType, CalcMeta> = {
     category: "Solar & Energy",
     component: SolarYieldCalculator,
     standards: ["IEC 61724", "IEC 61853"],
+  },
+  "diesel-vs-bess": {
+    title: "Diesel vs Lithium BESS",
+    description:
+      "Compare the monthly running cost of a diesel generator versus a grid/solar-charged " +
+      "LFP battery for backup, using cited Bangladesh tariffs. Emails a sourced report.",
+    icon: "🔋",
+    iconSrc: "/icons-3d/chart_increasing.webp",
+    category: "Solar & Energy",
+    component: DieselVsBessCalculator,
+    standards: ["BERC tariff", "BPC diesel price"],
   },
 };
 

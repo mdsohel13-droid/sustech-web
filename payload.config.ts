@@ -27,6 +27,7 @@ import { Testimonials } from "./cms/collections/testimonials";
 import { Users } from "./cms/collections/Users";
 import { Navigation } from "./cms/globals/navigation";
 import { SiteSettings } from "./cms/globals/site-settings";
+import { TariffRates } from "./cms/globals/tariff-rates";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const serverURL = process.env.NEXT_PUBLIC_SERVER_URL ?? "http://localhost:4123";
@@ -62,7 +63,7 @@ export default buildConfig({
     Sources,
     Users,
   ],
-  globals: [SiteSettings, Navigation],
+  globals: [SiteSettings, Navigation, TariffRates],
   db: postgresAdapter({
     pool: { connectionString: process.env.DATABASE_URI },
     // `push` auto-syncs the DB schema from the collection configs — on by default

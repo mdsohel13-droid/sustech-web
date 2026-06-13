@@ -19,6 +19,8 @@ import { Container } from "@/components/ui/container";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { Section } from "@/components/ui/section";
 import { CALCULATOR_REGISTRY, getCalcMeta } from "@/components/calculators/calculator-registry";
+import { getTariffRates } from "@/lib/payload";
+import { toTariffSnapshot } from "@/lib/tariffs";
 import { serverUrl } from "@/lib/seo";
 
 export const revalidate = 3600;
@@ -51,6 +53,8 @@ export default async function CalculatorPage({ params }: { params: Promise<{ typ
   if (!meta) notFound();
 
   const { component: CalcComponent } = meta;
+  // Cited rates for rate-driven calculators (others ignore the prop).
+  const rates = toTariffSnapshot(await getTariffRates());
 
   return (
     <>
@@ -157,7 +161,7 @@ export default async function CalculatorPage({ params }: { params: Promise<{ typ
 
       {/* Calculator body */}
       <Section>
-        <CalcComponent />
+        <CalcComponent rates={rates} />
       </Section>
 
       {/* Back link + CTA */}

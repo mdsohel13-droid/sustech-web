@@ -16,6 +16,7 @@ import type {
   Sector,
   Service,
   SiteSetting,
+  TariffRate,
   Team,
   Testimonial,
 } from "@/payload-types";
@@ -429,4 +430,17 @@ export const getNavigation = unstable_cache(
   },
   ["navigation"],
   { revalidate: 3600, tags: ["navigation"] },
+);
+
+/**
+ * Tariff rates — cited electricity/diesel prices used by the calculators.
+ * Cached across ISR cycles; flush via revalidateTag('tariff-rates').
+ */
+export const getTariffRates = unstable_cache(
+  async (): Promise<TariffRate> => {
+    const payload = await getPayloadClient();
+    return payload.findGlobal({ slug: "tariff-rates", depth: 0 });
+  },
+  ["tariff-rates"],
+  { revalidate: 3600, tags: ["tariff-rates"] },
 );

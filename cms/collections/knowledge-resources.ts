@@ -21,6 +21,7 @@ export const CALC_TYPES = [
   { label: "Cable Sizing — Voltage Drop Method", value: "cable-sizing" },
   { label: "Lightning Protection Zone (IEC 62305 Rolling Sphere)", value: "lightning-zone" },
   { label: "Solar Energy Yield Estimate", value: "solar-yield" },
+  { label: "Diesel vs Lithium BESS — running cost", value: "diesel-vs-bess" },
 ] as const;
 
 export type CalcType = (typeof CALC_TYPES)[number]["value"];

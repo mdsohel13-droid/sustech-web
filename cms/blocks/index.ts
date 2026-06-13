@@ -11,6 +11,7 @@
  * render correctly while editors migrate to the richer controls.
  */
 import type { Block, Field } from "payload";
+import { CALC_TYPES } from "../collections/knowledge-resources";
 import { ctaArray } from "../fields/link";
 import { blockStyleGroup } from "./style-fields";
 
@@ -515,9 +516,20 @@ const CalculatorEmbed: Block = {
     { type: "row", fields: [{ name: "heading", type: "text" }, appearance] },
     { name: "body", type: "textarea" },
     {
+      name: "calcType",
+      type: "select",
+      options: [...CALC_TYPES],
+      admin: {
+        description:
+          "Embed a live, interactive calculator inline (it captures leads via the report gate). " +
+          "Leave empty to show a CTA card linking to /tools instead.",
+      },
+    },
+    {
       name: "tool",
       type: "select",
       defaultValue: "solarcalc",
+      admin: { description: "CTA-card mode only (used when no inline calculator is selected)." },
       options: [
         { label: "SolarCalc Pro", value: "solarcalc" },
         { label: "ROI calculator", value: "roi" },

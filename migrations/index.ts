@@ -12,6 +12,7 @@ import * as migration_20260610_063000_nav_style from "./20260610_063000_nav_styl
 import * as migration_20260610_064000_nav_style_options from "./20260610_064000_nav_style_options";
 import * as migration_20260613_050000_leads_collection from "./20260613_050000_leads_collection";
 import * as migration_20260613_060000_citations_and_sources from "./20260613_060000_citations_and_sources";
+import * as migration_20260613_080000_tariff_rates_and_calc_payload from "./20260613_080000_tariff_rates_and_calc_payload";
 
 export const migrations = [
   {
@@ -83,5 +84,10 @@ export const migrations = [
     up: migration_20260613_060000_citations_and_sources.up,
     down: migration_20260613_060000_citations_and_sources.down,
     name: "20260613_060000_citations_and_sources",
+  },
+  {
+    up: migration_20260613_080000_tariff_rates_and_calc_payload.up,
+    down: migration_20260613_080000_tariff_rates_and_calc_payload.down,
+    name: "20260613_080000_tariff_rates_and_calc_payload",
   },
 ];

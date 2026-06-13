@@ -128,10 +128,12 @@ export interface Config {
   globals: {
     'site-settings': SiteSetting;
     navigation: Navigation;
+    'tariff-rates': TariffRate;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     navigation: NavigationSelect<false> | NavigationSelect<true>;
+    'tariff-rates': TariffRatesSelect<false> | TariffRatesSelect<true>;
   };
   locale: null;
   widgets: {
@@ -2281,6 +2283,15 @@ export interface CalculatorEmbedBlock {
    */
   appearance?: ('default' | 'muted' | 'dark') | null;
   body?: string | null;
+  /**
+   * Embed a live, interactive calculator inline (it captures leads via the report gate). Leave empty to show a CTA card linking to /tools instead.
+   */
+  calcType?:
+    | ('solar-roi' | 'earthing-resistance' | 'cable-sizing' | 'lightning-zone' | 'solar-yield' | 'diesel-vs-bess')
+    | null;
+  /**
+   * CTA-card mode only (used when no inline calculator is selected).
+   */
   tool?: ('solarcalc' | 'roi') | null;
   ctaLabel?: string | null;
   /**
@@ -2636,7 +2647,9 @@ export interface KnowledgeResource {
   /**
    * Which built-in calculator to render. New calc types require a developer deploy.
    */
-  calcType?: ('solar-roi' | 'earthing-resistance' | 'cable-sizing' | 'lightning-zone' | 'solar-yield') | null;
+  calcType?:
+    | ('solar-roi' | 'earthing-resistance' | 'cable-sizing' | 'lightning-zone' | 'solar-yield' | 'diesel-vs-bess')
+    | null;
   /**
    * Upload PDF, DOCX, or XLSX directly. If the file is large or already hosted elsewhere, use the External URL field below instead.
    */
@@ -3034,6 +3047,18 @@ export interface Lead {
    * Free-form notes for follow-up.
    */
   notes?: string | null;
+  /**
+   * Calculator inputs/outputs captured with the lead (powers the emailed report). Set by code.
+   */
+  calcPayload?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -3984,6 +4009,7 @@ export interface CalculatorEmbedBlockSelect<T extends boolean = true> {
   heading?: T;
   appearance?: T;
   body?: T;
+  calcType?: T;
   tool?: T;
   ctaLabel?: T;
   style?:
@@ -4547,6 +4573,7 @@ export interface LeadsSelect<T extends boolean = true> {
         id?: T;
       };
   notes?: T;
+  calcPayload?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -4977,6 +5004,51 @@ export interface Navigation {
   createdAt?: string | null;
 }
 /**
+ * Cited electricity & diesel prices used by the calculators. Update from the official BERC/utility notification and set the source URL + date. Human-edited only.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tariff-rates".
+ */
+export interface TariffRate {
+  id: number;
+  /**
+   * Indicative industrial flat rate.
+   */
+  industrialFlatBdtPerKwh: number;
+  commercialFlatBdtPerKwh: number;
+  /**
+   * e.g. "BERC Order No. … 2026".
+   */
+  electricitySourceLabel?: string | null;
+  electricitySourceUrl?: string | null;
+  /**
+   * Surfaced as "rates as of {date}".
+   */
+  electricityVerifiedAt?: string | null;
+  dieselPriceBdtPerLitre: number;
+  /**
+   * kWh produced per litre (typical 3.0–3.6).
+   */
+  dieselGenEfficiencyKwhPerLitre: number;
+  /**
+   * Servicing/oil per kWh.
+   */
+  dieselMaintenanceBdtPerKwh: number;
+  dieselSourceLabel?: string | null;
+  dieselSourceUrl?: string | null;
+  dieselVerifiedAt?: string | null;
+  /**
+   * Conservative LFP round-trip (0.90–0.95). Used as a floor, not the catalog ceiling.
+   */
+  bessRoundTripEfficiency: number;
+  /**
+   * Bangladesh avg daily yield per kWp (Global Solar Atlas).
+   */
+  solarYieldKwhPerKwpDay: number;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings_select".
  */
@@ -5155,6 +5227,28 @@ export interface NavigationSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tariff-rates_select".
+ */
+export interface TariffRatesSelect<T extends boolean = true> {
+  industrialFlatBdtPerKwh?: T;
+  commercialFlatBdtPerKwh?: T;
+  electricitySourceLabel?: T;
+  electricitySourceUrl?: T;
+  electricityVerifiedAt?: T;
+  dieselPriceBdtPerLitre?: T;
+  dieselGenEfficiencyKwhPerLitre?: T;
+  dieselMaintenanceBdtPerKwh?: T;
+  dieselSourceLabel?: T;
+  dieselSourceUrl?: T;
+  dieselVerifiedAt?: T;
+  bessRoundTripEfficiency?: T;
+  solarYieldKwhPerKwpDay?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

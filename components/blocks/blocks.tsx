@@ -29,9 +29,12 @@ import {
   getRecentMedia,
   getSectors,
   getServices,
+  getTariffRates,
   getTeam,
   getTestimonials,
 } from "@/lib/payload";
+import { getCalcMeta } from "@/components/calculators/calculator-registry";
+import { toTariffSnapshot } from "@/lib/tariffs";
 import { pagePath } from "@/cms/utils/preview";
 import type {
   ArticlesListBlock,
@@ -1499,8 +1502,44 @@ export function FAQView({ block }: { block: FAQBlock }) {
 
 // --- CalculatorEmbed (placeholder) ------------------------------------------
 
-export function CalculatorEmbedView({ block }: { block: CalculatorEmbedBlock }) {
+export async function CalculatorEmbedView({ block }: { block: CalculatorEmbedBlock }) {
   const bs = resolveBlockStyle(getBlockStyle(block), block.appearance);
+
+  // Inline mode: render the live, lead-capturing calculator directly on the page.
+  const meta = block.calcType ? getCalcMeta(block.calcType) : undefined;
+  if (meta) {
+    const CalcComponent = meta.component;
+    const rates = toTariffSnapshot(await getTariffRates());
+    return (
+      <Section
+        tone={bs.tone}
+        width={bs.width}
+        paddingSize={bs.paddingSize}
+        align={bs.textAlign}
+        headingSize={bs.headingSize}
+        headingFont={bs.headingFont}
+        eyebrowAccent={bs.accentColour}
+        withBorder={bs.withBorder}
+        headerAnimation={bs.animationStyle}
+      >
+        <Reveal animation={bs.animationStyle} delay={bs.delayMs}>
+          {block.heading && (
+            <h2 className="text-h2 text-ink-900 mb-2 font-semibold text-balance">
+              {block.heading}
+            </h2>
+          )}
+          {block.body && (
+            <p className="text-text-soft mb-6 max-w-2xl text-[1.0625rem]">{block.body}</p>
+          )}
+          <div className="border-border bg-surface rounded-xl border p-6 md:p-8">
+            <CalcComponent rates={rates} />
+          </div>
+        </Reveal>
+      </Section>
+    );
+  }
+
+  // CTA-card mode (default / legacy): link out to the tools hub.
   return (
     <Section
       tone={bs.tone}

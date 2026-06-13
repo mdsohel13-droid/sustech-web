@@ -22,10 +22,17 @@ the boundary CLAUDE.md §9 requires.
 1. n8n → **Workflows → Import from File** → `lead-to-erp.workflow.json`.
 2. Open the **Webhook** node, copy its **Production URL**
    (e.g. `https://n8n.sustechltd.com/webhook/lead-to-erp`).
-3. Set the HMAC secret so Verify HMAC can check signatures. Either:
-   - n8n **Settings → Variables** → add `LEAD_FORWARD_SECRET` = the same random
-     value you'll put on the web server, **or**
-   - open the **Verify HMAC** node and replace `PASTE_LEAD_FORWARD_SECRET_HERE`.
+3. Set the HMAC secret so Verify HMAC can check signatures. The node reads
+   `$env.LEAD_FORWARD_SECRET` — that's an **OS/process env var, not an n8n
+   "Variable"** (`$vars`). So either:
+   - add `LEAD_FORWARD_SECRET=<value>` to the **n8n container's environment**
+     (docker-compose `environment:` for the n8n service, same place as
+     `ERP_WEB_INGEST_KEY`) and restart n8n, **or**
+   - open the **Verify HMAC** node and replace `PASTE_LEAD_FORWARD_SECRET_HERE`
+     with the literal value.
+
+   ⚠️ Setting it under **Settings → Variables will NOT work** — `$env` doesn't
+   read `$vars`.
 4. Open **ERP /from-web** → set the URL to the ERP route (or set n8n variable
    `ERP_LEAD_INGEST_URL`), and attach a **Header Auth** credential:
    name `Authorization`, value `Bearer <ERP_WEB_INGEST_KEY>`. This is the only
@@ -70,3 +77,9 @@ of [`erp-thin-route.md`](erp-thin-route.md).
   retry / error-trigger branch if you want hard delivery guarantees.
 - **Idempotency lives in the ERP route**, not n8n — it upserts by email so repeat
   submissions don't create duplicate contacts.
+- **The ERP route must accept the website's full field set** (see the contract in
+  [`erp-thin-route.md`](erp-thin-route.md)): `name, email, phone, company,
+  segment, source, score, temperature, sourcePath, message, leadId, utm, ts`. In
+  particular the website sends **`message`** (not `notes`) and the enrichment
+  fields **`score`/`temperature`/`segment`/`utm.campaign`/`leadId`** — drop those
+  and the ERP can't prioritise hot leads or attribute the campaign.

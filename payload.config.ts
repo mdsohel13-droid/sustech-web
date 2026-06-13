@@ -10,6 +10,7 @@ import { Awards } from "./cms/collections/awards";
 import { JobOpenings } from "./cms/collections/job-openings";
 import { Partners } from "./cms/collections/partners";
 import { KnowledgeResources } from "./cms/collections/knowledge-resources";
+import { Leads } from "./cms/collections/leads";
 import { NewsItems } from "./cms/collections/news-items";
 import { Clients } from "./cms/collections/clients";
 import { Icons } from "./cms/collections/icons";
@@ -56,6 +57,7 @@ export default buildConfig({
     Media,
     Icons,
     RfqRequests,
+    Leads,
     Users,
   ],
   globals: [SiteSettings, Navigation],

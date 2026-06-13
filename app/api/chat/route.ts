@@ -20,6 +20,8 @@
  *   CHAT_WIDGET_SECRET — shared secret the n8n workflow checks
  */
 import { NextRequest, NextResponse } from "next/server";
+import { ANALYTICS_EVENTS } from "@/lib/analytics/events";
+import { serverCapture } from "@/lib/analytics/server";
 
 export const runtime = "nodejs";
 
@@ -41,6 +43,9 @@ function rateLimited(ip: string): boolean {
 
 const FALLBACK =
   "I’m having trouble right now. Please try again, or reach us via the Contact page.";
+
+// Visitor refs that already counted a "chat started" event (resets on deploy).
+const seenRefs = new Set<string>();
 
 // Shown when the upstream AI provider is rate-limited or erroring — actionable
 // and on-brand (the WhatsApp button is on every page), never a raw error dump.
@@ -88,6 +93,13 @@ export async function POST(req: NextRequest) {
   }
   const userRef =
     typeof body.user_ref === "string" ? body.user_ref.replace(/[^\w-]/g, "").slice(0, 64) : "web";
+
+  // Funnel analytics: count a conversation once per visitor (bounded memory).
+  if (!seenRefs.has(userRef)) {
+    if (seenRefs.size > 5000) seenRefs.clear();
+    seenRefs.add(userRef);
+    serverCapture(ANALYTICS_EVENTS.CHAT_STARTED, {});
+  }
 
   const endpoint = process.env.CHAT_N8N_ENDPOINT;
   const secret = process.env.CHAT_WIDGET_SECRET;

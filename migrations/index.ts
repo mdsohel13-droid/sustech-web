@@ -10,6 +10,7 @@ import * as migration_20260610_061000_hero_background_fx from "./20260610_061000
 import * as migration_20260610_062000_hero_fx_options from "./20260610_062000_hero_fx_options";
 import * as migration_20260610_063000_nav_style from "./20260610_063000_nav_style";
 import * as migration_20260610_064000_nav_style_options from "./20260610_064000_nav_style_options";
+import * as migration_20260613_050000_leads_collection from "./20260613_050000_leads_collection";
 
 export const migrations = [
   {
@@ -71,5 +72,10 @@ export const migrations = [
     up: migration_20260610_064000_nav_style_options.up,
     down: migration_20260610_064000_nav_style_options.down,
     name: "20260610_064000_nav_style_options",
+  },
+  {
+    up: migration_20260613_050000_leads_collection.up,
+    down: migration_20260613_050000_leads_collection.down,
+    name: "20260613_050000_leads_collection",
   },
 ];

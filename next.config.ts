@@ -70,6 +70,17 @@ const nextConfig: NextConfig = {
       { source: "/home", destination: "/", permanent: true },
     ];
   },
+  async rewrites() {
+    // First-party analytics proxy: the browser only ever talks to /ingest/*
+    // (same-origin — CSP connect-src 'self' stays intact, ad blockers don't
+    // recognise it), and Next proxies server-side to PostHog. No cookies,
+    // no third-party scripts. See lib/analytics/*.
+    const host = (process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://app.posthog.com").replace(
+      /\/$/,
+      "",
+    );
+    return [{ source: "/ingest/:path*", destination: `${host}/:path*` }];
+  },
 };
 
 // CSP is injected per-request via middleware.ts using a nonce-based approach.

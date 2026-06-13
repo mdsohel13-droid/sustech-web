@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import "@/styles/globals.css";
 import { cabinet, jetbrains, switzer } from "@/app/fonts";
+import { Analytics } from "@/components/analytics/analytics";
 import { AdaptivePillNav } from "@/components/layout/adaptive-pill-nav";
 import { DockNav } from "@/components/layout/dock-nav";
 import { EngagementWidgets } from "@/components/layout/engagement-widgets";
@@ -80,6 +81,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
         {/* CMS-driven WhatsApp + chatbot widgets (enabled/configured in Settings) */}
         <EngagementWidgets />
         <Footer columns={columns} settings={settings} />
+        <Analytics />
         <RevealFallback />
         <noscript>
           <style>{`[data-reveal]{opacity:1 !important;transform:none !important;}`}</style>

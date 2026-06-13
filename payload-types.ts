@@ -84,6 +84,7 @@ export interface Config {
     media: Media;
     icons: Icon;
     'rfq-requests': RfqRequest;
+    leads: Lead;
     users: User;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
@@ -110,6 +111,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     icons: IconsSelect<false> | IconsSelect<true>;
     'rfq-requests': RfqRequestsSelect<false> | RfqRequestsSelect<true>;
+    leads: LeadsSelect<false> | LeadsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
@@ -2815,6 +2817,69 @@ export interface RfqRequest {
   createdAt: string;
 }
 /**
+ * Consented hand-raisers from RFQ, chat, calculators, gated assets and outbound promotion. Sorted hottest-first by score.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "leads".
+ */
+export interface Lead {
+  id: number;
+  displayName?: string | null;
+  name?: string | null;
+  company?: string | null;
+  /**
+   * Stored lowercased; dedupe key.
+   */
+  email?: string | null;
+  phone?: string | null;
+  segment?: ('investor' | 'rmg' | 'real-estate' | 'commercial' | 'bank' | 'gov-ngo' | 'home' | 'other') | null;
+  /**
+   * First-touch source. Later touches append to the timeline.
+   */
+  source: 'rfq' | 'chat' | 'calculator' | 'gated-asset' | 'outbound' | 'manual';
+  /**
+   * Rule-based heat score (0–100). ≥60 = hot. Recomputed on every touch.
+   */
+  score?: number | null;
+  status?: ('new' | 'contacted' | 'qualified' | 'won' | 'lost') | null;
+  /**
+   * True only if the visitor ticked the (unticked) marketing checkbox themselves.
+   */
+  marketingOptIn?: boolean | null;
+  /**
+   * Set by the double-opt-in confirm link. Empty = unconfirmed.
+   */
+  optInConfirmedAt?: string | null;
+  /**
+   * Unsubscribe / opt-out. Exported (as a hash) to the outbound suppression feed.
+   */
+  doNotContact?: boolean | null;
+  utmSource?: string | null;
+  utmMedium?: string | null;
+  utmCampaign?: string | null;
+  /**
+   * Page the lead came from.
+   */
+  sourcePath?: string | null;
+  /**
+   * Append-only interaction history (newest last). Written by code on upsert.
+   */
+  touches?:
+    | {
+        at: string;
+        channel: string;
+        note?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Free-form notes for follow-up.
+   */
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Manage who can access the CMS and what they can do. Only a Super Admin can create or promote users.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3029,6 +3094,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'rfq-requests';
         value: number | RfqRequest;
+      } | null)
+    | ({
+        relationTo: 'leads';
+        value: number | Lead;
       } | null)
     | ({
         relationTo: 'users';
@@ -4232,6 +4301,39 @@ export interface RfqRequestsSelect<T extends boolean = true> {
   message?: T;
   status?: T;
   sourcePath?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "leads_select".
+ */
+export interface LeadsSelect<T extends boolean = true> {
+  displayName?: T;
+  name?: T;
+  company?: T;
+  email?: T;
+  phone?: T;
+  segment?: T;
+  source?: T;
+  score?: T;
+  status?: T;
+  marketingOptIn?: T;
+  optInConfirmedAt?: T;
+  doNotContact?: T;
+  utmSource?: T;
+  utmMedium?: T;
+  utmCampaign?: T;
+  sourcePath?: T;
+  touches?:
+    | T
+    | {
+        at?: T;
+        channel?: T;
+        note?: T;
+        id?: T;
+      };
+  notes?: T;
   updatedAt?: T;
   createdAt?: T;
 }

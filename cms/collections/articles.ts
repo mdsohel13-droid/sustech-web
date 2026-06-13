@@ -1,6 +1,7 @@
 import type { CollectionConfig } from "payload";
 import { isAdminOrEditor, isContentWriter, readPublished } from "../access";
 import { categoryField, citationsField, claimsField } from "../fields/citations";
+import { revisionMetaField } from "../fields/revision-meta";
 import { seoField } from "../fields/seo";
 import { slugField } from "../fields/slug";
 import { citationGuard } from "../hooks/citation-guard";
@@ -22,7 +23,7 @@ export const Articles: CollectionConfig = {
     update: isContentWriter,
     delete: isAdminOrEditor,
   },
-  versions: { drafts: { autosave: { interval: 375 } }, maxPerDoc: 20 },
+  versions: { drafts: { autosave: { interval: 375 } }, maxPerDoc: 50 },
   hooks: {
     beforeValidate: [citationGuard],
     beforeChange: [denyHermesPublish],
@@ -57,6 +58,7 @@ export const Articles: CollectionConfig = {
       ],
     },
     categoryField,
+    revisionMetaField,
     seoField,
   ],
 };

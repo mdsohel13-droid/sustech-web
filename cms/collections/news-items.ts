@@ -24,6 +24,7 @@
 import type { CollectionConfig } from "payload";
 import { isAdminOrEditor, isContentWriter, readPublished } from "../access";
 import { citationsField, claimsField } from "../fields/citations";
+import { revisionMetaField } from "../fields/revision-meta";
 import { seoField } from "../fields/seo";
 import { slugField } from "../fields/slug";
 import { citationGuard } from "../hooks/citation-guard";
@@ -56,7 +57,7 @@ export const NewsItems: CollectionConfig = {
     update: isContentWriter,
     delete: isAdminOrEditor,
   },
-  versions: { drafts: { autosave: { interval: 375 } }, maxPerDoc: 20 },
+  versions: { drafts: { autosave: { interval: 375 } }, maxPerDoc: 50 },
   hooks: {
     beforeValidate: [citationGuard],
     beforeChange: [denyHermesPublish],
@@ -173,6 +174,9 @@ export const NewsItems: CollectionConfig = {
 
     // ── SEO ───────────────────────────────────────────────────────────
     seoField,
+
+    // ── Pipeline / revision state ─────────────────────────────────────
+    revisionMetaField,
 
     // ── Hermes metadata (for audit trail) ────────────────────────────
     {

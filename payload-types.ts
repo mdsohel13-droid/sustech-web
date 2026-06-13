@@ -86,6 +86,8 @@ export interface Config {
     'rfq-requests': RfqRequest;
     leads: Lead;
     sources: Source;
+    'pipeline-runs': PipelineRun;
+    'publish-audit': PublishAudit;
     users: User;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
@@ -114,6 +116,8 @@ export interface Config {
     'rfq-requests': RfqRequestsSelect<false> | RfqRequestsSelect<true>;
     leads: LeadsSelect<false> | LeadsSelect<true>;
     sources: SourcesSelect<false> | SourcesSelect<true>;
+    'pipeline-runs': PipelineRunsSelect<false> | PipelineRunsSelect<true>;
+    'publish-audit': PublishAuditSelect<false> | PublishAuditSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
@@ -130,12 +134,14 @@ export interface Config {
     navigation: Navigation;
     'tariff-rates': TariffRate;
     'next-best-actions': NextBestAction;
+    'automation-settings': AutomationSetting;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     navigation: NavigationSelect<false> | NavigationSelect<true>;
     'tariff-rates': TariffRatesSelect<false> | TariffRatesSelect<true>;
     'next-best-actions': NextBestActionsSelect<false> | NextBestActionsSelect<true>;
+    'automation-settings': AutomationSettingsSelect<false> | AutomationSettingsSelect<true>;
   };
   locale: null;
   widgets: {
@@ -2789,6 +2795,26 @@ export interface Article {
     | 'glossary'
     | 'company-update';
   /**
+   * Set by the content pipeline. Read-only.
+   */
+  revisionMeta?: {
+    approvalState?: ('none' | 'pending' | 'approved' | 'rejected' | 'auto-published') | null;
+    triggeredBySource?: (number | null) | Source;
+    changeSummary?: string | null;
+    riskFlags?: ('pricing' | 'legal' | 'stat-claim' | 'tariff' | 'third-party-name')[] | null;
+    /**
+     * Set only when the approval email is DELIVERED — starts the 24 h clock.
+     */
+    pendingSince?: string | null;
+    /**
+     * A cited source changed; excluded from auto-publish until reviewed.
+     */
+    staleSource?: boolean | null;
+    tokenJti?: string | null;
+    decidedBy?: string | null;
+    decidedAt?: string | null;
+  };
+  /**
    * Search & social. Leave blank to use the site defaults.
    */
   seo?: {
@@ -3164,6 +3190,26 @@ export interface NewsItem {
     noindex?: boolean | null;
   };
   /**
+   * Set by the content pipeline. Read-only.
+   */
+  revisionMeta?: {
+    approvalState?: ('none' | 'pending' | 'approved' | 'rejected' | 'auto-published') | null;
+    triggeredBySource?: (number | null) | Source;
+    changeSummary?: string | null;
+    riskFlags?: ('pricing' | 'legal' | 'stat-claim' | 'tariff' | 'third-party-name')[] | null;
+    /**
+     * Set only when the approval email is DELIVERED — starts the 24 h clock.
+     */
+    pendingSince?: string | null;
+    /**
+     * A cited source changed; excluded from auto-publish until reviewed.
+     */
+    staleSource?: boolean | null;
+    tokenJti?: string | null;
+    decidedBy?: string | null;
+    decidedAt?: string | null;
+  };
+  /**
    * Set automatically by Hermes. Do not edit manually.
    */
   agentMeta?: {
@@ -3413,6 +3459,72 @@ export interface Lead {
   createdAt: string;
 }
 /**
+ * Nightly source-watch runs (and fallback/heartbeat). Read-only.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pipeline-runs".
+ */
+export interface PipelineRun {
+  id: number;
+  runDate: string;
+  trigger: 'n8n' | 'fallback' | 'heartbeat';
+  sourcesChecked?: number | null;
+  sourcesChanged?: number | null;
+  draftsCreated?: number | null;
+  startedAt?: string | null;
+  finishedAt?: string | null;
+  errors?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Immutable publish/approval history. Cannot be edited or deleted.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publish-audit".
+ */
+export interface PublishAudit {
+  id: number;
+  at: string;
+  action:
+    | 'drafted'
+    | 'approval-email-sent'
+    | 'approval-email-delivered'
+    | 'approved-by-owner'
+    | 'rejected'
+    | 'auto-published-24h'
+    | 'killed'
+    | 'rolled-back';
+  docCollection?: string | null;
+  docId?: string | null;
+  versionIdFrom?: string | null;
+  versionIdTo?: string | null;
+  /**
+   * owner | pipeline | admin:<id> — auto-publish is never recorded as owner.
+   */
+  actor: string;
+  tokenJti?: string | null;
+  claimDiffSnapshot?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Manage who can access the CMS and what they can do. Only a Super Admin can create or promote users.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3635,6 +3747,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'sources';
         value: number | Source;
+      } | null)
+    | ({
+        relationTo: 'pipeline-runs';
+        value: number | PipelineRun;
+      } | null)
+    | ({
+        relationTo: 'publish-audit';
+        value: number | PublishAudit;
       } | null)
     | ({
         relationTo: 'users';
@@ -4756,6 +4876,19 @@ export interface ArticlesSelect<T extends boolean = true> {
         id?: T;
       };
   category?: T;
+  revisionMeta?:
+    | T
+    | {
+        approvalState?: T;
+        triggeredBySource?: T;
+        changeSummary?: T;
+        riskFlags?: T;
+        pendingSince?: T;
+        staleSource?: T;
+        tokenJti?: T;
+        decidedBy?: T;
+        decidedAt?: T;
+      };
   seo?:
     | T
     | {
@@ -4851,6 +4984,19 @@ export interface NewsItemsSelect<T extends boolean = true> {
         description?: T;
         image?: T;
         noindex?: T;
+      };
+  revisionMeta?:
+    | T
+    | {
+        approvalState?: T;
+        triggeredBySource?: T;
+        changeSummary?: T;
+        riskFlags?: T;
+        pendingSince?: T;
+        staleSource?: T;
+        tokenJti?: T;
+        decidedBy?: T;
+        decidedAt?: T;
       };
   agentMeta?:
     | T
@@ -5074,6 +5220,39 @@ export interface SourcesSelect<T extends boolean = true> {
   lastCheckedAt?: T;
   lastChangedAt?: T;
   robotsCheckedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pipeline-runs_select".
+ */
+export interface PipelineRunsSelect<T extends boolean = true> {
+  runDate?: T;
+  trigger?: T;
+  sourcesChecked?: T;
+  sourcesChanged?: T;
+  draftsCreated?: T;
+  startedAt?: T;
+  finishedAt?: T;
+  errors?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publish-audit_select".
+ */
+export interface PublishAuditSelect<T extends boolean = true> {
+  at?: T;
+  action?: T;
+  docCollection?: T;
+  docId?: T;
+  versionIdFrom?: T;
+  versionIdTo?: T;
+  actor?: T;
+  tokenJti?: T;
+  claimDiffSnapshot?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -5548,6 +5727,25 @@ export interface NextBestAction {
   createdAt?: string | null;
 }
 /**
+ * Master switches for the nightly content pipeline. Auto-publish ships OFF — turn it on only after reviewing the shadow-mode logs.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "automation-settings".
+ */
+export interface AutomationSetting {
+  id: number;
+  /**
+   * When OFF, every draft waits for your explicit approval forever (recommended until trusted). When ON, low-risk prose-only edits in the whitelisted categories may publish 24 h after the approval email is delivered — still subject to the env switch, kill switch, claim-diff veto, category whitelist and daily cap.
+   */
+  autoPublishEnabled?: boolean | null;
+  /**
+   * Internal note (e.g. why auto-publish is on/off, who decided).
+   */
+  pipelineNote?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings_select".
  */
@@ -5769,6 +5967,17 @@ export interface NextBestActionsSelect<T extends boolean = true> {
   fallbackLabel?: T;
   fallbackHref?: T;
   fallbackNote?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "automation-settings_select".
+ */
+export interface AutomationSettingsSelect<T extends boolean = true> {
+  autoPublishEnabled?: T;
+  pipelineNote?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

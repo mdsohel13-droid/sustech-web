@@ -14,6 +14,7 @@ import * as migration_20260613_050000_leads_collection from "./20260613_050000_l
 import * as migration_20260613_060000_citations_and_sources from "./20260613_060000_citations_and_sources";
 import * as migration_20260613_080000_tariff_rates_and_calc_payload from "./20260613_080000_tariff_rates_and_calc_payload";
 import * as migration_20260613_100000_segments_gated_suggestions from "./20260613_100000_segments_gated_suggestions";
+import * as migration_20260613_120000_pipeline_approval from "./20260613_120000_pipeline_approval";
 
 export const migrations = [
   {
@@ -95,5 +96,10 @@ export const migrations = [
     up: migration_20260613_100000_segments_gated_suggestions.up,
     down: migration_20260613_100000_segments_gated_suggestions.down,
     name: "20260613_100000_segments_gated_suggestions",
+  },
+  {
+    up: migration_20260613_120000_pipeline_approval.up,
+    down: migration_20260613_120000_pipeline_approval.down,
+    name: "20260613_120000_pipeline_approval",
   },
 ];

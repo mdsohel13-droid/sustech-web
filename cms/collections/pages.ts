@@ -26,7 +26,7 @@ export const Pages: CollectionConfig = {
   },
   versions: {
     drafts: { autosave: { interval: 375 }, schedulePublish: true },
-    maxPerDoc: 20,
+    maxPerDoc: 50,
   },
   hooks: {
     beforeChange: [denyHermesPublish],

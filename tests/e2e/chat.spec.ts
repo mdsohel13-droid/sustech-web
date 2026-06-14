@@ -6,7 +6,7 @@ test.describe("Chat widget", () => {
     await page.getByRole("button", { name: "Open chat assistant" }).click();
     const dialog = page.getByRole("dialog", { name: "Sustech assistant" });
     await expect(dialog).toBeVisible();
-    await expect(dialog.getByText(/How can I help/)).toBeVisible();
+    await expect(dialog.getByText(/Ask me anything/)).toBeVisible();
 
     await dialog.getByRole("button", { name: "Get a quote" }).click();
     await dialog.getByLabel("Service").selectOption({ index: 1 });

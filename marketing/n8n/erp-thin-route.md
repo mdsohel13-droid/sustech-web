@@ -75,6 +75,14 @@ DO UPDATE SET name=EXCLUDED.name, phone=EXCLUDED.phone, company=EXCLUDED.company
 App-level equivalent (if you don't use raw SQL): `findByWebLeadId(leadId) ?? findByEmail(email)` → `update` else `insert`. Either way a repeat
 `leadId:999` updates the existing row instead of creating a duplicate.
 
+**Apply it now (runnable):** [`erp-idempotency.sql`](erp-idempotency.sql) does the
+whole DB side in order — preview dupes → collapse existing dupes (so the index
+can be built) → create the partial unique index → verify. Run it against the ERP
+Postgres, then change the route's write from a bare `INSERT` to the
+`ON CONFLICT (webleadid) WHERE webleadid IS NOT NULL DO UPDATE` form above (or the
+find-then-update equivalent). The route's response and the n8n workflow are
+unchanged — n8n still gets `{ "ok": true }` whether it was an insert or update.
+
 ---
 
 ## Reference implementation A — Next.js App Router (t3 / tRPC ERP)

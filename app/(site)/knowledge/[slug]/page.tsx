@@ -9,7 +9,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { Section } from "@/components/ui/section";
 import { getArticleBySlug } from "@/lib/payload";
-import { articleJsonLd } from "@/lib/seo";
+import { articleJsonLd, breadcrumbJsonLd, serverUrl } from "@/lib/seo";
 
 type RichData = ComponentProps<typeof RichText>["data"];
 
@@ -26,11 +26,20 @@ export async function generateMetadata({
   const a = await getArticleBySlug(slug);
   if (!a) return {};
   const noindex = process.env.SITE_INDEXABLE !== "true";
+  const ogUrl = `/api/og?title=${encodeURIComponent(a.title)}&section=Knowledge${a.excerpt ? `&description=${encodeURIComponent(a.excerpt.slice(0, 120))}` : ""}`;
   return {
     title: { absolute: `${a.title} · Sustech Technology Ltd` },
     description: a.excerpt ?? undefined,
     alternates: { canonical: `/knowledge/${a.slug}` },
     robots: noindex ? { index: false, follow: false } : undefined,
+    openGraph: {
+      type: "article",
+      title: a.title,
+      description: a.excerpt ?? undefined,
+      url: `/knowledge/${a.slug}`,
+      images: [{ url: ogUrl, width: 1200, height: 630, alt: a.title }],
+    },
+    twitter: { card: "summary_large_image" },
   };
 }
 
@@ -45,6 +54,14 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   return (
     <>
       <JsonLd data={articleJsonLd(a, "/knowledge")} />
+      {/* BreadcrumbList: Home › Knowledge › {article title} */}
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Home", url: serverUrl },
+          { name: "Knowledge", url: `${serverUrl}/knowledge` },
+          { name: a.title },
+        ])}
+      />
       <Section containerSize="default">
         <article className="mx-auto max-w-3xl">
           <Eyebrow>Knowledge</Eyebrow>

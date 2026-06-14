@@ -76,8 +76,19 @@ export interface Config {
     testimonials: Testimonial;
     clients: Client;
     articles: Article;
+    'knowledge-resources': KnowledgeResource;
+    'news-items': NewsItem;
+    awards: Award;
+    partners: Partner;
+    'job-openings': JobOpening;
     media: Media;
+    icons: Icon;
     'rfq-requests': RfqRequest;
+    leads: Lead;
+    sources: Source;
+    'pipeline-runs': PipelineRun;
+    'publish-audit': PublishAudit;
+    'daily-reports': DailyReport;
     users: User;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
@@ -96,8 +107,19 @@ export interface Config {
     testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
     clients: ClientsSelect<false> | ClientsSelect<true>;
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
+    'knowledge-resources': KnowledgeResourcesSelect<false> | KnowledgeResourcesSelect<true>;
+    'news-items': NewsItemsSelect<false> | NewsItemsSelect<true>;
+    awards: AwardsSelect<false> | AwardsSelect<true>;
+    partners: PartnersSelect<false> | PartnersSelect<true>;
+    'job-openings': JobOpeningsSelect<false> | JobOpeningsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    icons: IconsSelect<false> | IconsSelect<true>;
     'rfq-requests': RfqRequestsSelect<false> | RfqRequestsSelect<true>;
+    leads: LeadsSelect<false> | LeadsSelect<true>;
+    sources: SourcesSelect<false> | SourcesSelect<true>;
+    'pipeline-runs': PipelineRunsSelect<false> | PipelineRunsSelect<true>;
+    'publish-audit': PublishAuditSelect<false> | PublishAuditSelect<true>;
+    'daily-reports': DailyReportsSelect<false> | DailyReportsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
@@ -112,10 +134,16 @@ export interface Config {
   globals: {
     'site-settings': SiteSetting;
     navigation: Navigation;
+    'tariff-rates': TariffRate;
+    'next-best-actions': NextBestAction;
+    'automation-settings': AutomationSetting;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     navigation: NavigationSelect<false> | NavigationSelect<true>;
+    'tariff-rates': TariffRatesSelect<false> | TariffRatesSelect<true>;
+    'next-best-actions': NextBestActionsSelect<false> | NextBestActionsSelect<true>;
+    'automation-settings': AutomationSettingsSelect<false> | AutomationSettingsSelect<true>;
   };
   locale: null;
   widgets: {
@@ -173,6 +201,8 @@ export interface Page {
         | SectorTilesBlock
         | ProjectsListBlock
         | ImageGalleryBlock
+        | PhotoStripBlock
+        | VideoShowcaseBlock
         | LogoWallBlock
         | PartnerBarBlock
         | ProductShowcaseBlock
@@ -183,6 +213,10 @@ export interface Page {
         | CTABandBlock
         | FAQBlock
         | CalculatorEmbedBlock
+        | GatedAssetBlock
+        | ProofStripBlock
+        | RelatedContentBlock
+        | NextBestActionBlock
         | ContactRFQBlock
         | SpacerBlock
       )[]
@@ -213,6 +247,12 @@ export interface Page {
    * Hint only — the live menu is controlled by Settings → Navigation.
    */
   showInNav?: boolean | null;
+  /**
+   * Tags this as a segment landing page. Powers next-best-action targeting and lead attribution.
+   */
+  segment?:
+    | ('none' | 'foreign-investor' | 'rmg-factory' | 'real-estate' | 'commercial-building' | 'bank-financial')
+    | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -228,15 +268,68 @@ export interface HeroBlock {
   eyebrow?: string | null;
   heading: string;
   subhead?: string | null;
+  /**
+   * How tall the hero band is. 'Full screen' fills the first view on load.
+   */
+  height?: ('compact' | 'standard' | 'tall' | 'screen') | null;
   tone?: ('dark' | 'light') | null;
   /**
    * Optional background image (also used as the video poster).
    */
   backgroundImage?: (number | null) | Media;
   /**
-   * Optional MP4 (autoplay, muted, looping, ≤ 10s). Falls back to the image when motion is reduced, on small screens, or when missing.
+   * Optional MP4 (autoplay, muted, looping, ≤ 10s). Falls back to the image when motion is reduced.
    */
   backgroundVideo?: (number | null) | Media;
+  /**
+   * Live animated background for DARK heroes — all brand-tuned (True Blue). Each loads lazily, honours reduced motion (static gradient fallback) and pairs well with the Pro design version. Aurora = WebGL plasma; Particle field = drifting motes; Engineering grid = CAD perspective sweep; Circuit traces = pulsing rules.
+   */
+  backgroundFx?: ('none' | 'aurora' | 'particles' | 'retro' | 'tracing') | null;
+  /**
+   * Single: one background image/video. Carousel: cycle through multiple media items automatically.
+   */
+  heroMode?: ('single' | 'carousel') | null;
+  /**
+   * Add images or videos. They cycle automatically every 5 seconds.
+   */
+  carouselItems?:
+    | {
+        /**
+         * Image (AVIF/WebP/JPG) or MP4 video.
+         */
+        media: number | Media;
+        /**
+         * Optional visible caption shown on this slide.
+         */
+        caption?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * How long each slide shows before advancing. Default: 5 s.
+   */
+  carouselInterval?: number | null;
+  /**
+   * Auto-scrolling images/videos shown beside the hero text (fills the empty space on the right).
+   */
+  sideMedia?: {
+    enabled?: boolean | null;
+    source?: ('projects' | 'library' | 'manual') | null;
+    interval?: number | null;
+    /**
+     * Images (AVIF/WebP/JPG) or MP4 videos to cycle through.
+     */
+    items?:
+      | {
+          media: number | Media;
+          /**
+           * Optional caption overlay.
+           */
+          caption?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
   ctas?:
     | {
         label: string;
@@ -254,6 +347,63 @@ export interface HeroBlock {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
+     */
+    withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'hero';
@@ -320,6 +470,9 @@ export interface Media {
  * via the `definition` "RichTextBlock".
  */
 export interface RichTextBlock {
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
   appearance?: ('default' | 'muted' | 'dark') | null;
   content: {
     root: {
@@ -336,6 +489,63 @@ export interface RichTextBlock {
     };
     [k: string]: unknown;
   };
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
+     */
+    withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'richText';
@@ -346,6 +556,9 @@ export interface RichTextBlock {
  */
 export interface StatsCountersBlock {
   intro?: string | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
   appearance?: ('default' | 'muted' | 'dark') | null;
   stats?:
     | {
@@ -361,6 +574,63 @@ export interface StatsCountersBlock {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
+     */
+    withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'statsCounters';
@@ -373,8 +643,68 @@ export interface ServicesGridBlock {
   heading?: string | null;
   lede?: string | null;
   source?: ('auto' | 'selected') | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
   appearance?: ('default' | 'muted' | 'dark') | null;
   services?: (number | Service)[] | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
+     */
+    withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'servicesGrid';
@@ -402,6 +732,10 @@ export interface Service {
     | 'training'
     | 'consultancy';
   order?: number | null;
+  /**
+   * Optional uploaded icon (e.g. a 3D PNG with transparent background) shown on service cards instead of the built-in line icon. Leave empty to keep the standard SVG. `pnpm icons:3d` pre-loads an MIT-licensed 3D set.
+   */
+  customIcon?: (number | null) | Media;
   /**
    * One-line outcome shown on cards and grids.
    */
@@ -494,8 +828,68 @@ export interface SectorTilesBlock {
   heading?: string | null;
   lede?: string | null;
   source?: ('auto' | 'selected') | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
   appearance?: ('default' | 'muted' | 'dark') | null;
   sectors?: (number | Sector)[] | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
+     */
+    withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'sectorTiles';
@@ -523,6 +917,10 @@ export interface Sector {
     | 'commercial'
     | 'heritage';
   order?: number | null;
+  /**
+   * Optional uploaded icon (e.g. a 3D PNG with transparent background) shown on sector tiles instead of the built-in line icon. Leave empty to keep the standard SVG.
+   */
+  customIcon?: (number | null) | Media;
   summary: string;
   /**
    * Sector challenges → how Sustech solves them.
@@ -579,9 +977,69 @@ export interface ProjectsListBlock {
   heading?: string | null;
   lede?: string | null;
   source?: ('featured' | 'selected') | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
   appearance?: ('default' | 'muted' | 'dark') | null;
   projects?: (number | Project)[] | null;
   viewAllLabel?: string | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
+     */
+    withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'projectsList';
@@ -746,6 +1204,9 @@ export interface Client {
  */
 export interface ImageGalleryBlock {
   heading?: string | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
   appearance?: ('default' | 'muted' | 'dark') | null;
   images?:
     | {
@@ -753,9 +1214,261 @@ export interface ImageGalleryBlock {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
+     */
+    withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'imageGallery';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PhotoStripBlock".
+ */
+export interface PhotoStripBlock {
+  heading?: string | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
+  appearance?: ('default' | 'muted' | 'dark') | null;
+  displayMode?: ('marquee' | 'carousel') | null;
+  speed?: ('slow' | 'normal' | 'fast') | null;
+  photos?:
+    | {
+        image: number | Media;
+        caption?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
+     */
+    withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'photoStrip';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "VideoShowcaseBlock".
+ */
+export interface VideoShowcaseBlock {
+  /**
+   * Small label above the heading.
+   */
+  eyebrow?: string | null;
+  heading?: string | null;
+  lede?: string | null;
+  /**
+   * Spotlight highlights the first (or 'Feature large') video full-width. Grid shows all videos equally.
+   */
+  layout?: ('spotlight' | 'grid') | null;
+  /**
+   * Dark looks best for video.
+   */
+  tone?: ('dark' | 'light' | 'muted' | 'brand') | null;
+  /**
+   * Each video shows a poster image with a play button; the video only loads when a visitor clicks it (fast page loads, no third-party cookies until play).
+   */
+  videos?:
+    | {
+        title: string;
+        /**
+         * 1–2 sentences. Shown under the video and given to AI/search engines as the video's description (VideoObject schema).
+         */
+        description?: string | null;
+        source?: ('upload' | 'url') | null;
+        /**
+         * Badge shown on the poster, e.g. "1:24".
+         */
+        duration?: string | null;
+        /**
+         * The MP4 video file.
+         */
+        videoFile?: (number | null) | Media;
+        /**
+         * Paste the full video link (youtube.com, youtu.be, or vimeo.com).
+         */
+        videoUrl?: string | null;
+        /**
+         * Poster / thumbnail image (16:9 recommended). Shown before play. For YouTube links this is optional — the YouTube thumbnail is used if left blank.
+         */
+        poster?: (number | null) | Media;
+        featured?: boolean | null;
+        /**
+         * Publish date — used in the video's search schema.
+         */
+        uploadDate?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
+     */
+    withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'videoShowcase';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -764,8 +1477,68 @@ export interface ImageGalleryBlock {
 export interface LogoWallBlock {
   heading?: string | null;
   source?: ('auto' | 'selected') | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
   appearance?: ('default' | 'muted' | 'dark') | null;
   clients?: (number | Client)[] | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
+     */
+    withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'logoWall';
@@ -776,6 +1549,9 @@ export interface LogoWallBlock {
  */
 export interface PartnerBarBlock {
   heading?: string | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
   appearance?: ('default' | 'muted' | 'dark') | null;
   partners?:
     | {
@@ -787,6 +1563,63 @@ export interface PartnerBarBlock {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
+     */
+    withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'partnerBar';
@@ -799,9 +1632,69 @@ export interface ProductShowcaseBlock {
   heading?: string | null;
   lede?: string | null;
   source?: ('featured' | 'selected') | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
   appearance?: ('default' | 'muted' | 'dark') | null;
   products?: (number | Product)[] | null;
   viewAllLabel?: string | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
+     */
+    withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'productShowcase';
@@ -888,8 +1781,68 @@ export interface Product {
 export interface ArticlesListBlock {
   heading?: string | null;
   lede?: string | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
   appearance?: ('default' | 'muted' | 'dark') | null;
   viewAllLabel?: string | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
+     */
+    withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'articlesList';
@@ -901,8 +1854,68 @@ export interface ArticlesListBlock {
 export interface TestimonialsBlock {
   heading?: string | null;
   source?: ('auto' | 'selected') | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
   appearance?: ('default' | 'muted' | 'dark') | null;
   testimonials?: (number | Testimonial)[] | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
+     */
+    withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'testimonials';
@@ -932,11 +1945,75 @@ export interface TeamGridBlock {
   heading?: string | null;
   lede?: string | null;
   source?: ('auto' | 'selected') | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
   appearance?: ('default' | 'muted' | 'dark') | null;
+  /**
+   * Automatic mode only: show just one group. Add several Team blocks — one per group (Leadership, Engineering, Advisors…) — each with its own heading.
+   */
+  group?: ('all' | 'leadership' | 'management' | 'engineering' | 'consultant' | 'advisor' | 'other') | null;
   /**
    * Pick and order the people to show.
    */
   members?: (number | Team)[] | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
+     */
+    withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'teamGrid';
@@ -954,6 +2031,10 @@ export interface Team {
    * e.g. Managing Director, Head of Engineering.
    */
   role: string;
+  /**
+   * Which group this person belongs to. The Team block can show one group at a time.
+   */
+  category?: ('leadership' | 'management' | 'engineering' | 'consultant' | 'advisor' | 'other') | null;
   /**
    * Headshot. Square images look best.
    */
@@ -975,6 +2056,9 @@ export interface Team {
  */
 export interface StepsBlock {
   eyebrow?: string | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
   appearance?: ('default' | 'muted' | 'dark') | null;
   heading?: string | null;
   steps?:
@@ -984,6 +2068,63 @@ export interface StepsBlock {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
+     */
+    withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'steps';
@@ -1012,6 +2153,63 @@ export interface CTABandBlock {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
+     */
+    withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'ctaBand';
@@ -1022,6 +2220,9 @@ export interface CTABandBlock {
  */
 export interface FAQBlock {
   heading?: string | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
   appearance?: ('default' | 'muted' | 'dark') | null;
   items?:
     | {
@@ -1030,6 +2231,63 @@ export interface FAQBlock {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
+     */
+    withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'faq';
@@ -1040,36 +2298,403 @@ export interface FAQBlock {
  */
 export interface CalculatorEmbedBlock {
   heading?: string | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
   appearance?: ('default' | 'muted' | 'dark') | null;
   body?: string | null;
+  /**
+   * Embed a live, interactive calculator inline (it captures leads via the report gate). Leave empty to show a CTA card linking to /tools instead.
+   */
+  calcType?:
+    | (
+        | 'solar-roi'
+        | 'earthing-resistance'
+        | 'cable-sizing'
+        | 'lightning-zone'
+        | 'solar-yield'
+        | 'diesel-vs-bess'
+        | 'atm-ups-sizing'
+        | 'outage-cost'
+      )
+    | null;
+  /**
+   * CTA-card mode only (used when no inline calculator is selected).
+   */
   tool?: ('solarcalc' | 'roi') | null;
   ctaLabel?: string | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
+     */
+    withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'calculatorEmbed';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ContactRFQBlock".
+ * via the `definition` "GatedAssetBlock".
  */
-export interface ContactRFQBlock {
+export interface GatedAssetBlock {
   heading?: string | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
   appearance?: ('default' | 'muted' | 'dark') | null;
-  subhead?: string | null;
+  /**
+   * Open, indexable description of the asset (AI engines cite this — make it substantive). Only the file download is gated.
+   */
+  summary?: string | null;
+  /**
+   * The downloadable asset (a 'sample document' resource with a gate level).
+   */
+  resource: number | KnowledgeResource;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
+     */
+    withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
+  };
   id?: string | null;
   blockName?: string | null;
-  blockType: 'contactRFQ';
+  blockType: 'gatedAsset';
+}
+/**
+ * Calculators and sample documents shown in the Knowledge Hub. Toggle enabled/disabled without a code deploy.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "knowledge-resources".
+ */
+export interface KnowledgeResource {
+  id: number;
+  title: string;
+  /**
+   * The URL path segment. Auto-filled from the title — edit only if you must.
+   */
+  slug: string;
+  /**
+   * Calculator = built-in interactive tool. Sample = downloadable document or link.
+   */
+  type: 'calculator' | 'sample';
+  /**
+   * Short description shown on the resource card (1–2 sentences).
+   */
+  description?: string | null;
+  /**
+   * Display order within the tab. Lower numbers appear first.
+   */
+  order?: number | null;
+  /**
+   * Tick to show in the Knowledge Hub. Untick to hide without deleting.
+   */
+  enabled?: boolean | null;
+  /**
+   * Which built-in calculator to render. New calc types require a developer deploy.
+   */
+  calcType?:
+    | (
+        | 'solar-roi'
+        | 'earthing-resistance'
+        | 'cable-sizing'
+        | 'lightning-zone'
+        | 'solar-yield'
+        | 'diesel-vs-bess'
+        | 'atm-ups-sizing'
+        | 'outage-cost'
+      )
+    | null;
+  /**
+   * Upload PDF, DOCX, or XLSX directly. If the file is large or already hosted elsewhere, use the External URL field below instead.
+   */
+  fileUpload?: (number | null) | Media;
+  /**
+   * Google Drive link, SharePoint URL, or any direct download link. Leave blank if you uploaded the file above.
+   */
+  fileUrl?: string | null;
+  /**
+   * Human-readable size, e.g. "420 KB" or "1.2 MB".
+   */
+  fileSize?: string | null;
+  fileFormat?: ('pdf' | 'docx' | 'xlsx' | 'image' | 'zip' | 'other') | null;
+  /**
+   * View opens the file in the browser (PDFs and images render inline); Download saves it to the visitor's device. Choose one or both.
+   */
+  openMode?: ('both' | 'view' | 'download') | null;
+  /**
+   * Text on the download button. Default: "Download".
+   */
+  downloadLabel?: string | null;
+  /**
+   * Gated assets stay open & indexable (summary visible); only the file download is behind a short form that captures a consented lead and a signed 24-hour link.
+   */
+  gateLevel?: ('open' | 'email' | 'email-company') | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "SpacerBlock".
+ * via the `definition` "ProofStripBlock".
  */
-export interface SpacerBlock {
-  size?: ('sm' | 'md' | 'lg') | null;
-  divider?: boolean | null;
+export interface ProofStripBlock {
+  heading?: string | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
+  appearance?: ('default' | 'muted' | 'dark') | null;
+  /**
+   * Optional — scope the proof (testimonial, client logos) to one sector for a segment page.
+   */
+  sector?: (number | null) | Sector;
+  /**
+   * Show the headline stats band (from Site Settings).
+   */
+  showStats?: boolean | null;
+  /**
+   * Show a client logo row.
+   */
+  showClients?: boolean | null;
+  /**
+   * Optional — feature one testimonial.
+   */
+  testimonial?: (number | null) | Testimonial;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
+     */
+    withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
+  };
   id?: string | null;
   blockName?: string | null;
-  blockType: 'spacer';
+  blockType: 'proofStrip';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "RelatedContentBlock".
+ */
+export interface RelatedContentBlock {
+  heading?: string | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
+  appearance?: ('default' | 'muted' | 'dark') | null;
+  mode?: ('auto' | 'manual') | null;
+  articles?: (number | Article)[] | null;
+  limit?: number | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
+     */
+    withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'relatedContent';
 }
 /**
  * Knowledge hub. Lives at /knowledge/[slug].
@@ -1105,6 +2730,438 @@ export interface Article {
     };
     [k: string]: unknown;
   };
+  /**
+   * Bibliography. Reference the nth entry in body copy with [cite:n]. Required for market-data / tariffs / policy / finance / calculations.
+   */
+  citations?:
+    | {
+        source: number | Source;
+        /**
+         * The exact claim in THIS document the source backs.
+         */
+        quotedClaim: string;
+        /**
+         * Deep link to the specific page/document.
+         */
+        url: string;
+        title?: string | null;
+        accessedDate: string;
+        sourcePublishedDate?: string | null;
+        /**
+         * e.g. "p. 14", "SRO No. 155", "Circular No. 02/2024".
+         */
+        locator?: string | null;
+        /**
+         * Refreshed by approved revisions.
+         */
+        lastVerifiedAt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Numbers stated in this document and where each comes from. Powers the claim-diff guard before auto-publish.
+   */
+  claims?:
+    | {
+        claimText?: string | null;
+        value?: string | null;
+        unit?: string | null;
+        sourceType?: ('registry-source' | 'company-catalog') | null;
+        /**
+         * 1-based index into citations[]. Empty only when sourceType = company-catalog.
+         */
+        citationIndex?: number | null;
+        hedge?: ('as-of-date' | 'up-to' | 'approx' | 'exact-verified') | null;
+        retrievedAt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  faq?:
+    | {
+        question: string;
+        answer: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Drives citation enforcement (market-data / tariffs / policy / finance / calculations require ≥1 citation) and the nightly auto-update whitelist.
+   */
+  category:
+    | 'knowledge-explainer'
+    | 'market-data'
+    | 'tariffs'
+    | 'policy'
+    | 'finance'
+    | 'calculations'
+    | 'industry-news-roundup'
+    | 'glossary'
+    | 'company-update';
+  /**
+   * Set by the content pipeline. Read-only.
+   */
+  revisionMeta?: {
+    approvalState?: ('none' | 'pending' | 'approved' | 'rejected' | 'auto-published') | null;
+    triggeredBySource?: (number | null) | Source;
+    changeSummary?: string | null;
+    riskFlags?: ('pricing' | 'legal' | 'stat-claim' | 'tariff' | 'third-party-name')[] | null;
+    /**
+     * Set only when the approval email is DELIVERED — starts the 24 h clock.
+     */
+    pendingSince?: string | null;
+    /**
+     * A cited source changed; excluded from auto-publish until reviewed.
+     */
+    staleSource?: boolean | null;
+    tokenJti?: string | null;
+    decidedBy?: string | null;
+    decidedAt?: string | null;
+  };
+  /**
+   * Search & social. Leave blank to use the site defaults.
+   */
+  seo?: {
+    /**
+     * Overrides the page/site title.
+     */
+    title?: string | null;
+    /**
+     * Canonical URL (advanced; usually leave blank).
+     */
+    canonical?: string | null;
+    /**
+     * ~150–160 characters. Shown in search results and link previews.
+     */
+    description?: string | null;
+    /**
+     * Social share image (Open Graph), 1200×630.
+     */
+    image?: (number | null) | Media;
+    noindex?: boolean | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Authoritative sources behind every cited number. Seed with `pnpm seed:sources`. Not shown on the public site.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sources".
+ */
+export interface Source {
+  id: number;
+  name: string;
+  /**
+   * Canonical homepage.
+   */
+  url: string;
+  /**
+   * Specific page the nightly job hashes (tariff page, circular index).
+   */
+  checkUrl?: string | null;
+  tier: 'tier1-gov' | 'tier1-multilateral' | 'tier2-analyst' | 'tier3-press';
+  fetchMethod?: ('rss' | 'html' | 'pdf-link') | null;
+  /**
+   * Auto-flips to manual-only if robots.txt disallows.
+   */
+  fetchPolicy?: ('auto' | 'manual-only') | null;
+  checkFrequency?: ('daily' | 'weekly' | 'monthly' | 'quarterly') | null;
+  /**
+   * CSS selector isolating meaningful content (kills false diffs).
+   */
+  contentSelector?: string | null;
+  language?: ('en' | 'bn' | 'both') | null;
+  /**
+   * Cite headline + link only; never quote body.
+   */
+  paywalled?: boolean | null;
+  /**
+   * Per-source kill switch.
+   */
+  active?: boolean | null;
+  notes?: string | null;
+  lastContentHash?: string | null;
+  etag?: string | null;
+  lastModified?: string | null;
+  /**
+   * Alert at 3, auto-deactivate at 10.
+   */
+  consecutiveFailures?: number | null;
+  lastCheckedAt?: string | null;
+  lastChangedAt?: string | null;
+  robotsCheckedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "NextBestActionBlock".
+ */
+export interface NextBestActionBlock {
+  /**
+   * Which rule to use from Lead Engine → Next-best actions.
+   */
+  segment?:
+    | ('auto' | 'foreign-investor' | 'rmg-factory' | 'real-estate' | 'commercial-building' | 'bank-financial')
+    | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
+  appearance?: ('default' | 'muted' | 'dark') | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
+     */
+    withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'nextBestAction';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContactRFQBlock".
+ */
+export interface ContactRFQBlock {
+  heading?: string | null;
+  /**
+   * Quick colour override. Use 'Style & Animation' below for full control.
+   */
+  appearance?: ('default' | 'muted' | 'dark') | null;
+  subhead?: string | null;
+  /**
+   * Override visual style. All defaults give the standard site look — only open if you need a custom treatment.
+   */
+  style?: {
+    /**
+     * Background + text colour for this block.
+     */
+    colorScheme?: ('default' | 'muted' | 'dark' | 'brand' | 'energy' | 'solar') | null;
+    /**
+     * Colour of eyebrow labels, icons and inline links.
+     */
+    accentColour?: ('brand' | 'energy' | 'solar') | null;
+    /**
+     * Maximum width of the inner content area.
+     */
+    width?: ('narrow' | 'default' | 'wide' | 'full-bleed') | null;
+    /**
+     * Top and bottom spacing of this block.
+     */
+    paddingSize?: ('compact' | 'standard' | 'spacious') | null;
+    /**
+     * Alignment of the section heading and body.
+     */
+    textAlign?: ('left' | 'center') | null;
+    /**
+     * Override the section heading font size.
+     */
+    headingSize?: ('default' | 'large' | 'xl') | null;
+    /**
+     * Typeface used for the block heading.
+     */
+    headingFont?: ('display' | 'mono') | null;
+    /**
+     * Typeface for paragraph and body text in this block.
+     */
+    bodyFont?: ('sans' | 'display' | 'mono') | null;
+    /**
+     * Override the paragraph / body copy size.
+     */
+    bodySize?: ('sm' | 'base' | 'lg' | 'xl') | null;
+    /**
+     * How content enters the viewport as the user scrolls.
+     */
+    animationStyle?: ('fade-rise' | 'slide-left' | 'slide-right' | 'scale-up' | 'stagger' | 'none') | null;
+    /**
+     * Pause before this block's entrance animation begins.
+     */
+    animationDelay?: ('none' | 'short' | 'medium' | 'long') | null;
+    /**
+     * Wrap this section in a rounded card with a fine border and depth shadow for a lifted, 3-D look that subtly responds on hover.
+     */
+    withBorder?: boolean | null;
+    /**
+     * Vertical space after this block, before the next one.
+     */
+    gapBelow?: ('none' | 'small' | 'default' | 'large') | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'contactRFQ';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SpacerBlock".
+ */
+export interface SpacerBlock {
+  size?: ('sm' | 'md' | 'lg') | null;
+  divider?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'spacer';
+}
+/**
+ * Daily news feed — updated by the Hermes AI agent and/or editorial team. Lives at /news/[slug].
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "news-items".
+ */
+export interface NewsItem {
+  id: number;
+  title: string;
+  /**
+   * The URL path segment. Auto-filled from the title — edit only if you must.
+   */
+  slug: string;
+  category: 'company-update' | 'industry-news' | 'product-update' | 'ai-tech' | 'market-insight';
+  /**
+   * Defaults to today. Used for ordering in the news feed.
+   */
+  publishedDate?: string | null;
+  /**
+   * TL;DR — the direct answer in 1–2 sentences. AI engines pull this as the short answer citation. Make it specific and factual.
+   */
+  summary: string;
+  /**
+   * Full article. Lead with the most important fact, then explain.
+   */
+  body: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Optional featured image (16:9 recommended).
+   */
+  heroImage?: (number | null) | Media;
+  /**
+   * e.g. "The Daily Star", "Solar Power World". Leave blank for original content.
+   */
+  source?: string | null;
+  /**
+   * Original article URL (if curated).
+   */
+  sourceUrl?: string | null;
+  /**
+   * Keywords: solar, earthing, BESS, Bangladesh, etc.
+   */
+  tags?:
+    | {
+        tag: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Bibliography. Reference the nth entry in body copy with [cite:n]. Required for market-data / tariffs / policy / finance / calculations.
+   */
+  citations?:
+    | {
+        source: number | Source;
+        /**
+         * The exact claim in THIS document the source backs.
+         */
+        quotedClaim: string;
+        /**
+         * Deep link to the specific page/document.
+         */
+        url: string;
+        title?: string | null;
+        accessedDate: string;
+        sourcePublishedDate?: string | null;
+        /**
+         * e.g. "p. 14", "SRO No. 155", "Circular No. 02/2024".
+         */
+        locator?: string | null;
+        /**
+         * Refreshed by approved revisions.
+         */
+        lastVerifiedAt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Numbers stated in this document and where each comes from. Powers the claim-diff guard before auto-publish.
+   */
+  claims?:
+    | {
+        claimText?: string | null;
+        value?: string | null;
+        unit?: string | null;
+        sourceType?: ('registry-source' | 'company-catalog') | null;
+        /**
+         * 1-based index into citations[]. Empty only when sourceType = company-catalog.
+         */
+        citationIndex?: number | null;
+        hedge?: ('as-of-date' | 'up-to' | 'approx' | 'exact-verified') | null;
+        retrievedAt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Questions & answers related to this news. Each Q&A becomes FAQPage schema — the single highest-citability signal for AI engines. Add 2–5 per article.
+   */
   faq?:
     | {
         question: string;
@@ -1134,9 +3191,176 @@ export interface Article {
     image?: (number | null) | Media;
     noindex?: boolean | null;
   };
+  /**
+   * Set by the content pipeline. Read-only.
+   */
+  revisionMeta?: {
+    approvalState?: ('none' | 'pending' | 'approved' | 'rejected' | 'auto-published') | null;
+    triggeredBySource?: (number | null) | Source;
+    changeSummary?: string | null;
+    riskFlags?: ('pricing' | 'legal' | 'stat-claim' | 'tariff' | 'third-party-name')[] | null;
+    /**
+     * Set only when the approval email is DELIVERED — starts the 24 h clock.
+     */
+    pendingSince?: string | null;
+    /**
+     * A cited source changed; excluded from auto-publish until reviewed.
+     */
+    staleSource?: boolean | null;
+    tokenJti?: string | null;
+    decidedBy?: string | null;
+    decidedAt?: string | null;
+  };
+  /**
+   * Set automatically by Hermes. Do not edit manually.
+   */
+  agentMeta?: {
+    generatedBy?: string | null;
+    model?: string | null;
+    sourceUrls?: string | null;
+    generatedAt?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * Awards, certifications and accreditations. Populate as needed — these can be surfaced on a page later.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "awards".
+ */
+export interface Award {
+  id: number;
+  title: string;
+  kind?: ('award' | 'certification' | 'accreditation') | null;
+  /**
+   * Body that issued it (e.g. Bureau Veritas, SREDA, ISO).
+   */
+  issuer?: string | null;
+  dateAwarded?: string | null;
+  /**
+   * Leave blank if it does not expire.
+   */
+  validUntil?: string | null;
+  description?: string | null;
+  /**
+   * Scan or photo of the certificate (PDF or image).
+   */
+  certificate?: (number | null) | Media;
+  /**
+   * Optional link to verify the award/certificate.
+   */
+  referenceUrl?: string | null;
+  /**
+   * Lower numbers appear first.
+   */
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Technology, distribution and channel partners.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partners".
+ */
+export interface Partner {
+  id: number;
+  name: string;
+  /**
+   * Partner logo (transparent PNG).
+   */
+  logo?: (number | null) | Media;
+  type?: ('technology' | 'distribution' | 'channel' | 'strategic') | null;
+  description?: string | null;
+  /**
+   * Optional link to the partner's website.
+   */
+  url?: string | null;
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Open roles. Ready to drive a Careers page when you want one.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "job-openings".
+ */
+export interface JobOpening {
+  id: number;
+  title: string;
+  /**
+   * The URL path segment. Auto-filled from the title — edit only if you must.
+   */
+  slug: string;
+  /**
+   * e.g. Engineering, Sales, Operations.
+   */
+  department?: string | null;
+  /**
+   * e.g. Chattogram, BD or Remote.
+   */
+  location?: string | null;
+  employmentType?: ('full-time' | 'part-time' | 'contract' | 'internship') | null;
+  status?: ('open' | 'closed') | null;
+  /**
+   * One or two sentences shown on the careers list.
+   */
+  summary?: string | null;
+  /**
+   * Full role description, responsibilities and requirements.
+   */
+  description?: string | null;
+  /**
+   * Where applicants send their CV.
+   */
+  applyEmail?: string | null;
+  /**
+   * Optional external application link.
+   */
+  applyUrl?: string | null;
+  closingDate?: string | null;
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * 3-D renders, AI-generated icons, SVG symbols and brand marks. Upload here to keep icons separate from general media.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "icons".
+ */
+export interface Icon {
+  id: number;
+  /**
+   * Human-readable name shown in the picker (e.g. 'Solar Panel 3D').
+   */
+  name: string;
+  /**
+   * Organise icons by type so editors can find them quickly.
+   */
+  category?: ('service' | 'sector' | 'ui' | 'brand' | '3d' | 'ai' | 'other') | null;
+  /**
+   * Comma-separated keywords for search (e.g. 'solar, panel, energy').
+   */
+  tags?: string | null;
+  /**
+   * Describe the icon for screen readers. Leave blank if purely decorative (will be rendered as aria-hidden).
+   */
+  alt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * Consultation / quote requests submitted from the website.
@@ -1162,6 +3386,178 @@ export interface RfqRequest {
   createdAt: string;
 }
 /**
+ * Consented hand-raisers from RFQ, chat, calculators, gated assets and outbound promotion. Sorted hottest-first by score.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "leads".
+ */
+export interface Lead {
+  id: number;
+  displayName?: string | null;
+  name?: string | null;
+  company?: string | null;
+  /**
+   * Stored lowercased; dedupe key.
+   */
+  email?: string | null;
+  phone?: string | null;
+  segment?: ('investor' | 'rmg' | 'real-estate' | 'commercial' | 'bank' | 'gov-ngo' | 'home' | 'other') | null;
+  /**
+   * First-touch source. Later touches append to the timeline.
+   */
+  source: 'rfq' | 'chat' | 'calculator' | 'gated-asset' | 'outbound' | 'manual';
+  /**
+   * Rule-based heat score (0–100). ≥60 = hot. Recomputed on every touch.
+   */
+  score?: number | null;
+  status?: ('new' | 'contacted' | 'qualified' | 'won' | 'lost') | null;
+  /**
+   * True only if the visitor ticked the (unticked) marketing checkbox themselves.
+   */
+  marketingOptIn?: boolean | null;
+  /**
+   * Set by the double-opt-in confirm link. Empty = unconfirmed.
+   */
+  optInConfirmedAt?: string | null;
+  /**
+   * Unsubscribe / opt-out. Exported (as a hash) to the outbound suppression feed.
+   */
+  doNotContact?: boolean | null;
+  utmSource?: string | null;
+  utmMedium?: string | null;
+  utmCampaign?: string | null;
+  /**
+   * Page the lead came from.
+   */
+  sourcePath?: string | null;
+  /**
+   * Append-only interaction history (newest last). Written by code on upsert.
+   */
+  touches?:
+    | {
+        at: string;
+        channel: string;
+        note?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Free-form notes for follow-up.
+   */
+  notes?: string | null;
+  /**
+   * Calculator inputs/outputs captured with the lead (powers the emailed report). Set by code.
+   */
+  calcPayload?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Nightly source-watch runs (and fallback/heartbeat). Read-only.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pipeline-runs".
+ */
+export interface PipelineRun {
+  id: number;
+  runDate: string;
+  trigger: 'n8n' | 'fallback' | 'heartbeat';
+  sourcesChecked?: number | null;
+  sourcesChanged?: number | null;
+  draftsCreated?: number | null;
+  startedAt?: string | null;
+  finishedAt?: string | null;
+  errors?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Immutable publish/approval history. Cannot be edited or deleted.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publish-audit".
+ */
+export interface PublishAudit {
+  id: number;
+  at: string;
+  action:
+    | 'drafted'
+    | 'approval-email-sent'
+    | 'approval-email-delivered'
+    | 'approved-by-owner'
+    | 'rejected'
+    | 'auto-published-24h'
+    | 'killed'
+    | 'rolled-back';
+  docCollection?: string | null;
+  docId?: string | null;
+  versionIdFrom?: string | null;
+  versionIdTo?: string | null;
+  /**
+   * owner | pipeline | admin:<id> — auto-publish is never recorded as owner.
+   */
+  actor: string;
+  tokenJti?: string | null;
+  claimDiffSnapshot?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Archived morning reports (leads, traffic, approvals, pipeline). Read-only.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "daily-reports".
+ */
+export interface DailyReport {
+  id: number;
+  /**
+   * YYYY-MM-DD (Asia/Dhaka).
+   */
+  date: string;
+  generatedAt?: string | null;
+  /**
+   * Rendered report HTML (as emailed).
+   */
+  html?: string | null;
+  metrics?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Manage who can access the CMS and what they can do. Only a Super Admin can create or promote users.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
@@ -1169,9 +3565,9 @@ export interface User {
   id: number;
   name?: string | null;
   /**
-   * Controls permissions. Only admins can change roles.
+   * Controls permissions. Only a Super Admin can assign the Super Admin or Admin role.
    */
-  role: 'admin' | 'editor' | 'hermes';
+  role: 'superAdmin' | 'admin' | 'editor' | 'hermes';
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -1344,12 +3740,56 @@ export interface PayloadLockedDocument {
         value: number | Article;
       } | null)
     | ({
+        relationTo: 'knowledge-resources';
+        value: number | KnowledgeResource;
+      } | null)
+    | ({
+        relationTo: 'news-items';
+        value: number | NewsItem;
+      } | null)
+    | ({
+        relationTo: 'awards';
+        value: number | Award;
+      } | null)
+    | ({
+        relationTo: 'partners';
+        value: number | Partner;
+      } | null)
+    | ({
+        relationTo: 'job-openings';
+        value: number | JobOpening;
+      } | null)
+    | ({
         relationTo: 'media';
         value: number | Media;
       } | null)
     | ({
+        relationTo: 'icons';
+        value: number | Icon;
+      } | null)
+    | ({
         relationTo: 'rfq-requests';
         value: number | RfqRequest;
+      } | null)
+    | ({
+        relationTo: 'leads';
+        value: number | Lead;
+      } | null)
+    | ({
+        relationTo: 'sources';
+        value: number | Source;
+      } | null)
+    | ({
+        relationTo: 'pipeline-runs';
+        value: number | PipelineRun;
+      } | null)
+    | ({
+        relationTo: 'publish-audit';
+        value: number | PublishAudit;
+      } | null)
+    | ({
+        relationTo: 'daily-reports';
+        value: number | DailyReport;
       } | null)
     | ({
         relationTo: 'users';
@@ -1414,6 +3854,8 @@ export interface PagesSelect<T extends boolean = true> {
         sectorTiles?: T | SectorTilesBlockSelect<T>;
         projectsList?: T | ProjectsListBlockSelect<T>;
         imageGallery?: T | ImageGalleryBlockSelect<T>;
+        photoStrip?: T | PhotoStripBlockSelect<T>;
+        videoShowcase?: T | VideoShowcaseBlockSelect<T>;
         logoWall?: T | LogoWallBlockSelect<T>;
         partnerBar?: T | PartnerBarBlockSelect<T>;
         productShowcase?: T | ProductShowcaseBlockSelect<T>;
@@ -1424,6 +3866,10 @@ export interface PagesSelect<T extends boolean = true> {
         ctaBand?: T | CTABandBlockSelect<T>;
         faq?: T | FAQBlockSelect<T>;
         calculatorEmbed?: T | CalculatorEmbedBlockSelect<T>;
+        gatedAsset?: T | GatedAssetBlockSelect<T>;
+        proofStrip?: T | ProofStripBlockSelect<T>;
+        relatedContent?: T | RelatedContentBlockSelect<T>;
+        nextBestAction?: T | NextBestActionBlockSelect<T>;
         contactRFQ?: T | ContactRFQBlockSelect<T>;
         spacer?: T | SpacerBlockSelect<T>;
       };
@@ -1437,6 +3883,7 @@ export interface PagesSelect<T extends boolean = true> {
         noindex?: T;
       };
   showInNav?: T;
+  segment?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1449,9 +3896,34 @@ export interface HeroBlockSelect<T extends boolean = true> {
   eyebrow?: T;
   heading?: T;
   subhead?: T;
+  height?: T;
   tone?: T;
   backgroundImage?: T;
   backgroundVideo?: T;
+  backgroundFx?: T;
+  heroMode?: T;
+  carouselItems?:
+    | T
+    | {
+        media?: T;
+        caption?: T;
+        id?: T;
+      };
+  carouselInterval?: T;
+  sideMedia?:
+    | T
+    | {
+        enabled?: T;
+        source?: T;
+        interval?: T;
+        items?:
+          | T
+          | {
+              media?: T;
+              caption?: T;
+              id?: T;
+            };
+      };
   ctas?:
     | T
     | {
@@ -1463,6 +3935,23 @@ export interface HeroBlockSelect<T extends boolean = true> {
         style?: T;
         id?: T;
       };
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+        gapBelow?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1473,6 +3962,23 @@ export interface HeroBlockSelect<T extends boolean = true> {
 export interface RichTextBlockSelect<T extends boolean = true> {
   appearance?: T;
   content?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+        gapBelow?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1491,6 +3997,23 @@ export interface StatsCountersBlockSelect<T extends boolean = true> {
         label?: T;
         id?: T;
       };
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+        gapBelow?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1504,6 +4027,23 @@ export interface ServicesGridBlockSelect<T extends boolean = true> {
   source?: T;
   appearance?: T;
   services?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+        gapBelow?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1517,6 +4057,23 @@ export interface SectorTilesBlockSelect<T extends boolean = true> {
   source?: T;
   appearance?: T;
   sectors?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+        gapBelow?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1531,6 +4088,23 @@ export interface ProjectsListBlockSelect<T extends boolean = true> {
   appearance?: T;
   projects?: T;
   viewAllLabel?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+        gapBelow?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1547,6 +4121,103 @@ export interface ImageGalleryBlockSelect<T extends boolean = true> {
         image?: T;
         id?: T;
       };
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+        gapBelow?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PhotoStripBlock_select".
+ */
+export interface PhotoStripBlockSelect<T extends boolean = true> {
+  heading?: T;
+  appearance?: T;
+  displayMode?: T;
+  speed?: T;
+  photos?:
+    | T
+    | {
+        image?: T;
+        caption?: T;
+        id?: T;
+      };
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+        gapBelow?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "VideoShowcaseBlock_select".
+ */
+export interface VideoShowcaseBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  heading?: T;
+  lede?: T;
+  layout?: T;
+  tone?: T;
+  videos?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        source?: T;
+        duration?: T;
+        videoFile?: T;
+        videoUrl?: T;
+        poster?: T;
+        featured?: T;
+        uploadDate?: T;
+        id?: T;
+      };
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+        gapBelow?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1559,6 +4230,23 @@ export interface LogoWallBlockSelect<T extends boolean = true> {
   source?: T;
   appearance?: T;
   clients?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+        gapBelow?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1576,6 +4264,23 @@ export interface PartnerBarBlockSelect<T extends boolean = true> {
         logo?: T;
         id?: T;
       };
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+        gapBelow?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1590,6 +4295,23 @@ export interface ProductShowcaseBlockSelect<T extends boolean = true> {
   appearance?: T;
   products?: T;
   viewAllLabel?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+        gapBelow?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1602,6 +4324,23 @@ export interface ArticlesListBlockSelect<T extends boolean = true> {
   lede?: T;
   appearance?: T;
   viewAllLabel?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+        gapBelow?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1614,6 +4353,23 @@ export interface TestimonialsBlockSelect<T extends boolean = true> {
   source?: T;
   appearance?: T;
   testimonials?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+        gapBelow?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1626,7 +4382,25 @@ export interface TeamGridBlockSelect<T extends boolean = true> {
   lede?: T;
   source?: T;
   appearance?: T;
+  group?: T;
   members?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+        gapBelow?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1644,6 +4418,23 @@ export interface StepsBlockSelect<T extends boolean = true> {
         title?: T;
         body?: T;
         id?: T;
+      };
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+        gapBelow?: T;
       };
   id?: T;
   blockName?: T;
@@ -1666,6 +4457,23 @@ export interface CTABandBlockSelect<T extends boolean = true> {
         style?: T;
         id?: T;
       };
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+        gapBelow?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1683,6 +4491,23 @@ export interface FAQBlockSelect<T extends boolean = true> {
         answer?: T;
         id?: T;
       };
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+        gapBelow?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1694,8 +4519,143 @@ export interface CalculatorEmbedBlockSelect<T extends boolean = true> {
   heading?: T;
   appearance?: T;
   body?: T;
+  calcType?: T;
   tool?: T;
   ctaLabel?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+        gapBelow?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GatedAssetBlock_select".
+ */
+export interface GatedAssetBlockSelect<T extends boolean = true> {
+  heading?: T;
+  appearance?: T;
+  summary?: T;
+  resource?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+        gapBelow?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProofStripBlock_select".
+ */
+export interface ProofStripBlockSelect<T extends boolean = true> {
+  heading?: T;
+  appearance?: T;
+  sector?: T;
+  showStats?: T;
+  showClients?: T;
+  testimonial?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+        gapBelow?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "RelatedContentBlock_select".
+ */
+export interface RelatedContentBlockSelect<T extends boolean = true> {
+  heading?: T;
+  appearance?: T;
+  mode?: T;
+  articles?: T;
+  limit?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+        gapBelow?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "NextBestActionBlock_select".
+ */
+export interface NextBestActionBlockSelect<T extends boolean = true> {
+  segment?: T;
+  appearance?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+        gapBelow?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1707,6 +4667,23 @@ export interface ContactRFQBlockSelect<T extends boolean = true> {
   heading?: T;
   appearance?: T;
   subhead?: T;
+  style?:
+    | T
+    | {
+        colorScheme?: T;
+        accentColour?: T;
+        width?: T;
+        paddingSize?: T;
+        textAlign?: T;
+        headingSize?: T;
+        headingFont?: T;
+        bodyFont?: T;
+        bodySize?: T;
+        animationStyle?: T;
+        animationDelay?: T;
+        withBorder?: T;
+        gapBelow?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1799,6 +4776,7 @@ export interface ServicesSelect<T extends boolean = true> {
   slug?: T;
   icon?: T;
   order?: T;
+  customIcon?: T;
   summary?: T;
   heroImage?: T;
   explainerVideo?: T;
@@ -1833,6 +4811,7 @@ export interface SectorsSelect<T extends boolean = true> {
   slug?: T;
   icon?: T;
   order?: T;
+  customIcon?: T;
   summary?: T;
   challenges?: T;
   services?: T;
@@ -1855,6 +4834,7 @@ export interface SectorsSelect<T extends boolean = true> {
 export interface TeamSelect<T extends boolean = true> {
   name?: T;
   role?: T;
+  category?: T;
   photo?: T;
   bio?: T;
   order?: T;
@@ -1898,6 +4878,132 @@ export interface ArticlesSelect<T extends boolean = true> {
   publishedDate?: T;
   excerpt?: T;
   body?: T;
+  citations?:
+    | T
+    | {
+        source?: T;
+        quotedClaim?: T;
+        url?: T;
+        title?: T;
+        accessedDate?: T;
+        sourcePublishedDate?: T;
+        locator?: T;
+        lastVerifiedAt?: T;
+        id?: T;
+      };
+  claims?:
+    | T
+    | {
+        claimText?: T;
+        value?: T;
+        unit?: T;
+        sourceType?: T;
+        citationIndex?: T;
+        hedge?: T;
+        retrievedAt?: T;
+        id?: T;
+      };
+  faq?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  category?: T;
+  revisionMeta?:
+    | T
+    | {
+        approvalState?: T;
+        triggeredBySource?: T;
+        changeSummary?: T;
+        riskFlags?: T;
+        pendingSince?: T;
+        staleSource?: T;
+        tokenJti?: T;
+        decidedBy?: T;
+        decidedAt?: T;
+      };
+  seo?:
+    | T
+    | {
+        title?: T;
+        canonical?: T;
+        description?: T;
+        image?: T;
+        noindex?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "knowledge-resources_select".
+ */
+export interface KnowledgeResourcesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  type?: T;
+  description?: T;
+  order?: T;
+  enabled?: T;
+  calcType?: T;
+  fileUpload?: T;
+  fileUrl?: T;
+  fileSize?: T;
+  fileFormat?: T;
+  openMode?: T;
+  downloadLabel?: T;
+  gateLevel?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "news-items_select".
+ */
+export interface NewsItemsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  category?: T;
+  publishedDate?: T;
+  summary?: T;
+  body?: T;
+  heroImage?: T;
+  source?: T;
+  sourceUrl?: T;
+  tags?:
+    | T
+    | {
+        tag?: T;
+        id?: T;
+      };
+  citations?:
+    | T
+    | {
+        source?: T;
+        quotedClaim?: T;
+        url?: T;
+        title?: T;
+        accessedDate?: T;
+        sourcePublishedDate?: T;
+        locator?: T;
+        lastVerifiedAt?: T;
+        id?: T;
+      };
+  claims?:
+    | T
+    | {
+        claimText?: T;
+        value?: T;
+        unit?: T;
+        sourceType?: T;
+        citationIndex?: T;
+        hedge?: T;
+        retrievedAt?: T;
+        id?: T;
+      };
   faq?:
     | T
     | {
@@ -1914,9 +5020,81 @@ export interface ArticlesSelect<T extends boolean = true> {
         image?: T;
         noindex?: T;
       };
+  revisionMeta?:
+    | T
+    | {
+        approvalState?: T;
+        triggeredBySource?: T;
+        changeSummary?: T;
+        riskFlags?: T;
+        pendingSince?: T;
+        staleSource?: T;
+        tokenJti?: T;
+        decidedBy?: T;
+        decidedAt?: T;
+      };
+  agentMeta?:
+    | T
+    | {
+        generatedBy?: T;
+        model?: T;
+        sourceUrls?: T;
+        generatedAt?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "awards_select".
+ */
+export interface AwardsSelect<T extends boolean = true> {
+  title?: T;
+  kind?: T;
+  issuer?: T;
+  dateAwarded?: T;
+  validUntil?: T;
+  description?: T;
+  certificate?: T;
+  referenceUrl?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partners_select".
+ */
+export interface PartnersSelect<T extends boolean = true> {
+  name?: T;
+  logo?: T;
+  type?: T;
+  description?: T;
+  url?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "job-openings_select".
+ */
+export interface JobOpeningsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  department?: T;
+  location?: T;
+  employmentType?: T;
+  status?: T;
+  summary?: T;
+  description?: T;
+  applyEmail?: T;
+  applyUrl?: T;
+  closingDate?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1983,6 +5161,27 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "icons_select".
+ */
+export interface IconsSelect<T extends boolean = true> {
+  name?: T;
+  category?: T;
+  tags?: T;
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "rfq-requests_select".
  */
 export interface RfqRequestsSelect<T extends boolean = true> {
@@ -1995,6 +5194,112 @@ export interface RfqRequestsSelect<T extends boolean = true> {
   message?: T;
   status?: T;
   sourcePath?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "leads_select".
+ */
+export interface LeadsSelect<T extends boolean = true> {
+  displayName?: T;
+  name?: T;
+  company?: T;
+  email?: T;
+  phone?: T;
+  segment?: T;
+  source?: T;
+  score?: T;
+  status?: T;
+  marketingOptIn?: T;
+  optInConfirmedAt?: T;
+  doNotContact?: T;
+  utmSource?: T;
+  utmMedium?: T;
+  utmCampaign?: T;
+  sourcePath?: T;
+  touches?:
+    | T
+    | {
+        at?: T;
+        channel?: T;
+        note?: T;
+        id?: T;
+      };
+  notes?: T;
+  calcPayload?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sources_select".
+ */
+export interface SourcesSelect<T extends boolean = true> {
+  name?: T;
+  url?: T;
+  checkUrl?: T;
+  tier?: T;
+  fetchMethod?: T;
+  fetchPolicy?: T;
+  checkFrequency?: T;
+  contentSelector?: T;
+  language?: T;
+  paywalled?: T;
+  active?: T;
+  notes?: T;
+  lastContentHash?: T;
+  etag?: T;
+  lastModified?: T;
+  consecutiveFailures?: T;
+  lastCheckedAt?: T;
+  lastChangedAt?: T;
+  robotsCheckedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pipeline-runs_select".
+ */
+export interface PipelineRunsSelect<T extends boolean = true> {
+  runDate?: T;
+  trigger?: T;
+  sourcesChecked?: T;
+  sourcesChanged?: T;
+  draftsCreated?: T;
+  startedAt?: T;
+  finishedAt?: T;
+  errors?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publish-audit_select".
+ */
+export interface PublishAuditSelect<T extends boolean = true> {
+  at?: T;
+  action?: T;
+  docCollection?: T;
+  docId?: T;
+  versionIdFrom?: T;
+  versionIdTo?: T;
+  actor?: T;
+  tokenJti?: T;
+  claimDiffSnapshot?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "daily-reports_select".
+ */
+export interface DailyReportsSelect<T extends boolean = true> {
+  date?: T;
+  generatedAt?: T;
+  html?: T;
+  metrics?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2114,13 +5419,40 @@ export interface SiteSetting {
   description?: string | null;
   foundingYear?: number | null;
   areaServed?: string | null;
+  /**
+   * Real, verified figures shown on the Projects page. Leave empty to hide the stats band. Use real numbers only — never invented or placeholder values.
+   */
+  stats?:
+    | {
+        value: number;
+        /**
+         * e.g. "+", "%", "MWp"
+         */
+        suffix?: string | null;
+        /**
+         * e.g. Projects executed
+         */
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
   phones?:
     | {
         number: string;
         id?: string | null;
       }[]
     | null;
-  email?: string | null;
+  /**
+   * Contact emails. The first is the primary (shown in the footer and used in schema); add more for departments like Sales or Support.
+   */
+  emails: {
+    address: string;
+    /**
+     * Optional, e.g. "Sales", "Support".
+     */
+    label?: string | null;
+    id?: string | null;
+  }[];
   address?: {
     street?: string | null;
     city?: string | null;
@@ -2162,6 +5494,125 @@ export interface SiteSetting {
    * Default social share image (1200×630).
    */
   ogImage?: (number | null) | Media;
+  /**
+   * Switch the entire site's visual style. Classic is the standard look; Pro layers frosted-glass surfaces, subtle brand gradients and richer motion on top — same content, fully reversible. Flip back to Classic anytime.
+   */
+  designVersion?: ('classic' | 'pro') | null;
+  /**
+   * Classic = full menu bar with Solutions/Services dropdowns. The other three are compact, top-level-only styles (parents link to their first item, no dropdowns), all brand-tuned and fully reversible: Adaptive pill = glass pill that expands on hover/tap; Tab bar = segmented bordered tabs; Floating dock = bottom-centre bar with a sliding active indicator (logo + CTA stay in a slim top bar; the dock coexists with the WhatsApp button).
+   */
+  navStyle?: ('classic' | 'pill' | 'tabs' | 'dock') | null;
+  /**
+   * Add a rule per listing you want to control. Pick the surface and the card style. Any surface without a rule uses the default (vertical grid). Horizontal rows reveal the description on hover — the same interaction as About → Our Team.
+   */
+  contentLayouts?:
+    | {
+        surface: 'knowledge' | 'projects' | 'services' | 'sectors' | 'capabilities';
+        style: 'vertical' | 'horizontal';
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Add a row for each index page you want to customise.
+   */
+  pageIntros?:
+    | {
+        page: 'services' | 'solutions' | 'projects' | 'knowledge' | 'contact' | 'request-quote';
+        /**
+         * Small label above the heading.
+         */
+        eyebrow?: string | null;
+        /**
+         * Main hero heading (H1).
+         */
+        heading?: string | null;
+        /**
+         * Intro paragraph under the heading.
+         */
+        lede?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * One authoritative paragraph describing Sustech for AI engines. Facts only — this becomes the lead context AI assistants cite when asked about the company.
+   */
+  aiOverview?: string | null;
+  /**
+   * Short, citable facts (e.g. 'Founded 2017', 'IEC 62305 / NFPA 780 lightning protection', 'Serves C&I clients across Bangladesh'). Verifiable only.
+   */
+  keyFacts?:
+    | {
+        fact: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Common questions about Sustech with accurate answers. Added to /llms.txt so AI engines answer correctly. For an on-page FAQ with rich-result schema, use the FAQ block on a Page instead.
+   */
+  aiFaqs?:
+    | {
+        question: string;
+        answer: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Shows a floating WhatsApp button on every page. Leave the number blank to disable.
+   */
+  whatsapp?: {
+    enabled?: boolean | null;
+    /**
+     * Include country code, no spaces (e.g. 8801711000000).
+     */
+    number?: string | null;
+    /**
+     * Message pre-typed when the user opens WhatsApp.
+     */
+    prefilledMessage?: string | null;
+    position?: ('bottom-right' | 'bottom-left') | null;
+  };
+  /**
+   * Deploy a chatbot widget. Choose between Hermes (your custom AI agent), Crisp (free live chat), or a custom embed script.
+   */
+  chatbot?: {
+    enabled?: boolean | null;
+    /**
+     * Hermes / n8n: your own open-ended AI assistant (recommended) — same brand widget, answers from your database with text + image support. Crisp: free live chat. Custom: paste any embed script.
+     */
+    provider?: ('hermes' | 'n8n' | 'crisp' | 'custom') | null;
+    /**
+     * The /chat API endpoint of your Hermes agent. Leave blank to use the built-in /api/chat route.
+     */
+    hermesWebhookUrl?: string | null;
+    hermesGreeting?: string | null;
+    /**
+     * Find your Website ID in Crisp Dashboard → Settings → Website Settings.
+     */
+    crispWebsiteId?: string | null;
+    /**
+     * Paste the full <script> tag(s) from your chat provider. Script is injected into the page footer.
+     */
+    customScript?: string | null;
+    chatPosition?: ('bottom-right' | 'bottom-left') | null;
+  };
+  /**
+   * Quick-reply chips shown when the chat opens. Leave empty to use the built-in defaults. "Get a quote" opens the quote form; others are sent as questions.
+   */
+  chatSuggestions?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Options in the chat quote form's "Project scale" dropdown. Leave empty to use the built-in defaults.
+   */
+  quoteScales?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -2252,6 +5703,96 @@ export interface Navigation {
   createdAt?: string | null;
 }
 /**
+ * Cited electricity & diesel prices used by the calculators. Update from the official BERC/utility notification and set the source URL + date. Human-edited only.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tariff-rates".
+ */
+export interface TariffRate {
+  id: number;
+  /**
+   * Indicative industrial flat rate.
+   */
+  industrialFlatBdtPerKwh: number;
+  commercialFlatBdtPerKwh: number;
+  /**
+   * e.g. "BERC Order No. … 2026".
+   */
+  electricitySourceLabel?: string | null;
+  electricitySourceUrl?: string | null;
+  /**
+   * Surfaced as "rates as of {date}".
+   */
+  electricityVerifiedAt?: string | null;
+  dieselPriceBdtPerLitre: number;
+  /**
+   * kWh produced per litre (typical 3.0–3.6).
+   */
+  dieselGenEfficiencyKwhPerLitre: number;
+  /**
+   * Servicing/oil per kWh.
+   */
+  dieselMaintenanceBdtPerKwh: number;
+  dieselSourceLabel?: string | null;
+  dieselSourceUrl?: string | null;
+  dieselVerifiedAt?: string | null;
+  /**
+   * Conservative LFP round-trip (0.90–0.95). Used as a floor, not the catalog ceiling.
+   */
+  bessRoundTripEfficiency: number;
+  /**
+   * Bangladesh avg daily yield per kWp (Global Solar Atlas).
+   */
+  solarYieldKwhPerKwpDay: number;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Per-segment call-to-action rules used by the Next-best-action block.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "next-best-actions".
+ */
+export interface NextBestAction {
+  id: number;
+  rules?:
+    | {
+        segment: 'foreign-investor' | 'rmg-factory' | 'real-estate' | 'commercial-building' | 'bank-financial';
+        /**
+         * Short line above the button.
+         */
+        note?: string | null;
+        ctaLabel: string;
+        ctaHref: string;
+        id?: string | null;
+      }[]
+    | null;
+  fallbackLabel?: string | null;
+  fallbackHref?: string | null;
+  fallbackNote?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Master switches for the nightly content pipeline. Auto-publish ships OFF — turn it on only after reviewing the shadow-mode logs.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "automation-settings".
+ */
+export interface AutomationSetting {
+  id: number;
+  /**
+   * When OFF, every draft waits for your explicit approval forever (recommended until trusted). When ON, low-risk prose-only edits in the whitelisted categories may publish 24 h after the approval email is delivered — still subject to the env switch, kill switch, claim-diff veto, category whitelist and daily cap.
+   */
+  autoPublishEnabled?: boolean | null;
+  /**
+   * Internal note (e.g. why auto-publish is on/off, who decided).
+   */
+  pipelineNote?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings_select".
  */
@@ -2263,13 +5804,27 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   description?: T;
   foundingYear?: T;
   areaServed?: T;
+  stats?:
+    | T
+    | {
+        value?: T;
+        suffix?: T;
+        label?: T;
+        id?: T;
+      };
   phones?:
     | T
     | {
         number?: T;
         id?: T;
       };
-  email?: T;
+  emails?:
+    | T
+    | {
+        address?: T;
+        label?: T;
+        id?: T;
+      };
   address?:
     | T
     | {
@@ -2297,6 +5852,69 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   titleTemplate?: T;
   defaultDescription?: T;
   ogImage?: T;
+  designVersion?: T;
+  navStyle?: T;
+  contentLayouts?:
+    | T
+    | {
+        surface?: T;
+        style?: T;
+        id?: T;
+      };
+  pageIntros?:
+    | T
+    | {
+        page?: T;
+        eyebrow?: T;
+        heading?: T;
+        lede?: T;
+        id?: T;
+      };
+  aiOverview?: T;
+  keyFacts?:
+    | T
+    | {
+        fact?: T;
+        id?: T;
+      };
+  aiFaqs?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  whatsapp?:
+    | T
+    | {
+        enabled?: T;
+        number?: T;
+        prefilledMessage?: T;
+        position?: T;
+      };
+  chatbot?:
+    | T
+    | {
+        enabled?: T;
+        provider?: T;
+        hermesWebhookUrl?: T;
+        hermesGreeting?: T;
+        crispWebsiteId?: T;
+        customScript?: T;
+        chatPosition?: T;
+      };
+  chatSuggestions?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  quoteScales?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -2353,6 +5971,60 @@ export interface NavigationSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tariff-rates_select".
+ */
+export interface TariffRatesSelect<T extends boolean = true> {
+  industrialFlatBdtPerKwh?: T;
+  commercialFlatBdtPerKwh?: T;
+  electricitySourceLabel?: T;
+  electricitySourceUrl?: T;
+  electricityVerifiedAt?: T;
+  dieselPriceBdtPerLitre?: T;
+  dieselGenEfficiencyKwhPerLitre?: T;
+  dieselMaintenanceBdtPerKwh?: T;
+  dieselSourceLabel?: T;
+  dieselSourceUrl?: T;
+  dieselVerifiedAt?: T;
+  bessRoundTripEfficiency?: T;
+  solarYieldKwhPerKwpDay?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "next-best-actions_select".
+ */
+export interface NextBestActionsSelect<T extends boolean = true> {
+  rules?:
+    | T
+    | {
+        segment?: T;
+        note?: T;
+        ctaLabel?: T;
+        ctaHref?: T;
+        id?: T;
+      };
+  fallbackLabel?: T;
+  fallbackHref?: T;
+  fallbackNote?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "automation-settings_select".
+ */
+export interface AutomationSettingsSelect<T extends boolean = true> {
+  autoPublishEnabled?: T;
+  pipelineNote?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

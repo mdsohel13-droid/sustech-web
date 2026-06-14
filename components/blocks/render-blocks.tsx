@@ -1,16 +1,23 @@
+import { Fragment } from "react";
 import type { Page } from "@/payload-types";
+import { gapBelowClass, type GapBelow } from "@/lib/block-styles";
 import {
   ArticlesListView,
   CalculatorEmbedView,
   CTABandView,
   ContactRFQView,
   FAQView,
+  GatedAssetView,
   HeroView,
+  NextBestActionView,
+  RelatedContentView,
   ImageGalleryView,
   LogoWallView,
   PartnerBarView,
+  PhotoStripView,
   ProductShowcaseView,
   ProjectsListView,
+  ProofStripView,
   RichTextView,
   SectorTilesView,
   ServicesGridView,
@@ -19,11 +26,23 @@ import {
   StepsView,
   TeamGridView,
   TestimonialsView,
+  VideoShowcaseView,
 } from "./blocks";
 
 type Block = NonNullable<Page["layout"]>[number];
+// Extended to cover newly-added block types before payload-types.ts is regenerated.
+type AnyBlock = Block | { blockType: "photoStrip"; [k: string]: unknown };
 
-function BlockSwitch({ block, index }: { block: Block; index: number }) {
+function BlockSwitch({
+  block,
+  index,
+  cardLayout,
+}: {
+  block: AnyBlock;
+  index: number;
+  /** Page-level listing layout (Site Settings → Display) applied to listing blocks. */
+  cardLayout?: "vertical" | "horizontal";
+}) {
   switch (block.blockType) {
     case "hero":
       return <HeroView block={block} isFirst={index === 0} />;
@@ -32,13 +51,17 @@ function BlockSwitch({ block, index }: { block: Block; index: number }) {
     case "statsCounters":
       return <StatsCountersView block={block} />;
     case "servicesGrid":
-      return <ServicesGridView block={block} />;
+      return <ServicesGridView block={block} cardLayout={cardLayout} />;
     case "sectorTiles":
-      return <SectorTilesView block={block} />;
+      return <SectorTilesView block={block} cardLayout={cardLayout} />;
     case "projectsList":
       return <ProjectsListView block={block} />;
     case "imageGallery":
       return <ImageGalleryView block={block} />;
+    case "photoStrip":
+      return <PhotoStripView block={block as Parameters<typeof PhotoStripView>[0]["block"]} />;
+    case "videoShowcase":
+      return <VideoShowcaseView block={block} />;
     case "logoWall":
       return <LogoWallView block={block} />;
     case "partnerBar":
@@ -59,6 +82,14 @@ function BlockSwitch({ block, index }: { block: Block; index: number }) {
       return <FAQView block={block} />;
     case "calculatorEmbed":
       return <CalculatorEmbedView block={block} />;
+    case "gatedAsset":
+      return <GatedAssetView block={block} />;
+    case "proofStrip":
+      return <ProofStripView block={block} />;
+    case "relatedContent":
+      return <RelatedContentView block={block} />;
+    case "nextBestAction":
+      return <NextBestActionView block={block} />;
     case "contactRFQ":
       return <ContactRFQView block={block} />;
     case "spacer":
@@ -68,13 +99,40 @@ function BlockSwitch({ block, index }: { block: Block; index: number }) {
   }
 }
 
-export function RenderBlocks({ blocks }: { blocks?: Page["layout"] | null }) {
+const GAP_KEYS: readonly GapBelow[] = ["none", "small", "default", "large"];
+
+/** Resolve the admin-set gap-below class for a block without re-resolving full style. */
+function gapClassFor(block: AnyBlock): string {
+  const g = (block as { style?: { gapBelow?: string | null } }).style?.gapBelow;
+  const key = GAP_KEYS.includes(g as GapBelow) ? (g as GapBelow) : "default";
+  return gapBelowClass[key];
+}
+
+export function RenderBlocks({
+  blocks,
+  cardLayout,
+}: {
+  blocks?: Page["layout"] | null;
+  /** Optional page-level listing layout, applied to listing blocks (servicesGrid, sectorTiles). */
+  cardLayout?: "vertical" | "horizontal";
+}) {
   if (!blocks?.length) return null;
   return (
     <>
-      {blocks.map((block, i) => (
-        <BlockSwitch key={block.id ?? i} block={block} index={i} />
-      ))}
+      {(blocks as AnyBlock[]).map((block, i) => {
+        const gap = gapClassFor(block);
+        const key = (block as { id?: string }).id ?? i;
+        const view = <BlockSwitch block={block} index={i} cardLayout={cardLayout} />;
+        // Only introduce a wrapper when a non-default gap is requested, to avoid
+        // changing the layout of existing content.
+        return gap ? (
+          <div key={key} className={gap}>
+            {view}
+          </div>
+        ) : (
+          <Fragment key={key}>{view}</Fragment>
+        );
+      })}
     </>
   );
 }

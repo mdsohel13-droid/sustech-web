@@ -1,43 +1,57 @@
 import config from "@payload-config";
-import { getPayload, type Payload } from "payload";
+import { unstable_cache } from "next/cache";
+import { getPayload } from "payload";
+import type { Where } from "payload";
 import { cache } from "react";
 import type {
   Article,
   Client,
+  KnowledgeResource,
+  Media,
   Navigation,
+  NewsItem,
+  NextBestAction,
   Page,
   Product,
   Project,
   Sector,
   Service,
   SiteSetting,
+  TariffRate,
   Team,
   Testimonial,
 } from "@/payload-types";
 
-let client: Promise<Payload> | null = null;
-
-/** Memoised Payload local-API client (same process as the CMS; no network hop). */
-export function getPayloadClient(): Promise<Payload> {
-  if (!client) client = getPayload({ config });
-  return client;
-}
+/**
+ * Returns a memoised Payload local-API client.
+ *
+ * Uses React cache() for request-level deduplication. Resets the reference on
+ * rejection so the next call retries instead of serving a stale rejection.
+ */
+export const getPayloadClient = cache(async () => {
+  return getPayload({ config });
+});
 
 // Pages ----------------------------------------------------------------------
 
 export const getPageBySlug = cache(async (slug: string, draft = false): Promise<Page | null> => {
-  const payload = await getPayloadClient();
-  const res = await payload.find({
-    collection: "pages",
-    draft,
-    depth: 2,
-    limit: 1,
-    overrideAccess: true,
-    where: draft
-      ? { slug: { equals: slug } }
-      : { and: [{ slug: { equals: slug } }, { _status: { equals: "published" } }] },
-  });
-  return res.docs[0] ?? null;
+  try {
+    const payload = await getPayloadClient();
+    const res = await payload.find({
+      collection: "pages",
+      draft,
+      depth: 2,
+      limit: 1,
+      // Only override access when previewing a draft (editor session required)
+      ...(draft ? { overrideAccess: true } : {}),
+      where: draft
+        ? { slug: { equals: slug } }
+        : { and: [{ slug: { equals: slug } }, { _status: { equals: "published" } }] },
+    });
+    return res.docs[0] ?? null;
+  } catch {
+    return null;
+  }
 });
 
 export const getPublishedPageSlugs = cache(async (): Promise<string[]> => {
@@ -60,35 +74,43 @@ export const getPublishedPageSlugs = cache(async (): Promise<string[]> => {
 
 export const getProjectBySlug = cache(
   async (slug: string, draft = false): Promise<Project | null> => {
-    const payload = await getPayloadClient();
-    const res = await payload.find({
-      collection: "projects",
-      draft,
-      depth: 2,
-      limit: 1,
-      overrideAccess: true,
-      where: draft
-        ? { slug: { equals: slug } }
-        : { and: [{ slug: { equals: slug } }, { _status: { equals: "published" } }] },
-    });
-    return res.docs[0] ?? null;
+    try {
+      const payload = await getPayloadClient();
+      const res = await payload.find({
+        collection: "projects",
+        draft,
+        depth: 2,
+        limit: 1,
+        ...(draft ? { overrideAccess: true } : {}),
+        where: draft
+          ? { slug: { equals: slug } }
+          : { and: [{ slug: { equals: slug } }, { _status: { equals: "published" } }] },
+      });
+      return res.docs[0] ?? null;
+    } catch {
+      return null;
+    }
   },
 );
 
 export const getArticleBySlug = cache(
   async (slug: string, draft = false): Promise<Article | null> => {
-    const payload = await getPayloadClient();
-    const res = await payload.find({
-      collection: "articles",
-      draft,
-      depth: 2,
-      limit: 1,
-      overrideAccess: true,
-      where: draft
-        ? { slug: { equals: slug } }
-        : { and: [{ slug: { equals: slug } }, { _status: { equals: "published" } }] },
-    });
-    return res.docs[0] ?? null;
+    try {
+      const payload = await getPayloadClient();
+      const res = await payload.find({
+        collection: "articles",
+        draft,
+        depth: 2,
+        limit: 1,
+        ...(draft ? { overrideAccess: true } : {}),
+        where: draft
+          ? { slug: { equals: slug } }
+          : { and: [{ slug: { equals: slug } }, { _status: { equals: "published" } }] },
+      });
+      return res.docs[0] ?? null;
+    } catch {
+      return null;
+    }
   },
 );
 
@@ -109,14 +131,18 @@ export const getArticles = cache(async (): Promise<Article[]> => {
 });
 
 export const getServiceBySlug = cache(async (slug: string): Promise<Service | null> => {
-  const payload = await getPayloadClient();
-  const res = await payload.find({
-    collection: "services",
-    depth: 1,
-    limit: 1,
-    where: { slug: { equals: slug } },
-  });
-  return res.docs[0] ?? null;
+  try {
+    const payload = await getPayloadClient();
+    const res = await payload.find({
+      collection: "services",
+      depth: 1,
+      limit: 1,
+      where: { slug: { equals: slug } },
+    });
+    return res.docs[0] ?? null;
+  } catch {
+    return null;
+  }
 });
 
 export const getProjectsByService = cache(async (serviceId: number): Promise<Project[]> => {
@@ -138,26 +164,38 @@ export const getProjectsByService = cache(async (serviceId: number): Promise<Pro
 // Lists ----------------------------------------------------------------------
 
 export const getServices = cache(async (): Promise<Service[]> => {
-  const payload = await getPayloadClient();
-  const res = await payload.find({ collection: "services", depth: 1, limit: 50, sort: "order" });
-  return res.docs;
+  try {
+    const payload = await getPayloadClient();
+    const res = await payload.find({ collection: "services", depth: 1, limit: 50, sort: "order" });
+    return res.docs;
+  } catch {
+    return [];
+  }
 });
 
 export const getSectors = cache(async (): Promise<Sector[]> => {
-  const payload = await getPayloadClient();
-  const res = await payload.find({ collection: "sectors", depth: 1, limit: 50, sort: "order" });
-  return res.docs;
+  try {
+    const payload = await getPayloadClient();
+    const res = await payload.find({ collection: "sectors", depth: 1, limit: 50, sort: "order" });
+    return res.docs;
+  } catch {
+    return [];
+  }
 });
 
 export const getSectorBySlug = cache(async (slug: string): Promise<Sector | null> => {
-  const payload = await getPayloadClient();
-  const res = await payload.find({
-    collection: "sectors",
-    depth: 2,
-    limit: 1,
-    where: { slug: { equals: slug } },
-  });
-  return res.docs[0] ?? null;
+  try {
+    const payload = await getPayloadClient();
+    const res = await payload.find({
+      collection: "sectors",
+      depth: 2,
+      limit: 1,
+      where: { slug: { equals: slug } },
+    });
+    return res.docs[0] ?? null;
+  } catch {
+    return null;
+  }
 });
 
 export const getProjectsBySector = cache(async (sectorId: number): Promise<Project[]> => {
@@ -177,21 +215,38 @@ export const getProjectsBySector = cache(async (sectorId: number): Promise<Proje
 });
 
 export const getClients = cache(async (): Promise<Client[]> => {
-  const payload = await getPayloadClient();
-  const res = await payload.find({ collection: "clients", depth: 1, limit: 100, sort: "order" });
-  return res.docs;
+  try {
+    const payload = await getPayloadClient();
+    const res = await payload.find({
+      collection: "clients",
+      depth: 1,
+      limit: 100,
+      sort: "order",
+    });
+    return res.docs;
+  } catch {
+    return [];
+  }
 });
 
 export const getTestimonials = cache(async (): Promise<Testimonial[]> => {
-  const payload = await getPayloadClient();
-  const res = await payload.find({ collection: "testimonials", depth: 1, limit: 50 });
-  return res.docs;
+  try {
+    const payload = await getPayloadClient();
+    const res = await payload.find({ collection: "testimonials", depth: 1, limit: 50 });
+    return res.docs;
+  } catch {
+    return [];
+  }
 });
 
 export const getTeam = cache(async (): Promise<Team[]> => {
-  const payload = await getPayloadClient();
-  const res = await payload.find({ collection: "team", depth: 1, limit: 100, sort: "order" });
-  return res.docs;
+  try {
+    const payload = await getPayloadClient();
+    const res = await payload.find({ collection: "team", depth: 1, limit: 100, sort: "order" });
+    return res.docs;
+  } catch {
+    return [];
+  }
 });
 
 export const getProjects = cache(async (): Promise<Project[]> => {
@@ -211,8 +266,8 @@ export const getProjects = cache(async (): Promise<Project[]> => {
 });
 
 export const getProducts = cache(async (): Promise<Product[]> => {
-  const payload = await getPayloadClient();
   try {
+    const payload = await getPayloadClient();
     const res = await payload.find({
       collection: "products",
       depth: 1,
@@ -226,8 +281,8 @@ export const getProducts = cache(async (): Promise<Product[]> => {
 });
 
 export const getFeaturedProducts = cache(async (limit = 6): Promise<Product[]> => {
-  const payload = await getPayloadClient();
   try {
+    const payload = await getPayloadClient();
     const res = await payload.find({
       collection: "products",
       depth: 1,
@@ -242,25 +297,174 @@ export const getFeaturedProducts = cache(async (limit = 6): Promise<Product[]> =
 });
 
 export const getFeaturedProjects = cache(async (limit = 3): Promise<Project[]> => {
-  const payload = await getPayloadClient();
-  const res = await payload.find({
-    collection: "projects",
-    depth: 2,
-    limit,
-    where: { and: [{ _status: { equals: "published" } }, { featured: { equals: true } }] },
-    sort: "-year",
-  });
-  return res.docs;
+  try {
+    const payload = await getPayloadClient();
+    const res = await payload.find({
+      collection: "projects",
+      depth: 2,
+      limit,
+      where: { and: [{ _status: { equals: "published" } }, { featured: { equals: true } }] },
+      sort: "-year",
+    });
+    return res.docs;
+  } catch {
+    return [];
+  }
 });
+
+// Knowledge resources --------------------------------------------------------
+
+export const getKnowledgeResources = cache(
+  async (type?: "calculator" | "sample"): Promise<KnowledgeResource[]> => {
+    try {
+      const payload = await getPayloadClient();
+      const where: Where = type
+        ? { and: [{ enabled: { equals: true } }, { type: { equals: type } }] }
+        : { enabled: { equals: true } };
+      const res = await payload.find({
+        collection: "knowledge-resources",
+        depth: 1,
+        limit: 100,
+        sort: "order",
+        where,
+      });
+      return res.docs;
+    } catch {
+      return [];
+    }
+  },
+);
+
+// Media ----------------------------------------------------------------------
+
+/**
+ * Recent media for the hero side-media panel.
+ * `videoOnly` restricts to MP4 video uploads (used to mix in explainer clips).
+ */
+export const getRecentMedia = cache(
+  async (opts?: { limit?: number; videoOnly?: boolean }): Promise<Media[]> => {
+    try {
+      const payload = await getPayloadClient();
+      const res = await payload.find({
+        collection: "media",
+        depth: 0,
+        limit: opts?.limit ?? 12,
+        sort: "-createdAt",
+        ...(opts?.videoOnly ? { where: { mimeType: { contains: "video" } } } : {}),
+      });
+      return res.docs;
+    } catch {
+      return [];
+    }
+  },
+);
+
+// News items -----------------------------------------------------------------
+
+export const getNewsItems = cache(
+  async (opts?: { limit?: number; category?: string }): Promise<NewsItem[]> => {
+    try {
+      const payload = await getPayloadClient();
+      const where: Where =
+        opts?.category && opts.category !== "all"
+          ? {
+              and: [{ _status: { equals: "published" } }, { category: { equals: opts.category } }],
+            }
+          : { _status: { equals: "published" } };
+      const res = await payload.find({
+        collection: "news-items",
+        depth: 1,
+        limit: opts?.limit ?? 50,
+        sort: "-publishedDate",
+        where,
+      });
+      return res.docs;
+    } catch {
+      return [];
+    }
+  },
+);
+
+export const getNewsItemBySlug = cache(
+  async (slug: string, draft = false): Promise<NewsItem | null> => {
+    try {
+      const payload = await getPayloadClient();
+      const res = await payload.find({
+        collection: "news-items",
+        depth: 1,
+        limit: 1,
+        ...(draft ? { overrideAccess: true } : {}),
+        where: draft
+          ? { slug: { equals: slug } }
+          : { and: [{ slug: { equals: slug } }, { _status: { equals: "published" } }] },
+      });
+      return res.docs[0] ?? null;
+    } catch {
+      return null;
+    }
+  },
+);
 
 // Globals --------------------------------------------------------------------
 
-export const getSiteSettings = cache(async (): Promise<SiteSetting> => {
-  const payload = await getPayloadClient();
-  return payload.findGlobal({ slug: "site-settings", depth: 1 });
-});
+// Each global is read several times per render (layout, EngagementWidgets,
+// Footer, page bodies). unstable_cache dedupes across requests but NOT reliably
+// across concurrent in-render calls to the same key — under load one caller
+// could receive an empty result, which made the WhatsApp button / projects
+// filters intermittently vanish. Wrapping each in React `cache()` collapses all
+// in-render calls to a single Data Cache lookup, so every consumer sees the
+// same value within a request. unstable_cache still provides the cross-request
+// ISR caching + revalidateTag invalidation.
 
-export const getNavigation = cache(async (): Promise<Navigation> => {
-  const payload = await getPayloadClient();
-  return payload.findGlobal({ slug: "navigation", depth: 1 });
-});
+/**
+ * Site settings — cached across ISR revalidation cycles via Next.js Data Cache.
+ * Call `revalidateTag('site-settings')` in a Payload afterChange hook when the
+ * global is updated to flush the cache on demand.
+ */
+const siteSettingsCached = unstable_cache(
+  async (): Promise<SiteSetting> => {
+    const payload = await getPayloadClient();
+    return payload.findGlobal({ slug: "site-settings", depth: 1 });
+  },
+  ["site-settings"],
+  { revalidate: 3600, tags: ["site-settings"] },
+);
+export const getSiteSettings = cache((): Promise<SiteSetting> => siteSettingsCached());
+
+/**
+ * Navigation — cached across ISR cycles; flush via revalidateTag('navigation').
+ */
+const navigationCached = unstable_cache(
+  async (): Promise<Navigation> => {
+    const payload = await getPayloadClient();
+    return payload.findGlobal({ slug: "navigation", depth: 1 });
+  },
+  ["navigation"],
+  { revalidate: 3600, tags: ["navigation"] },
+);
+export const getNavigation = cache((): Promise<Navigation> => navigationCached());
+
+/**
+ * Tariff rates — cited electricity/diesel prices used by the calculators.
+ * Cached across ISR cycles; flush via revalidateTag('tariff-rates').
+ */
+const tariffRatesCached = unstable_cache(
+  async (): Promise<TariffRate> => {
+    const payload = await getPayloadClient();
+    return payload.findGlobal({ slug: "tariff-rates", depth: 0 });
+  },
+  ["tariff-rates"],
+  { revalidate: 3600, tags: ["tariff-rates"] },
+);
+export const getTariffRates = cache((): Promise<TariffRate> => tariffRatesCached());
+
+/** Next-best-action rules — cached; flush via revalidateTag('next-best-actions'). */
+const nextBestActionsCached = unstable_cache(
+  async (): Promise<NextBestAction> => {
+    const payload = await getPayloadClient();
+    return payload.findGlobal({ slug: "next-best-actions", depth: 0 });
+  },
+  ["next-best-actions"],
+  { revalidate: 3600, tags: ["next-best-actions"] },
+);
+export const getNextBestActions = cache((): Promise<NextBestAction> => nextBestActionsCached());

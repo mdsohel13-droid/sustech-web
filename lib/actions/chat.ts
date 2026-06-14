@@ -1,6 +1,8 @@
 "use server";
 
 import { headers } from "next/headers";
+import { ANALYTICS_EVENTS } from "@/lib/analytics/events";
+import { serverCapture } from "@/lib/analytics/server";
 import { getPayloadClient } from "@/lib/payload";
 
 /**
@@ -108,6 +110,12 @@ export async function submitChat(lead: ChatLead): Promise<{ ok: boolean }> {
         status: "new",
         sourcePath: "/chat",
       },
+    });
+    // Lead upsert + GrowthOS event fire via the rfq-requests afterChange hook;
+    // here we only record the funnel event.
+    serverCapture(ANALYTICS_EVENTS.CHAT_LEAD_SUBMITTED, {
+      intent,
+      service: service || "unspecified",
     });
   } catch {
     /* storage failed but n8n may have it — still return ok */

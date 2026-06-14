@@ -34,6 +34,31 @@ export function buildHeaderNav(nav: Navigation): { items: NavItem[]; cta: NavLea
   return { items, cta };
 }
 
+/** A flat top-level link for the compact header styles (pill / tabs / dock). */
+export interface TopLink {
+  label: string;
+  href: string;
+}
+
+/**
+ * Flatten header items to top-level links. Parents that only carry children
+ * (e.g. Solutions/Services) link to their first child so every entry navigates.
+ */
+export function toTopLevelLinks(items: NavItem[]): TopLink[] {
+  return items
+    .map((it) => {
+      const href = it.href ?? it.children?.[0]?.href;
+      return href ? { label: it.label, href } : null;
+    })
+    .filter((x): x is TopLink => x !== null);
+}
+
+/** Whether `href` is the active route for the current pathname. */
+export function isNavActive(pathname: string, href: string): boolean {
+  if (href === "/") return pathname === "/";
+  return pathname === href || pathname.startsWith(href + "/");
+}
+
 export interface FooterColumn {
   title: string;
   links: NavLeaf[];

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ComponentProps } from "react";
 import { sectorIcons, serviceIcons } from "@/components/icons";
+import { EntityIcon } from "@/components/ui/entity-icon";
 import { JsonLd } from "@/components/seo/json-ld";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -82,7 +83,7 @@ export default async function SectorPage({ params }: { params: Promise<{ slug: s
         <GridMotif tone="dark" />
         <Container className="relative py-20 md:py-28">
           <span className="bg-brand/15 text-brand-300 mb-6 inline-flex h-12 w-12 items-center justify-center rounded-md">
-            <Icon className="h-6 w-6" aria-hidden />
+            <EntityIcon customIcon={sector.customIcon} Fallback={Icon} />
           </span>
           <Eyebrow onDark>Sector solutions</Eyebrow>
           <h1 className="text-display mt-3 max-w-3xl font-bold text-balance">{sector.title}</h1>
@@ -119,7 +120,7 @@ export default async function SectorPage({ params }: { params: Promise<{ slug: s
                 <li key={svc.id}>
                   <Card interactive className="relative flex h-full flex-col p-6">
                     <span className="bg-brand/10 text-brand inline-flex h-11 w-11 items-center justify-center rounded-md">
-                      <SvcIcon className="h-6 w-6" aria-hidden />
+                      <EntityIcon customIcon={svc.customIcon} Fallback={SvcIcon} />
                     </span>
                     <h3 className="text-h3 text-ink-900 mt-5 font-semibold">{svc.title}</h3>
                     <p className="text-text-soft mt-2 flex-1 text-[0.9375rem]">{svc.summary}</p>

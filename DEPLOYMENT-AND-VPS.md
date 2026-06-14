@@ -131,3 +131,67 @@ Do this as a deliberate, reversible event.
 - **Local Hermes:** can run the heavy first build/migrations, then hand artifacts to the VPS.
 - **VPS Hermes:** owns ongoing deploys, the content pipeline, backups, monitoring, and the approval-gated publish — all reporting to you over Telegram.
 - **You:** approve the cutover and the production indexing flip.
+
+## 8. Database schema changes (the permanent rule — no more "vanished" data)
+
+Production runs with `push` OFF (`payload.config.ts`). Schema is changed only by
+**committed SQL migrations**, applied **before** the build. This is what prevents
+the "Site Settings / Knowledge looks empty" failure: that happens when the code
+SELECTs a column the database doesn't have yet, so Postgres errors and Payload
+returns nothing — the rows are never deleted, just unreadable until the column
+exists.
+
+> **Never hand-write schema SQL to "catch up" a database — it always misses
+> pieces.** Adding ONE collection (e.g. `awards`) changes the DB in several
+> places at once:
+> 1. its own table (`awards`);
+> 2. a foreign-key column in the shared system join tables
+>    `payload_locked_documents_rels` and `payload_preferences_rels`
+>    (`awards_id`) — the admin reads these on every dashboard load, so a
+>    missing column here 500s the whole admin;
+> 3. enum types, indexes, sequences.
+>
+> A hand-written `ALTER TABLE` only ever covers what you remembered. Only
+> Payload's own generator (`pnpm migrate:create`) — or a full `push` in dev —
+> captures **all** of it. So: change schema in dev, `pnpm migrate:create`,
+> review, commit, and `pnpm migrate` on deploy. `db:sync` is a *detector*
+> (it surfaces a missing column by failing), not a substitute for migrations.
+
+**Every deploy** (use the script — it runs migrate before build):
+
+```bash
+./scripts/deploy.sh feat/ui-improvements
+```
+
+**When you change a collection/global/field**, ship a migration in the same change:
+
+```bash
+pnpm migrate:create   # writes ./migrations/<ts>_*.ts  — REVIEW it is additive
+pnpm migrate:status   # shows applied / pending
+# commit the migration file alongside the code change
+```
+
+### 8a. One-time recovery / adopting migrations on the current beta DB
+
+The beta database was created by `push` and has accumulated additive schema gaps
+(new columns/tables from recent features). Heal it once, then it's in lock-step:
+
+```bash
+cd /path/to/sustech-web
+# 1) BACKUP FIRST (always)
+docker exec -t sustech-pg pg_dump -U <user> <db> > ~/sustech_$(date +%F_%H%M).sql
+# 2) Make the now-required contact email non-null so the sync can't trip on it
+docker exec -i sustech-pg psql -U <user> -d <db> \
+  -c "UPDATE site_settings SET email='info@sustechltd.com' WHERE email IS NULL OR email='';"
+# 3) Pull the code + install
+git fetch origin && git reset --hard origin/feat/ui-improvements
+pnpm install --frozen-lockfile
+# 4) Apply the ADDITIVE schema (safe; only adds, never drops) BEFORE building
+PAYLOAD_DB_PUSH=true pnpm db:sync
+# 5) Build + restart (push stays OFF here — back to the safe default)
+pnpm build
+pm2 restart sustech-web --update-env
+```
+
+Everything reappears immediately (same rows). From here on, use
+`./scripts/deploy.sh` and ship a migration with every schema change.

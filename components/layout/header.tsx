@@ -23,8 +23,19 @@ export function Header({ items, cta, logo }: HeaderProps) {
   const headerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
+    let ticking = false;
+    const update = () => {
+      setScrolled(window.scrollY > 8);
+      ticking = false;
+    };
+    const onScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(update);
+        ticking = true;
+      }
+    };
+    // Read scroll position once via rAF to avoid synchronous setState in effect
+    requestAnimationFrame(update);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -79,7 +90,7 @@ export function Header({ items, cta, logo }: HeaderProps) {
               <Link
                 key={item.label}
                 href={item.href ?? "#"}
-                prefetch={false}
+                prefetch={true}
                 className="text-text-soft hover:text-ink-900 focus-visible:outline-brand rounded-md px-3 py-2 text-[0.9375rem] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
               >
                 {item.label}
@@ -91,7 +102,7 @@ export function Header({ items, cta, logo }: HeaderProps) {
         <div className="flex items-center gap-2">
           {cta && (
             <Button asChild className="hidden sm:inline-flex">
-              <Link href={cta.href} prefetch={false}>
+              <Link href={cta.href} prefetch={true}>
                 {cta.label}
               </Link>
             </Button>
@@ -114,6 +125,18 @@ export function Header({ items, cta, logo }: HeaderProps) {
   );
 }
 
+/**
+ * The index page a dropdown's label links to. Prefers an explicit CMS href;
+ * otherwise derives it from the first child's top-level segment
+ * (e.g. /services/solar → /services, /solutions/garments → /solutions).
+ */
+function parentIndexHref(item: NavItem): string {
+  if (item.href && item.href !== "#") return item.href;
+  const firstChild = item.children?.[0]?.href ?? "";
+  const seg = firstChild.split("/").filter(Boolean)[0];
+  return seg ? `/${seg}` : "#";
+}
+
 function DesktopDropdown({
   item,
   open,
@@ -126,17 +149,27 @@ function DesktopDropdown({
   onClose: () => void;
 }) {
   const panelId = useId();
+  const indexHref = parentIndexHref(item);
   return (
-    <div className="relative">
+    <div className="relative flex items-center">
+      {/* Label → goes to the section index page (all services / all sectors) */}
+      <Link
+        href={indexHref}
+        prefetch={true}
+        className="text-text-soft hover:text-ink-900 focus-visible:outline-brand rounded-md py-2 pr-1 pl-3 text-[0.9375rem] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
+      >
+        {item.label}
+      </Link>
+      {/* Caret → toggles the dropdown menu */}
       <button
         type="button"
         aria-expanded={open}
         aria-controls={open ? panelId : undefined}
         aria-haspopup="true"
+        aria-label={`Show ${item.label} menu`}
         onClick={onToggle}
-        className="text-text-soft hover:text-ink-900 focus-visible:outline-brand aria-expanded:text-ink-900 inline-flex items-center gap-1 rounded-md px-3 py-2 text-[0.9375rem] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
+        className="text-text-soft hover:text-ink-900 focus-visible:outline-brand aria-expanded:text-ink-900 rounded-md py-2 pr-2 pl-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
       >
-        {item.label}
         <ChevronDown
           className={cn(
             "ease-brand h-4 w-4 transition-transform duration-200",
@@ -148,6 +181,7 @@ function DesktopDropdown({
       {open && (
         <div
           id={panelId}
+          data-card=""
           className="border-border bg-surface absolute top-full left-0 z-50 mt-2 w-[22rem] rounded-lg border p-2 shadow-lg"
         >
           <ul className="grid gap-1">
@@ -155,7 +189,7 @@ function DesktopDropdown({
               <li key={leaf.href + leaf.label}>
                 <Link
                   href={leaf.href}
-                  prefetch={false}
+                  prefetch={true}
                   onClick={onClose}
                   className="group hover:bg-surface-2 focus-visible:outline-brand block rounded-md p-3 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
                 >
@@ -197,11 +231,11 @@ function MobileMenu({
 }) {
   const [openSection, setOpenSection] = useState<string | null>(null);
   return (
-    <div id="mobile-menu" className="border-border bg-surface border-t lg:hidden">
+    <div id="mobile-menu" data-card="" className="border-border bg-surface border-t lg:hidden">
       <Container className="py-4">
         {cta && (
           <Button asChild className="mb-4 w-full">
-            <Link href={cta.href} prefetch={false} onClick={onNavigate}>
+            <Link href={cta.href} prefetch={true} onClick={onNavigate}>
               {cta.label}
             </Link>
           </Button>
@@ -230,11 +264,21 @@ function MobileMenu({
                   </button>
                   {openSection === item.label && (
                     <ul className="border-border mb-1 ml-3 grid gap-0.5 border-l pl-3">
+                      <li>
+                        <Link
+                          href={parentIndexHref(item)}
+                          prefetch={true}
+                          onClick={onNavigate}
+                          className="text-brand hover:text-brand-600 focus-visible:outline-brand block rounded-md px-3 py-2.5 text-[0.9375rem] font-medium focus-visible:outline-2 focus-visible:outline-offset-2"
+                        >
+                          All {item.label} →
+                        </Link>
+                      </li>
                       {item.children.map((leaf) => (
                         <li key={leaf.href + leaf.label}>
                           <Link
                             href={leaf.href}
-                            prefetch={false}
+                            prefetch={true}
                             onClick={onNavigate}
                             className="text-text-soft hover:text-ink-900 focus-visible:outline-brand block rounded-md px-3 py-2.5 text-[0.9375rem] focus-visible:outline-2 focus-visible:outline-offset-2"
                           >
@@ -249,7 +293,7 @@ function MobileMenu({
                 <li key={item.label}>
                   <Link
                     href={item.href ?? "#"}
-                    prefetch={false}
+                    prefetch={true}
                     onClick={onNavigate}
                     className="text-ink-900 hover:bg-surface-2 focus-visible:outline-brand block rounded-md px-3 py-3 text-base font-medium focus-visible:outline-2 focus-visible:outline-offset-2"
                   >

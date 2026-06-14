@@ -1,0 +1,165 @@
+/* ============================================================================
+   PRO THEME — opt-in premium visual layer.
+
+   Toggled from the CMS (Site Settings → Display → Design version), which sets
+   data-design="pro" on <html>. Everything here is scoped under that attribute,
+   so the Classic look is byte-for-byte unchanged when the flag is off.
+
+   Principles (CLAUDE.md):
+   · Pure CSS overlay — no JS. Content stays in the SSR HTML and crawlable.
+   · Built only from the brand tokens (True Blue / Lime Green / Golden Poppy +
+     ink/surface), mixed in OKLab, so it re-tunes if the brand colours change.
+   · GPU-only motion (transform/opacity), honours prefers-reduced-motion.
+   · Glass surfaces keep AA contrast: the translucent fill stays light enough
+     for dark body text; dark sections keep the ink base under the gradient.
+   ============================================================================ */
+
+[data-design="pro"] {
+  /* Frosted-glass surface tuning (light cards) */
+  --pro-glass-fill: color-mix(in oklab, var(--color-surface), transparent 16%);
+  --pro-glass-border: color-mix(in oklab, var(--color-brand) 24%, white);
+  --pro-glass-blur: 14px;
+  /* Beveled glass rim (bright top-left + faint brand bottom-right inset, the
+     premium frosted-edge trick) layered over a soft brand-tinted drop shadow. */
+  --pro-shadow:
+    inset 1px 1px 0 0 rgb(255 255 255 / 0.6),
+    inset -1px -1px 1px 0 color-mix(in oklab, var(--color-brand), transparent 90%),
+    0 1px 2px -1px color-mix(in oklab, var(--color-ink-900), transparent 86%),
+    0 16px 40px -18px color-mix(in oklab, var(--color-ink-900), transparent 70%);
+  --pro-shadow-hover:
+    inset 1px 1px 0 0 rgb(255 255 255 / 0.7),
+    inset -1px -1px 1px 0 color-mix(in oklab, var(--color-brand), transparent 84%),
+    0 2px 4px -1px color-mix(in oklab, var(--color-ink-900), transparent 82%),
+    0 26px 56px -20px color-mix(in oklab, var(--color-brand), transparent 60%);
+  /* Internal corner light source — a brand radial laid into the surface itself,
+     so no extra element is needed and overflow stays clean. */
+  --pro-glass-surface:
+    radial-gradient(
+      26rem 20rem at 100% 0%,
+      color-mix(in oklab, var(--color-brand), transparent 92%),
+      transparent 46%
+    ),
+    var(--pro-glass-fill);
+}
+
+/* ── Page backdrop: a very subtle brand gradient wash ─────────────────────── */
+[data-design="pro"] body {
+  background-color: var(--color-surface-2);
+  background-image:
+    radial-gradient(
+      60rem 42rem at 102% -8%,
+      color-mix(in oklab, var(--color-brand), transparent 90%),
+      transparent 60%
+    ),
+    radial-gradient(
+      52rem 40rem at -8% 14%,
+      color-mix(in oklab, var(--color-energy), transparent 93%),
+      transparent 55%
+    );
+  background-attachment: fixed;
+}
+
+/* ── Glass cards + bordered blocks ────────────────────────────────────────
+   Covers: <Card data-card> (light surface), any element opting in via
+   data-card, AND the "Card border + 3D shadow" block wrapper (a rounded,
+   bordered <section> rendered by components/ui/section.tsx withBorder — now the
+   default for every block). Dark/alt-surface variants are excluded so their
+   tone is preserved. */
+[data-design="pro"]
+  [data-card]:not([class*="bg-ink"]):not([class*="bg-surface-2"]):not([class*="bg-surface-3"]),
+[data-design="pro"] section:is(.rounded-2xl, .rounded-3xl).border:not([class*="bg-ink"]) {
+  background: var(--pro-glass-surface);
+  -webkit-backdrop-filter: blur(var(--pro-glass-blur)) saturate(1.18);
+  backdrop-filter: blur(var(--pro-glass-blur)) saturate(1.18);
+  border-color: var(--pro-glass-border);
+  box-shadow: var(--pro-shadow);
+}
+
+/* Stronger lift + brand glow on interactive cards */
+@media (prefers-reduced-motion: no-preference) {
+  [data-design="pro"]
+    [data-card][data-interactive]:not([class*="bg-ink"]):not([class*="bg-surface-2"]):not(
+      [class*="bg-surface-3"]
+    ):hover {
+    box-shadow: var(--pro-shadow-hover);
+    border-color: color-mix(in oklab, var(--color-brand) 45%, white);
+    transform: translateY(-3px);
+  }
+}
+
+/* ── Glass header ─────────────────────────────────────────────────────────── */
+[data-design="pro"] header.sticky {
+  background: color-mix(in oklab, var(--color-surface), transparent 32%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  backdrop-filter: blur(18px) saturate(1.4);
+  border-bottom-color: color-mix(in oklab, var(--color-brand) 30%, white) !important;
+  box-shadow: 0 6px 24px -18px color-mix(in oklab, var(--color-ink-900), transparent 60%);
+}
+
+/* ── Dark hero sections: brand gradient mesh over ink ─────────────────────── */
+[data-design="pro"] section.bg-ink-900 {
+  background-color: var(--color-ink-900);
+  background-image:
+    radial-gradient(
+      44rem 32rem at 82% -18%,
+      color-mix(in oklab, var(--color-brand), transparent 74%),
+      transparent 60%
+    ),
+    radial-gradient(
+      40rem 34rem at -6% 118%,
+      color-mix(in oklab, var(--color-energy), transparent 84%),
+      transparent 58%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--color-ink-900), black 6%),
+      var(--color-ink-900)
+    );
+}
+
+/* ── Primary CTAs: gradient + stacked colored halo (brand + solar buttons) ── */
+[data-design="pro"] a:is(.bg-brand, .bg-solar),
+[data-design="pro"] button:is(.bg-brand, .bg-solar) {
+  background-image: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--color-brand), white 14%),
+    var(--color-brand)
+  );
+  /* colored halo + grounding drop shadow stacked = a lifted, glowing CTA */
+  box-shadow:
+    0 8px 20px -8px color-mix(in oklab, var(--color-brand), transparent 45%),
+    0 0 28px -6px color-mix(in oklab, var(--color-brand), transparent 62%);
+}
+[data-design="pro"] a.bg-solar,
+[data-design="pro"] button.bg-solar {
+  background-image: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--color-solar), white 16%),
+    var(--color-solar)
+  );
+  box-shadow:
+    0 8px 20px -8px color-mix(in oklab, var(--color-solar), transparent 42%),
+    0 0 28px -6px color-mix(in oklab, var(--color-solar), transparent 58%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  [data-design="pro"] a:is(.bg-brand, .bg-solar):hover,
+  [data-design="pro"] button:is(.bg-brand, .bg-solar):hover {
+    transform: translateY(-1px);
+  }
+}
+
+/* ── A touch more depth on the page-enter under pro ───────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  [data-design="pro"] .page-enter {
+    animation-duration: 560ms;
+  }
+}
+
+/* ── Reduced motion: drop the heavy blur + animation, keep the look legible ─ */
+@media (prefers-reduced-motion: reduce) {
+  [data-design="pro"] [data-card],
+  [data-design="pro"] header.sticky {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}

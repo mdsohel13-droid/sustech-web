@@ -1,5 +1,5 @@
-import { Mail, MapPin, Phone, Clock } from "lucide-react";
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -10,6 +10,7 @@ import { Eyebrow } from "@/components/ui/eyebrow";
 import { GridMotif } from "@/components/ui/grid-motif";
 import { Section } from "@/components/ui/section";
 import { getSiteSettings } from "@/lib/payload";
+import { pageIntro } from "@/lib/page-intro";
 import { serverUrl } from "@/lib/seo";
 
 export const revalidate = 3600;
@@ -33,6 +34,11 @@ function formatAddress(
 ): string {
   if (!a) return "";
   return [a.street, a.city, a.region, a.postalCode, a.country].filter(Boolean).join(", ");
+}
+
+/** Small decorative 3D icon (static, MIT-licensed Fluent set in /public/icons-3d). */
+function Icon3d({ src }: { src: string }) {
+  return <Image src={src} alt="" width={40} height={40} className="h-5 w-5 object-contain" />;
 }
 
 function Detail({
@@ -59,16 +65,20 @@ function Detail({
 
 export default async function ContactPage() {
   const settings = await getSiteSettings();
+  const intro = pageIntro(settings, "contact");
   const phones = (settings.phones ?? []).map((p) => p.number).filter(Boolean);
-  const email = settings.email ?? null;
+  const emails = (settings.emails ?? [])
+    .map((e) => ({ address: e?.address?.trim() ?? "", label: e?.label?.trim() ?? "" }))
+    .filter((e) => e.address);
+  const primaryEmail = emails[0]?.address ?? null;
   const address = formatAddress(settings.address);
   const hours = settings.hours ?? null;
   const social = (settings.social ?? []).filter((s) => s.label && s.url);
-  const hasDetails = phones.length > 0 || email || address || hours;
+  const hasDetails = phones.length > 0 || emails.length > 0 || address || hours;
 
   const contactPoint: Record<string, unknown> = { "@type": "ContactPoint", contactType: "sales" };
   if (phones[0]) contactPoint.telephone = phones[0];
-  if (email) contactPoint.email = email;
+  if (primaryEmail) contactPoint.email = primaryEmail;
 
   return (
     <>
@@ -78,7 +88,7 @@ export default async function ContactPage() {
           "@type": "ContactPage",
           name: TITLE,
           url: `${serverUrl}/contact`,
-          ...((phones[0] || email) && {
+          ...((phones[0] || primaryEmail) && {
             mainEntity: {
               "@type": "Organization",
               name: settings.companyName ?? "Sustech Technology Ltd",
@@ -102,9 +112,11 @@ export default async function ContactPage() {
       <section className="bg-ink-900 text-text-invert relative isolate overflow-hidden">
         <GridMotif tone="dark" />
         <Container className="relative py-20 md:py-28">
-          <Eyebrow onDark>Contact</Eyebrow>
-          <h1 className="text-display mt-4 max-w-3xl font-bold text-balance">{TITLE}</h1>
-          <p className="text-lede text-text-invert-soft mt-4 max-w-2xl">{LEDE}</p>
+          <Eyebrow onDark>{intro.eyebrow ?? "Contact"}</Eyebrow>
+          <h1 className="text-display mt-4 max-w-3xl font-bold text-balance">
+            {intro.heading ?? TITLE}
+          </h1>
+          <p className="text-lede text-text-invert-soft mt-4 max-w-2xl">{intro.lede ?? LEDE}</p>
         </Container>
       </section>
 
@@ -115,7 +127,7 @@ export default async function ContactPage() {
             {hasDetails ? (
               <div className="mt-6 space-y-5">
                 {phones.length > 0 && (
-                  <Detail icon={<Phone className="h-4 w-4" aria-hidden />} label="Phone">
+                  <Detail icon={<Icon3d src="/icons-3d/telephone_receiver.webp" />} label="Phone">
                     {phones.map((p) => (
                       <a
                         key={p}
@@ -127,20 +139,29 @@ export default async function ContactPage() {
                     ))}
                   </Detail>
                 )}
-                {email && (
-                  <Detail icon={<Mail className="h-4 w-4" aria-hidden />} label="Email">
-                    <a href={`mailto:${email}`} className="hover:text-brand">
-                      {email}
-                    </a>
+                {emails.length > 0 && (
+                  <Detail icon={<Icon3d src="/icons-3d/envelope.webp" />} label="Email">
+                    <span className="flex flex-col gap-1">
+                      {emails.map((e) => (
+                        <a
+                          key={e.address}
+                          href={`mailto:${e.address}`}
+                          className="hover:text-brand"
+                        >
+                          {e.address}
+                          {e.label && <span className="text-text-soft"> · {e.label}</span>}
+                        </a>
+                      ))}
+                    </span>
                   </Detail>
                 )}
                 {address && (
-                  <Detail icon={<MapPin className="h-4 w-4" aria-hidden />} label="Office">
+                  <Detail icon={<Icon3d src="/icons-3d/round_pushpin.webp" />} label="Office">
                     {address}
                   </Detail>
                 )}
                 {hours && (
-                  <Detail icon={<Clock className="h-4 w-4" aria-hidden />} label="Hours">
+                  <Detail icon={<Icon3d src="/icons-3d/alarm_clock.webp" />} label="Hours">
                     {hours}
                   </Detail>
                 )}

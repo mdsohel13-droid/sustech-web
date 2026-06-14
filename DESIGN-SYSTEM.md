@@ -64,18 +64,18 @@ TEXT
 --text-invert #E9EFF7   (on ink)
 --text-invert-soft #A7B4C6
 
-BRAND
---brand       #0E5FD8   (engineering blue — trust; links, secondary)
---brand-600   #0B4FB5
---brand-300   #6EA4F2   (on dark)
---energy      #16A34A   (sustainability green — accents, success)
---energy-300  #4ADE80
---solar       #F59E0B   (PRIMARY CTA only — amber)
---solar-600   #D97706
---solar-text  #1A1206   (text on amber buttons)
+BRAND  (logo-accurate palette — True Blue · Lime Green · Golden Poppy)
+--brand       #0073CF   (True Blue — trust; nav, links, icons, secondary actions)
+--brand-600   #005BA3   (hover / active)
+--brand-300   #60B4F5   (on dark bands)
+--energy      #32CD32   (Lime Green — sustainability, energy, success states)
+--energy-300  #7EE87E   (on dark bands)
+--solar       #FCC200   (Golden Poppy — PRIMARY CTA only; use ONCE per screen)
+--solar-600   #D9A500   (button hover)
+--solar-text  #1A1206   (near-black — text on golden buttons)
 
 FUNCTIONAL
---success #16A34A  --warn #D97706  --error #DC2626  --info #0E5FD8
+--success #32CD32  --warn #D9A500  --error #DC2626  --info #0073CF
 ```
 
 **Usage rules**
@@ -146,12 +146,13 @@ export default {
   --color-text-soft: #5B6675;
   --color-text-invert: #E9EFF7;
   --color-text-invert-soft: #A7B4C6;
-  --color-brand: #0E5FD8;
-  --color-brand-600: #0B4FB5;
-  --color-brand-300: #6EA4F2;
-  --color-energy: #16A34A;
-  --color-solar: #F59E0B;
-  --color-solar-600: #D97706;
+  --color-brand: #0073CF;     /* True Blue */
+  --color-brand-600: #005BA3;
+  --color-brand-300: #60B4F5;
+  --color-energy: #32CD32;    /* Lime Green */
+  --color-energy-300: #7EE87E;
+  --color-solar: #FCC200;     /* Golden Poppy — PRIMARY CTA ONLY */
+  --color-solar-600: #D9A500;
   --color-solar-text: #1A1206;
   /* radius */
   --radius-sm: 6px; --radius-md: 10px; --radius-lg: 16px; --radius-xl: 24px;

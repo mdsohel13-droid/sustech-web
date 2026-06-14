@@ -1,6 +1,8 @@
 "use server";
 
 import { headers } from "next/headers";
+import { ANALYTICS_EVENTS } from "@/lib/analytics/events";
+import { serverCapture } from "@/lib/analytics/server";
 import { getPayloadClient } from "@/lib/payload";
 
 export type RfqState = {
@@ -82,6 +84,11 @@ export async function submitRfq(_prev: RfqState, formData: FormData): Promise<Rf
         status: "new",
         sourcePath: str(formData.get("sourcePath"), 200) || undefined,
       },
+    });
+    // Lead upsert + GrowthOS dedupe event fire from the rfq-requests
+    // afterChange hook; here we only record the authoritative funnel event.
+    serverCapture(ANALYTICS_EVENTS.RFQ_SUBMITTED, {
+      service: values.serviceInterest || "unspecified",
     });
     return { ok: true };
   } catch {

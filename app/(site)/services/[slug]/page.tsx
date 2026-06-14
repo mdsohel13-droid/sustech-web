@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ComponentProps } from "react";
 import { serviceIcons } from "@/components/icons";
+import { EntityIcon } from "@/components/ui/entity-icon";
 import { JsonLd } from "@/components/seo/json-ld";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
@@ -111,7 +112,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         ) : null}
         <Container className="relative py-20 md:py-28">
           <span className="bg-brand/15 text-brand-300 mb-6 inline-flex h-12 w-12 items-center justify-center rounded-md">
-            <Icon className="h-6 w-6" aria-hidden />
+            <EntityIcon customIcon={service.customIcon} Fallback={Icon} />
           </span>
           <Eyebrow onDark>Service</Eyebrow>
           <h1 className="text-display mt-3 max-w-3xl font-bold text-balance">{service.title}</h1>

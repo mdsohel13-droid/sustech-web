@@ -20,7 +20,7 @@ export const Projects: CollectionConfig = {
     update: isContentWriter,
     delete: isAdminOrEditor,
   },
-  versions: { drafts: { autosave: { interval: 375 } }, maxPerDoc: 20 },
+  versions: { drafts: { autosave: { interval: 375 } }, maxPerDoc: 50 },
   hooks: {
     beforeChange: [denyHermesPublish],
     afterChange: [revalidateCollectionRoute("/projects")],

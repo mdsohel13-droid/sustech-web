@@ -53,7 +53,9 @@ test.describe("CMS-driven site", () => {
     await page.goto("/");
     const wa = page.getByRole("link", { name: "Chat with us on WhatsApp" });
     await expect(wa).toBeVisible();
-    await expect(wa).toHaveAttribute("href", /wa\.me\/8801867655599/);
+    // Primary line per the brief is +880 1722-002125 (the WhatsApp number);
+    // engagement-widgets derives the wa.me target from settings.phones[0].
+    await expect(wa).toHaveAttribute("href", /wa\.me\/8801722002125/);
   });
 
   test("the home shows the knowledge preview", async ({ page }) => {

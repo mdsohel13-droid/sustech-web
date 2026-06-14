@@ -1,0 +1,92 @@
+{
+  "name": "Sustech — Lead → ERP",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-to-erp",
+        "responseMode": "responseNode",
+        "options": {
+          "rawBody": true
+        }
+      },
+      "id": "webhook-in",
+      "name": "Webhook (lead-to-erp)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 320],
+      "webhookId": "sustech-lead-to-erp"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Verify the HMAC-SHA256 signature the website sends in X-Signature.\n// The secret MUST equal LEAD_FORWARD_SECRET set on the web server.\n// Set it in n8n → Settings → Variables, or paste it below (less safe).\nconst crypto = require('crypto');\nconst SECRET = $env.LEAD_FORWARD_SECRET || 'PASTE_LEAD_FORWARD_SECRET_HERE';\n\nconst item = $input.first();\n// rawBody is the exact bytes the site signed — never re-stringify the parsed JSON.\nconst raw = item.binary && item.binary.data\n  ? Buffer.from(item.binary.data.data, 'base64').toString('utf8')\n  : (item.json.rawBody || JSON.stringify(item.json.body));\nconst headers = item.json.headers || {};\nconst sig = headers['x-signature'] || headers['X-Signature'] || '';\n\nconst expected = crypto.createHmac('sha256', SECRET).update(raw).digest('hex');\nconst a = Buffer.from(sig);\nconst b = Buffer.from(expected);\nconst ok = a.length === b.length && crypto.timingSafeEqual(a, b);\n\nif (!ok) {\n  // 401 — reject forged/replayed posts.\n  throw new Error('Invalid X-Signature');\n}\n\n// Forward the verified lead AS-IS. The ERP's thin /from-web route owns the\n// mapping into contact/opportunity/task — keeping ERP logic in the ERP.\nconst lead = JSON.parse(raw);\nreturn [{ json: lead }];"
+      },
+      "id": "verify-hmac",
+      "name": "Verify HMAC",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 320]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.ERP_LEAD_INGEST_URL || 'http://localhost:3010/api/leads/from-web' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{ "name": "Content-Type", "value": "application/json" }]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 10000,
+          "response": { "response": { "neverError": true } }
+        }
+      },
+      "id": "erp-ingest",
+      "name": "ERP /from-web",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [720, 320],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_WITH_ERP_CREDENTIAL_ID",
+          "name": "ERP web-ingest key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"ok\": true } }}",
+        "options": { "responseCode": 200 }
+      },
+      "id": "respond-ok",
+      "name": "200 OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [960, 320]
+    }
+  ],
+  "connections": {
+    "Webhook (lead-to-erp)": {
+      "main": [[{ "node": "Verify HMAC", "type": "main", "index": 0 }]]
+    },
+    "Verify HMAC": {
+      "main": [[{ "node": "ERP /from-web", "type": "main", "index": 0 }]]
+    },
+    "ERP /from-web": {
+      "main": [[{ "node": "200 OK", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "meta": {
+    "templateId": "sustech-lead-to-erp",
+    "description": "Receives HMAC-signed leads from the Sustech website, verifies the signature, and forwards the verified lead to the ERP's thin /api/leads/from-web route (Bearer auth). The ERP owns mapping into contact/opportunity/task. ERP credentials live ONLY in the ERP — n8n holds just the web-ingest Bearer key; the website holds neither."
+  }
+}

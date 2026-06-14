@@ -1,7 +1,21 @@
+/**
+ * CMS block definitions — every block an editor can stack inside a Page layout.
+ *
+ * Each block ends with `blockStyleGroup` — a collapsible "Style & Animation"
+ * panel that lets admins control colour scheme, width, padding, heading size,
+ * entrance animation and more without touching code or deploying. Defaults are
+ * all set, so editors can ignore the panel entirely for the standard look.
+ *
+ * The legacy `appearance` field (default/muted/dark) is kept alongside the
+ * new style group for backward compatibility — existing content continues to
+ * render correctly while editors migrate to the richer controls.
+ */
 import type { Block, Field } from "payload";
+import { CALC_TYPES } from "../collections/knowledge-resources";
 import { ctaArray } from "../fields/link";
+import { blockStyleGroup } from "./style-fields";
 
-/** Optional band background so editors control the light/dark rhythm of a page. */
+/** Legacy 3-option appearance select — kept for backward compat. */
 const appearance: Field = {
   name: "appearance",
   type: "select",
@@ -11,7 +25,10 @@ const appearance: Field = {
     { label: "Muted (light grey)", value: "muted" },
     { label: "Dark (ink)", value: "dark" },
   ],
-  admin: { width: "50%" },
+  admin: {
+    width: "50%",
+    description: "Quick colour override. Use 'Style & Animation' below for full control.",
+  },
 };
 
 const sourceSelect = (entity: string): Field => ({
@@ -25,6 +42,8 @@ const sourceSelect = (entity: string): Field => ({
   admin: { layout: "horizontal" },
 });
 
+/* ── Blocks ──────────────────────────────────────────────────────────────── */
+
 const Hero: Block = {
   slug: "hero",
   interfaceName: "HeroBlock",
@@ -33,6 +52,21 @@ const Hero: Block = {
     { name: "eyebrow", type: "text", admin: { description: "Small label above the heading." } },
     { name: "heading", type: "text", required: true },
     { name: "subhead", type: "textarea" },
+    {
+      name: "height",
+      type: "select",
+      defaultValue: "standard",
+      label: "Band height",
+      options: [
+        { label: "Compact", value: "compact" },
+        { label: "Standard (default)", value: "standard" },
+        { label: "Tall", value: "tall" },
+        { label: "Full screen", value: "screen" },
+      ],
+      admin: {
+        description: "How tall the hero band is. 'Full screen' fills the first view on load.",
+      },
+    },
     {
       type: "row",
       fields: [
@@ -63,10 +97,151 @@ const Hero: Block = {
       relationTo: "media",
       admin: {
         description:
-          "Optional MP4 (autoplay, muted, looping, ≤ 10s). Falls back to the image when motion is reduced, on small screens, or when missing.",
+          "Optional MP4 (autoplay, muted, looping, ≤ 10s). Falls back to the image when motion is reduced.",
+        condition: (_data, siblingData) => siblingData?.heroMode !== "carousel",
       },
     },
+    {
+      name: "backgroundFx",
+      type: "select",
+      label: "Background effect",
+      defaultValue: "none",
+      options: [
+        { label: "None (standard gradient)", value: "none" },
+        { label: "Aurora — flowing plasma lines (WebGL)", value: "aurora" },
+        { label: "Particle field — rising motes", value: "particles" },
+        { label: "Engineering grid — perspective sweep", value: "retro" },
+        { label: "Circuit traces — pulsing lines", value: "tracing" },
+      ],
+      admin: {
+        description:
+          "Live animated background for DARK heroes — all brand-tuned (True Blue). Each loads " +
+          "lazily, honours reduced motion (static gradient fallback) and pairs well with the Pro " +
+          "design version. Aurora = WebGL plasma; Particle field = drifting motes; Engineering " +
+          "grid = CAD perspective sweep; Circuit traces = pulsing rules.",
+        condition: (_data, siblingData) => siblingData?.tone !== "light",
+      },
+    },
+    /* ── Carousel mode ─────────────────────────────────────────────── */
+    {
+      name: "heroMode",
+      type: "select",
+      defaultValue: "single",
+      label: "Hero mode",
+      admin: {
+        description:
+          "Single: one background image/video. Carousel: cycle through multiple media items automatically.",
+      },
+      options: [
+        { label: "Single background (default)", value: "single" },
+        { label: "Carousel — auto-advance through media", value: "carousel" },
+      ],
+    },
+    {
+      name: "carouselItems",
+      type: "array",
+      label: "Carousel slides",
+      minRows: 2,
+      maxRows: 8,
+      admin: {
+        description: "Add images or videos. They cycle automatically every 5 seconds.",
+        condition: (_data, siblingData) => siblingData?.heroMode === "carousel",
+      },
+      fields: [
+        {
+          name: "media",
+          type: "upload",
+          relationTo: "media",
+          required: true,
+          admin: { description: "Image (AVIF/WebP/JPG) or MP4 video." },
+        },
+        {
+          name: "caption",
+          type: "text",
+          admin: { description: "Optional visible caption shown on this slide." },
+        },
+      ],
+    },
+    {
+      name: "carouselInterval",
+      type: "number",
+      label: "Slide interval (seconds)",
+      defaultValue: 5,
+      min: 2,
+      max: 30,
+      admin: {
+        description: "How long each slide shows before advancing. Default: 5 s.",
+        condition: (_data, siblingData) => siblingData?.heroMode === "carousel",
+      },
+    },
+    /* ── Side media panel ───────────────────────────────────────────────
+     * An auto-scrolling (crossfade) panel of images/videos shown BESIDE the
+     * hero text — fills the empty space on the right. Fully CMS-controlled:
+     * toggle per hero, and choose where the media comes from.
+     */
+    {
+      name: "sideMedia",
+      type: "group",
+      label: "Side media panel",
+      admin: {
+        description:
+          "Auto-scrolling images/videos shown beside the hero text (fills the empty space on the right).",
+      },
+      fields: [
+        {
+          name: "enabled",
+          type: "checkbox",
+          label: "Show side media panel",
+          defaultValue: false,
+        },
+        {
+          type: "row",
+          fields: [
+            {
+              name: "source",
+              type: "select",
+              defaultValue: "projects",
+              label: "Media source",
+              options: [
+                { label: "Auto — featured project photos + explainer videos", value: "projects" },
+                { label: "Auto — recent media library", value: "library" },
+                { label: "Manual — pick items below", value: "manual" },
+              ],
+              admin: {
+                width: "60%",
+                condition: (_d, s) => Boolean(s?.enabled),
+              },
+            },
+            {
+              name: "interval",
+              type: "number",
+              label: "Seconds per slide",
+              defaultValue: 5,
+              min: 2,
+              max: 20,
+              admin: { width: "40%", condition: (_d, s) => Boolean(s?.enabled) },
+            },
+          ],
+        },
+        {
+          name: "items",
+          type: "array",
+          labels: { singular: "Item", plural: "Items" },
+          minRows: 1,
+          maxRows: 12,
+          admin: {
+            description: "Images (AVIF/WebP/JPG) or MP4 videos to cycle through.",
+            condition: (_d, s) => Boolean(s?.enabled) && s?.source === "manual",
+          },
+          fields: [
+            { name: "media", type: "upload", relationTo: "media", required: true },
+            { name: "caption", type: "text", admin: { description: "Optional caption overlay." } },
+          ],
+        },
+      ],
+    },
     ctaArray,
+    blockStyleGroup,
   ],
 };
 
@@ -101,6 +276,7 @@ const ProductShowcase: Block = {
       admin: { condition: (_d, s) => s?.source === "selected" },
     },
     { name: "viewAllLabel", type: "text", defaultValue: "View all products" },
+    blockStyleGroup,
   ],
 };
 
@@ -111,6 +287,7 @@ const RichText: Block = {
   fields: [
     { type: "row", fields: [appearance] },
     { name: "content", type: "richText", required: true },
+    blockStyleGroup,
   ],
 };
 
@@ -148,6 +325,7 @@ const StatsCounters: Block = {
         { name: "label", type: "text", required: true },
       ],
     },
+    blockStyleGroup,
   ],
 };
 
@@ -166,6 +344,7 @@ const ServicesGrid: Block = {
       hasMany: true,
       admin: { condition: (_d, s) => s?.source === "selected" },
     },
+    blockStyleGroup,
   ],
 };
 
@@ -184,6 +363,7 @@ const SectorTiles: Block = {
       hasMany: true,
       admin: { condition: (_d, s) => s?.source === "selected" },
     },
+    blockStyleGroup,
   ],
 };
 
@@ -218,6 +398,7 @@ const ProjectsList: Block = {
       admin: { condition: (_d, s) => s?.source === "selected" },
     },
     { name: "viewAllLabel", type: "text", defaultValue: "View all projects" },
+    blockStyleGroup,
   ],
 };
 
@@ -234,6 +415,7 @@ const ImageGallery: Block = {
       labels: { singular: "Image", plural: "Images" },
       fields: [{ name: "image", type: "upload", relationTo: "media", required: true }],
     },
+    blockStyleGroup,
   ],
 };
 
@@ -251,6 +433,7 @@ const LogoWall: Block = {
       hasMany: true,
       admin: { condition: (_d, s) => s?.source === "selected" },
     },
+    blockStyleGroup,
   ],
 };
 
@@ -268,6 +451,7 @@ const TestimonialsBlock: Block = {
       hasMany: true,
       admin: { condition: (_d, s) => s?.source === "selected" },
     },
+    blockStyleGroup,
   ],
 };
 
@@ -288,6 +472,7 @@ const Steps: Block = {
         { name: "body", type: "textarea", required: true },
       ],
     },
+    blockStyleGroup,
   ],
 };
 
@@ -299,6 +484,7 @@ const CTABand: Block = {
     { name: "heading", type: "text", required: true },
     { name: "subhead", type: "textarea" },
     ctaArray,
+    blockStyleGroup,
   ],
 };
 
@@ -318,6 +504,7 @@ const FAQ: Block = {
         { name: "answer", type: "textarea", required: true },
       ],
     },
+    blockStyleGroup,
   ],
 };
 
@@ -329,15 +516,164 @@ const CalculatorEmbed: Block = {
     { type: "row", fields: [{ name: "heading", type: "text" }, appearance] },
     { name: "body", type: "textarea" },
     {
+      name: "calcType",
+      type: "select",
+      options: [...CALC_TYPES],
+      admin: {
+        description:
+          "Embed a live, interactive calculator inline (it captures leads via the report gate). " +
+          "Leave empty to show a CTA card linking to /tools instead.",
+      },
+    },
+    {
       name: "tool",
       type: "select",
       defaultValue: "solarcalc",
+      admin: { description: "CTA-card mode only (used when no inline calculator is selected)." },
       options: [
         { label: "SolarCalc Pro", value: "solarcalc" },
         { label: "ROI calculator", value: "roi" },
       ],
     },
     { name: "ctaLabel", type: "text", defaultValue: "Try the calculator" },
+    blockStyleGroup,
+  ],
+};
+
+const RelatedContent: Block = {
+  slug: "relatedContent",
+  interfaceName: "RelatedContentBlock",
+  labels: { singular: "Related content", plural: "Related content" },
+  fields: [
+    { type: "row", fields: [{ name: "heading", type: "text" }, appearance] },
+    {
+      name: "mode",
+      type: "radio",
+      defaultValue: "auto",
+      options: [
+        { label: "Auto (recent articles)", value: "auto" },
+        { label: "Choose manually", value: "manual" },
+      ],
+      admin: { layout: "horizontal" },
+    },
+    {
+      name: "articles",
+      type: "relationship",
+      relationTo: "articles",
+      hasMany: true,
+      admin: { condition: (_d, s) => s?.mode === "manual" },
+    },
+    {
+      name: "limit",
+      type: "number",
+      defaultValue: 3,
+      min: 1,
+      max: 6,
+      admin: { condition: (_d, s) => s?.mode !== "manual" },
+    },
+    blockStyleGroup,
+  ],
+};
+
+const NextBestAction: Block = {
+  slug: "nextBestAction",
+  interfaceName: "NextBestActionBlock",
+  labels: { singular: "Next-best action", plural: "Next-best actions" },
+  fields: [
+    {
+      type: "row",
+      fields: [
+        {
+          name: "segment",
+          type: "select",
+          options: [
+            { label: "Use page segment / fallback", value: "auto" },
+            { label: "Foreign investor", value: "foreign-investor" },
+            { label: "RMG factory", value: "rmg-factory" },
+            { label: "Real estate developer", value: "real-estate" },
+            { label: "Commercial building", value: "commercial-building" },
+            { label: "Bank / financial", value: "bank-financial" },
+          ],
+          defaultValue: "auto",
+          admin: { description: "Which rule to use from Lead Engine → Next-best actions." },
+        },
+        appearance,
+      ],
+    },
+    blockStyleGroup,
+  ],
+};
+
+const GatedAsset: Block = {
+  slug: "gatedAsset",
+  interfaceName: "GatedAssetBlock",
+  labels: { singular: "Gated asset", plural: "Gated assets" },
+  fields: [
+    { type: "row", fields: [{ name: "heading", type: "text" }, appearance] },
+    {
+      name: "summary",
+      type: "textarea",
+      admin: {
+        description:
+          "Open, indexable description of the asset (AI engines cite this — make it substantive). " +
+          "Only the file download is gated.",
+      },
+    },
+    {
+      name: "resource",
+      type: "relationship",
+      relationTo: "knowledge-resources",
+      required: true,
+      admin: {
+        description: "The downloadable asset (a 'sample document' resource with a gate level).",
+      },
+    },
+    blockStyleGroup,
+  ],
+};
+
+const ProofStrip: Block = {
+  slug: "proofStrip",
+  interfaceName: "ProofStripBlock",
+  labels: { singular: "Proof strip", plural: "Proof strips" },
+  fields: [
+    { type: "row", fields: [{ name: "heading", type: "text" }, appearance] },
+    {
+      name: "sector",
+      type: "relationship",
+      relationTo: "sectors",
+      admin: {
+        description:
+          "Optional — scope the proof (testimonial, client logos) to one sector for a segment page.",
+      },
+    },
+    {
+      type: "row",
+      fields: [
+        {
+          name: "showStats",
+          type: "checkbox",
+          defaultValue: true,
+          admin: {
+            width: "50%",
+            description: "Show the headline stats band (from Site Settings).",
+          },
+        },
+        {
+          name: "showClients",
+          type: "checkbox",
+          defaultValue: true,
+          admin: { width: "50%", description: "Show a client logo row." },
+        },
+      ],
+    },
+    {
+      name: "testimonial",
+      type: "relationship",
+      relationTo: "testimonials",
+      admin: { description: "Optional — feature one testimonial." },
+    },
+    blockStyleGroup,
   ],
 };
 
@@ -348,6 +684,7 @@ const ContactRFQ: Block = {
   fields: [
     { type: "row", fields: [{ name: "heading", type: "text" }, appearance] },
     { name: "subhead", type: "textarea" },
+    blockStyleGroup,
   ],
 };
 
@@ -378,6 +715,7 @@ const Spacer: Block = {
         },
       ],
     },
+    // No blockStyleGroup for Spacer — it has no visual content to style.
   ],
 };
 
@@ -390,6 +728,26 @@ const TeamGrid: Block = {
     { name: "lede", type: "textarea" },
     { type: "row", fields: [sourceSelect("team members"), appearance] },
     {
+      name: "group",
+      type: "select",
+      label: "Show which group",
+      defaultValue: "all",
+      options: [
+        { label: "All team members", value: "all" },
+        { label: "Leadership", value: "leadership" },
+        { label: "Management", value: "management" },
+        { label: "Engineering", value: "engineering" },
+        { label: "Consultants", value: "consultant" },
+        { label: "Advisors", value: "advisor" },
+        { label: "Other", value: "other" },
+      ],
+      admin: {
+        description:
+          "Automatic mode only: show just one group. Add several Team blocks — one per group (Leadership, Engineering, Advisors…) — each with its own heading.",
+        condition: (_d, s) => s?.source !== "selected",
+      },
+    },
+    {
       name: "members",
       type: "relationship",
       relationTo: "team",
@@ -399,6 +757,7 @@ const TeamGrid: Block = {
         description: "Pick and order the people to show.",
       },
     },
+    blockStyleGroup,
   ],
 };
 
@@ -422,6 +781,7 @@ const PartnerBar: Block = {
         },
       ],
     },
+    blockStyleGroup,
   ],
 };
 
@@ -434,6 +794,208 @@ const ArticlesList: Block = {
     { name: "lede", type: "textarea" },
     { type: "row", fields: [appearance] },
     { name: "viewAllLabel", type: "text", defaultValue: "Read the knowledge hub" },
+    blockStyleGroup,
+  ],
+};
+
+/**
+ * Video Showcase — a cinematic video band (section). Displays one or more
+ * videos as poster cards with a play button; the video loads only when the
+ * visitor clicks (facade pattern → fast, privacy-friendly). Supports uploaded
+ * MP4s and YouTube/Vimeo URLs. Two layouts: spotlight (one large + supporting
+ * grid) or grid (equal cards). Defaults to a dark cinematic band.
+ */
+const VideoShowcase: Block = {
+  slug: "videoShowcase",
+  interfaceName: "VideoShowcaseBlock",
+  labels: { singular: "Video showcase", plural: "Video showcases" },
+  fields: [
+    { name: "eyebrow", type: "text", admin: { description: "Small label above the heading." } },
+    { name: "heading", type: "text" },
+    { name: "lede", type: "textarea" },
+    {
+      type: "row",
+      fields: [
+        {
+          name: "layout",
+          type: "select",
+          defaultValue: "spotlight",
+          options: [
+            { label: "Spotlight — one large feature + supporting grid", value: "spotlight" },
+            { label: "Grid — equal-sized video cards", value: "grid" },
+          ],
+          admin: {
+            width: "50%",
+            description:
+              "Spotlight highlights the first (or 'Feature large') video full-width. Grid shows all videos equally.",
+          },
+        },
+        {
+          // Dedicated band treatment — owns the background of the whole section.
+          // (The 'Style & Animation' panel still controls width, padding, heading
+          // and animation.) Defaults to a dark cinematic band — best for video.
+          name: "tone",
+          type: "select",
+          defaultValue: "dark",
+          label: "Band background",
+          options: [
+            { label: "Dark cinematic (recommended)", value: "dark" },
+            { label: "Light", value: "light" },
+            { label: "Muted grey", value: "muted" },
+            { label: "Brand blue", value: "brand" },
+          ],
+          admin: { width: "50%", description: "Dark looks best for video." },
+        },
+      ],
+    },
+    {
+      name: "videos",
+      type: "array",
+      minRows: 1,
+      maxRows: 12,
+      labels: { singular: "Video", plural: "Videos" },
+      admin: {
+        description:
+          "Each video shows a poster image with a play button; the video only loads when a visitor clicks it (fast page loads, no third-party cookies until play).",
+      },
+      fields: [
+        { name: "title", type: "text", required: true },
+        {
+          name: "description",
+          type: "textarea",
+          admin: {
+            description:
+              "1–2 sentences. Shown under the video and given to AI/search engines as the video's description (VideoObject schema).",
+          },
+        },
+        {
+          type: "row",
+          fields: [
+            {
+              name: "source",
+              type: "radio",
+              defaultValue: "upload",
+              options: [
+                { label: "Uploaded MP4", value: "upload" },
+                { label: "YouTube / Vimeo link", value: "url" },
+              ],
+              admin: { layout: "horizontal", width: "60%" },
+            },
+            {
+              name: "duration",
+              type: "text",
+              admin: { width: "40%", description: 'Badge shown on the poster, e.g. "1:24".' },
+            },
+          ],
+        },
+        {
+          name: "videoFile",
+          type: "upload",
+          relationTo: "media",
+          admin: {
+            description: "The MP4 video file.",
+            condition: (_data, siblingData) => siblingData?.source !== "url",
+          },
+        },
+        {
+          name: "videoUrl",
+          type: "text",
+          label: "YouTube / Vimeo URL",
+          admin: {
+            description: "Paste the full video link (youtube.com, youtu.be, or vimeo.com).",
+            condition: (_data, siblingData) => siblingData?.source === "url",
+          },
+        },
+        {
+          name: "poster",
+          type: "upload",
+          relationTo: "media",
+          admin: {
+            description:
+              "Poster / thumbnail image (16:9 recommended). Shown before play. For YouTube links this is optional — the YouTube thumbnail is used if left blank.",
+          },
+        },
+        {
+          type: "row",
+          fields: [
+            {
+              name: "featured",
+              type: "checkbox",
+              label: "Feature large (spotlight layout)",
+              admin: { width: "50%" },
+            },
+            {
+              name: "uploadDate",
+              type: "date",
+              admin: {
+                width: "50%",
+                description: "Publish date — used in the video's search schema.",
+              },
+            },
+          ],
+        },
+      ],
+    },
+    blockStyleGroup,
+  ],
+};
+
+/**
+ * Photo Strip — infinite-scroll horizontal marquee of images.
+ * Two display modes:
+ *  - "marquee"   : images scroll continuously left (no JS, CSS-only)
+ *  - "carousel"  : images advance one-by-one with prev/next controls
+ */
+const PhotoStrip: Block = {
+  slug: "photoStrip",
+  interfaceName: "PhotoStripBlock",
+  labels: { singular: "Photo strip", plural: "Photo strips" },
+  fields: [
+    { type: "row", fields: [{ name: "heading", type: "text" }, appearance] },
+    {
+      name: "displayMode",
+      type: "select",
+      defaultValue: "marquee",
+      label: "Display mode",
+      options: [
+        {
+          label: "Marquee — continuous infinite scroll",
+          value: "marquee",
+        },
+        {
+          label: "Carousel — one at a time with arrows",
+          value: "carousel",
+        },
+      ],
+    },
+    {
+      name: "speed",
+      type: "select",
+      defaultValue: "normal",
+      label: "Scroll speed (marquee only)",
+      admin: { condition: (_d, s) => s?.displayMode !== "carousel" },
+      options: [
+        { label: "Slow", value: "slow" },
+        { label: "Normal", value: "normal" },
+        { label: "Fast", value: "fast" },
+      ],
+    },
+    {
+      name: "photos",
+      type: "array",
+      minRows: 2,
+      labels: { singular: "Photo", plural: "Photos" },
+      fields: [
+        {
+          name: "image",
+          type: "upload",
+          relationTo: "media",
+          required: true,
+        },
+        { name: "caption", type: "text" },
+      ],
+    },
+    blockStyleGroup,
   ],
 };
 
@@ -446,6 +1008,8 @@ export const layoutBlocks: Block[] = [
   SectorTiles,
   ProjectsList,
   ImageGallery,
+  PhotoStrip,
+  VideoShowcase,
   LogoWall,
   PartnerBar,
   ProductShowcase,
@@ -456,6 +1020,10 @@ export const layoutBlocks: Block[] = [
   CTABand,
   FAQ,
   CalculatorEmbed,
+  GatedAsset,
+  ProofStrip,
+  RelatedContent,
+  NextBestAction,
   ContactRFQ,
   Spacer,
 ];

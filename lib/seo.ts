@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import type { Media, Page, SiteSetting } from "@/payload-types";
+import type { Article, Media, NewsItem, Page, SiteSetting, Source } from "@/payload-types";
 
 export const serverUrl =
   process.env.NEXT_PUBLIC_SERVER_URL ?? process.env.SITE_URL ?? "http://localhost:4123";
@@ -65,7 +65,8 @@ export function siteJsonLd(settings: SiteSetting): Record<string, unknown> {
   };
   const phone = settings.phones?.[0]?.number;
   if (phone) lb.telephone = phone;
-  if (settings.email) lb.email = settings.email;
+  const primaryEmail = settings.emails?.[0]?.address;
+  if (primaryEmail) lb.email = primaryEmail;
   if (settings.hours) lb.openingHours = settings.hours;
   const a = settings.address;
   if (a && (a.street || a.city)) {
@@ -94,4 +95,55 @@ export function siteJsonLd(settings: SiteSetting): Record<string, unknown> {
   };
 
   return { "@context": "https://schema.org", "@graph": [org, lb, web] };
+}
+
+/**
+ * Article JSON-LD with Schema.org `citation` markup (master plan §3.1c) — so
+ * AI engines and search see exactly which authoritative sources back the page.
+ * `citation` lists every reference; `isBasedOn` highlights tier-1 sources.
+ * `dateModified` reflects the last review (drives freshness signals).
+ */
+export function articleJsonLd(
+  article: Pick<
+    Article | NewsItem,
+    "title" | "slug" | "publishedDate" | "updatedAt" | "citations"
+  > & { excerpt?: string | null; summary?: string | null; author?: string | null },
+  basePath: "/knowledge" | "/news",
+): Record<string, unknown> {
+  const citations = (article.citations ?? []) as NonNullable<Article["citations"]>;
+  const citationNodes = citations.map((c) => {
+    const source = (typeof c.source === "object" ? c.source : null) as Source | null;
+    return {
+      "@type": "CreativeWork",
+      name: c.title || c.quotedClaim || source?.name || "Source",
+      url: c.url,
+      ...(c.sourcePublishedDate ? { datePublished: c.sourcePublishedDate } : {}),
+      ...(source ? { publisher: { "@type": "Organization", name: source.name } } : {}),
+    };
+  });
+  const tier1Urls = citations
+    .filter((c) => {
+      const t = (typeof c.source === "object" ? c.source : null) as Source | null;
+      return t?.tier === "tier1-gov" || t?.tier === "tier1-multilateral";
+    })
+    .map((c) => c.url);
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: article.title,
+    description: article.excerpt ?? article.summary ?? undefined,
+    author: article.author ? { "@type": "Person", name: article.author } : undefined,
+    datePublished: article.publishedDate ?? undefined,
+    dateModified: article.updatedAt ?? article.publishedDate ?? undefined,
+    url: `${serverUrl}${basePath}/${article.slug}`,
+    ...(citationNodes.length ? { citation: citationNodes } : {}),
+    ...(tier1Urls.length ? { isBasedOn: tier1Urls } : {}),
+    publisher: { "@type": "Organization", name: settingsName() },
+  };
+}
+
+// The org name is stable; avoid threading settings through every call site.
+function settingsName(): string {
+  return "Sustech Technology Ltd";
 }

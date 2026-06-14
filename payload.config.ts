@@ -21,6 +21,7 @@ import { Projects } from "./cms/collections/projects";
 import { RfqRequests } from "./cms/collections/rfq-requests";
 import { Sectors } from "./cms/collections/sectors";
 import { Services } from "./cms/collections/services";
+import { DailyReports } from "./cms/collections/daily-reports";
 import { PipelineRuns } from "./cms/collections/pipeline-runs";
 import { PublishAudit } from "./cms/collections/publish-audit";
 import { Sources } from "./cms/collections/sources";
@@ -67,6 +68,7 @@ export default buildConfig({
     Sources,
     PipelineRuns,
     PublishAudit,
+    DailyReports,
     Users,
   ],
   globals: [SiteSettings, Navigation, TariffRates, NextBestActions, AutomationSettings],

@@ -88,6 +88,7 @@ export interface Config {
     sources: Source;
     'pipeline-runs': PipelineRun;
     'publish-audit': PublishAudit;
+    'daily-reports': DailyReport;
     users: User;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
@@ -118,6 +119,7 @@ export interface Config {
     sources: SourcesSelect<false> | SourcesSelect<true>;
     'pipeline-runs': PipelineRunsSelect<false> | PipelineRunsSelect<true>;
     'publish-audit': PublishAuditSelect<false> | PublishAuditSelect<true>;
+    'daily-reports': DailyReportsSelect<false> | DailyReportsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
@@ -3525,6 +3527,35 @@ export interface PublishAudit {
   createdAt: string;
 }
 /**
+ * Archived morning reports (leads, traffic, approvals, pipeline). Read-only.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "daily-reports".
+ */
+export interface DailyReport {
+  id: number;
+  /**
+   * YYYY-MM-DD (Asia/Dhaka).
+   */
+  date: string;
+  generatedAt?: string | null;
+  /**
+   * Rendered report HTML (as emailed).
+   */
+  html?: string | null;
+  metrics?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Manage who can access the CMS and what they can do. Only a Super Admin can create or promote users.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3755,6 +3786,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'publish-audit';
         value: number | PublishAudit;
+      } | null)
+    | ({
+        relationTo: 'daily-reports';
+        value: number | DailyReport;
       } | null)
     | ({
         relationTo: 'users';
@@ -5253,6 +5288,18 @@ export interface PublishAuditSelect<T extends boolean = true> {
   actor?: T;
   tokenJti?: T;
   claimDiffSnapshot?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "daily-reports_select".
+ */
+export interface DailyReportsSelect<T extends boolean = true> {
+  date?: T;
+  generatedAt?: T;
+  html?: T;
+  metrics?: T;
   updatedAt?: T;
   createdAt?: T;
 }

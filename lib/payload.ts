@@ -407,12 +407,21 @@ export const getNewsItemBySlug = cache(
 
 // Globals --------------------------------------------------------------------
 
+// Each global is read several times per render (layout, EngagementWidgets,
+// Footer, page bodies). unstable_cache dedupes across requests but NOT reliably
+// across concurrent in-render calls to the same key — under load one caller
+// could receive an empty result, which made the WhatsApp button / projects
+// filters intermittently vanish. Wrapping each in React `cache()` collapses all
+// in-render calls to a single Data Cache lookup, so every consumer sees the
+// same value within a request. unstable_cache still provides the cross-request
+// ISR caching + revalidateTag invalidation.
+
 /**
  * Site settings — cached across ISR revalidation cycles via Next.js Data Cache.
  * Call `revalidateTag('site-settings')` in a Payload afterChange hook when the
  * global is updated to flush the cache on demand.
  */
-export const getSiteSettings = unstable_cache(
+const siteSettingsCached = unstable_cache(
   async (): Promise<SiteSetting> => {
     const payload = await getPayloadClient();
     return payload.findGlobal({ slug: "site-settings", depth: 1 });
@@ -420,11 +429,12 @@ export const getSiteSettings = unstable_cache(
   ["site-settings"],
   { revalidate: 3600, tags: ["site-settings"] },
 );
+export const getSiteSettings = cache((): Promise<SiteSetting> => siteSettingsCached());
 
 /**
  * Navigation — cached across ISR cycles; flush via revalidateTag('navigation').
  */
-export const getNavigation = unstable_cache(
+const navigationCached = unstable_cache(
   async (): Promise<Navigation> => {
     const payload = await getPayloadClient();
     return payload.findGlobal({ slug: "navigation", depth: 1 });
@@ -432,12 +442,13 @@ export const getNavigation = unstable_cache(
   ["navigation"],
   { revalidate: 3600, tags: ["navigation"] },
 );
+export const getNavigation = cache((): Promise<Navigation> => navigationCached());
 
 /**
  * Tariff rates — cited electricity/diesel prices used by the calculators.
  * Cached across ISR cycles; flush via revalidateTag('tariff-rates').
  */
-export const getTariffRates = unstable_cache(
+const tariffRatesCached = unstable_cache(
   async (): Promise<TariffRate> => {
     const payload = await getPayloadClient();
     return payload.findGlobal({ slug: "tariff-rates", depth: 0 });
@@ -445,9 +456,10 @@ export const getTariffRates = unstable_cache(
   ["tariff-rates"],
   { revalidate: 3600, tags: ["tariff-rates"] },
 );
+export const getTariffRates = cache((): Promise<TariffRate> => tariffRatesCached());
 
 /** Next-best-action rules — cached; flush via revalidateTag('next-best-actions'). */
-export const getNextBestActions = unstable_cache(
+const nextBestActionsCached = unstable_cache(
   async (): Promise<NextBestAction> => {
     const payload = await getPayloadClient();
     return payload.findGlobal({ slug: "next-best-actions", depth: 0 });
@@ -455,3 +467,4 @@ export const getNextBestActions = unstable_cache(
   ["next-best-actions"],
   { revalidate: 3600, tags: ["next-best-actions"] },
 );
+export const getNextBestActions = cache((): Promise<NextBestAction> => nextBestActionsCached());

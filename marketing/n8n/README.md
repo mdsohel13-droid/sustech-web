@@ -133,3 +133,54 @@ header): in the HTTP node turn off credential auth and add the header manually
 under **Send Headers** → `Name = Authorization`, `Value = Bearer <token>` (or
 `={{ $env.ERP_WEB_INGEST_KEY }}` if you keep the env var). A static Bearer
 doesn't need the credential store.
+
+### ERP returns 400 "name is required" — body sent as an array `[{…}]`
+
+The HTTP Request node serialises the item(s) as an array, so the ERP sees
+`[{…}]` not `{…}`. If fiddling with the node's body modes won't produce a bare
+object, **replace the HTTP node with a Code node** that makes the call directly —
+deterministic, and it sidesteps both the array-wrap and the `fetch is not
+defined` sandbox error:
+
+```js
+// Code node, "Run Once for Each Item". $json = the verified lead object.
+// NOTE: the ERP is plain HTTP on localhost → require('http'), NOT 'https'.
+const http = require("http");
+const payload = JSON.stringify($json);
+
+const res = await new Promise((resolve, reject) => {
+  const r = http.request(
+    {
+      hostname: "127.0.0.1",
+      port: 3010,
+      path: "/api/leads/from-web",
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Content-Length": Buffer.byteLength(payload),
+        Authorization: "Bearer <ERP_WEB_INGEST_KEY>",
+      },
+    },
+    (resp) => {
+      let d = "";
+      resp.on("data", (c) => (d += c));
+      resp.on("end", () => resolve({ status: resp.statusCode, body: d }));
+    },
+  );
+  r.on("error", reject);
+  r.write(payload);
+  r.end();
+});
+
+if (res.status >= 300) throw new Error(`ERP ${res.status}: ${res.body}`);
+return [{ json: { erpStatus: res.status, erp: JSON.parse(res.body) } }];
+```
+
+`require()` of a built-in is blocked in the Code node unless allow-listed. Since
+the Verify HMAC node already uses `require('crypto')`, set both:
+```bash
+NODE_FUNCTION_ALLOW_BUILTIN=crypto,http     # n8n process env, then restart
+```
+Common near-miss: using `require('https')` against the plain-HTTP `:3010`
+endpoint — it errors at the socket and the execution shows a workflow-level
+"error" with no node error. Use `http`.

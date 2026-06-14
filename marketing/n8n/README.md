@@ -83,3 +83,29 @@ of [`erp-thin-route.md`](erp-thin-route.md).
   particular the website sends **`message`** (not `notes`) and the enrichment
   fields **`score`/`temperature`/`segment`/`utm.campaign`/`leadId`** — drop those
   and the ERP can't prioritise hot leads or attribute the campaign.
+
+## Troubleshooting — env vars & secrets
+
+- **n8n needs exactly ONE env var: `LEAD_FORWARD_SECRET`** (read by the Verify
+  HMAC Code node via `$env`). The ERP Bearer key does **not** need to be an env
+  var — store the literal `Bearer <ERP_WEB_INGEST_KEY>` inside the n8n **Header
+  Auth credential**. Only make it an env var if the credential value is the
+  expression `={{ $env.ERP_WEB_INGEST_KEY }}`. Simplest: put the literal in the
+  credential and skip the env var entirely.
+- **After editing a systemd unit you MUST `daemon-reload` before `restart`.**
+  `systemctl restart` alone reuses the cached unit, so newly-added
+  `Environment=` lines are silently ignored — the classic "file is correct but
+  the process doesn't have the var" symptom.
+  ```bash
+  sudo systemctl daemon-reload && sudo systemctl restart n8n
+  systemctl show n8n -p Environment                       # what systemd will inject
+  PID=$(systemctl show -p MainPID --value n8n)
+  tr '\0' '\n' < /proc/$PID/environ | grep -E 'LEAD_FORWARD_SECRET'   # live process
+  ```
+- **`Environment=` values containing spaces must be quoted**, or systemd splits
+  on the space and drops the tail: `Environment="ERP_WEB_INGEST_KEY=Bearer abc"`
+  (not `Environment=ERP_WEB_INGEST_KEY=Bearer abc`). A hex secret has no space
+  so `Environment=LEAD_FORWARD_SECRET=83f0…` is fine unquoted.
+- **Fastest unblock if env loading is stubborn:** open the Verify HMAC node in
+  the n8n UI and replace `PASTE_LEAD_FORWARD_SECRET_HERE` with the literal
+  secret. No restart needed; revisit the env approach later.

@@ -109,3 +109,27 @@ of [`erp-thin-route.md`](erp-thin-route.md).
 - **Fastest unblock if env loading is stubborn:** open the Verify HMAC node in
   the n8n UI and replace `PASTE_LEAD_FORWARD_SECRET_HERE` with the literal
   secret. No restart needed; revisit the env approach later.
+
+### ERP call returns 401 — Authorization header not sent
+
+If the HTTP node fires but the ERP replies 401 and only an `accept` header
+reached it (no `Authorization`), the Header-Auth credential isn't being applied.
+Two causes, both common with **API-created** workflows/credentials:
+
+1. **Credential fields are wrong.** An n8n *Header Auth* (`httpHeaderAuth`)
+   credential has exactly two fields — **`name`** and **`value`** (the API keys),
+   shown in the UI as **Name** and **Value**. For Bearer auth they must be
+   `Name = Authorization`, `Value = Bearer <ERP_WEB_INGEST_KEY>`. If it was
+   created via API with `headerName`/`headerValue` (wrong keys) the credential is
+   effectively empty → no header sent. The API does not return credential
+   secrets, so **verify in the UI**, not via API.
+2. **Stale node↔credential binding.** Importing a workflow JSON that references a
+   credential by id can leave the node showing the credential without actually
+   binding it. Open the HTTP node → Authentication → re-select *Generic
+   Credential Type → Header Auth → (the credential)* → Save → re-execute.
+
+**Most robust unblock** (removes the credential abstraction for a single static
+header): in the HTTP node turn off credential auth and add the header manually
+under **Send Headers** → `Name = Authorization`, `Value = Bearer <token>` (or
+`={{ $env.ERP_WEB_INGEST_KEY }}` if you keep the env var). A static Bearer
+doesn't need the credential store.

@@ -16,8 +16,11 @@ test.describe("Projects index", () => {
     // per-facet landmark navs).
     const filters = page.getByRole("navigation", { name: "Filter projects" });
     await expect(filters).toBeVisible();
-    await expect(filters.getByText("Sector")).toBeVisible();
-    await expect(filters.getByText("Service")).toBeVisible();
+    // exact:true — a loose "Sector"/"Service" match also hits the dropdown's
+    // "All sectors (N)" / "All services (N)" options (substring, case-insensitive)
+    // and trips Playwright strict mode. We just want the two facet labels.
+    await expect(filters.getByText("Sector", { exact: true })).toBeVisible();
+    await expect(filters.getByText("Service", { exact: true })).toBeVisible();
   });
 
   test("a project card links through to a detail page", async ({ page }) => {

@@ -50,8 +50,8 @@ const fieldClass =
   "border-border bg-surface focus-visible:border-brand focus-visible:outline-brand w-full rounded-md border px-3 py-2 text-sm outline-none focus-visible:outline-2";
 
 /** Stable per-visitor id so the n8n workflow can keep conversation memory.
- *  The widget is client-only (loaded with ssr:false), so reading localStorage
- *  in a lazy initialiser is safe and avoids a setState-in-effect. */
+ *  Reading localStorage in a lazy initialiser is SSR-safe (guarded by the
+ *  `typeof window` check below) and avoids a setState-in-effect. */
 function useUserRef() {
   const [ref] = useState(() => {
     if (typeof window === "undefined") return "web";

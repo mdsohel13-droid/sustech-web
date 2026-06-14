@@ -11,11 +11,13 @@ test.describe("Projects index", () => {
     await expect(
       page.getByRole("heading", { name: "Eastport Cumilla — 100 kWp On-Grid Solar EPC" }),
     ).toBeVisible();
-    // Filter rows render now that there is published data.
-    await expect(page.getByRole("navigation", { name: "Filter projects by sector" })).toBeVisible();
-    await expect(
-      page.getByRole("navigation", { name: "Filter projects by service" }),
-    ).toBeVisible();
+    // Filter row is a single <nav aria-label="Filter projects"> holding the
+    // Sector + Service dropdowns (UI refactored to FilterDropdown from the old
+    // per-facet landmark navs).
+    const filters = page.getByRole("navigation", { name: "Filter projects" });
+    await expect(filters).toBeVisible();
+    await expect(filters.getByText("Sector")).toBeVisible();
+    await expect(filters.getByText("Service")).toBeVisible();
   });
 
   test("a project card links through to a detail page", async ({ page }) => {

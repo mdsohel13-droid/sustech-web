@@ -14,17 +14,8 @@ export default defineConfig({
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
     // Port 3000 is reserved on some Windows hosts (WinNAT excluded port range),
-    // so the server for e2e binds 4123. CI/Linux is unaffected.
-    //
-    // In CI run against the PRODUCTION build (`pnpm start`): the dev server
-    // compiles each route on first hit, and under CI CPU load that first-compile
-    // latency makes ssr:false widgets (the chat launcher) and heavy routes
-    // (/projects) flake on the initial assertion. A prod build is precompiled and
-    // deterministic. The CI workflow runs `pnpm build` immediately before e2e.
-    // Locally keep `pnpm dev` for fast iteration.
-    command: process.env.CI
-      ? "pnpm start --port 4123 --hostname 127.0.0.1"
-      : "pnpm dev --port 4123 --hostname 127.0.0.1",
+    // so the dev server for e2e binds 4123. CI/Linux is unaffected.
+    command: "pnpm dev --port 4123 --hostname 127.0.0.1",
     url: "http://127.0.0.1:4123",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

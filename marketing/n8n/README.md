@@ -68,6 +68,36 @@ curl -s -X POST "$URL" -H "Content-Type: application/json" -H "X-Signature: $SIG
 To test the ERP route by itself (before wiring n8n), see the `curl` at the bottom
 of [`erp-thin-route.md`](erp-thin-route.md).
 
+### Negative test — REQUIRED before go-live (proves the gate rejects forgeries)
+
+A passing happy-path test does **not** prove HMAC verification is still running —
+if the Verify step was dropped or short-circuited while refactoring, a forged
+request would succeed too. The webhook is public; the signature is the only thing
+stopping anyone from injecting fake leads into the ERP. So verify the gate
+*rejects*:
+
+```bash
+URL='https://n8n.sustechltd.com/webhook/lead-to-erp'
+BODY='{"name":"FORGED","email":"attacker@evil.test","temperature":"hot"}'
+
+# (a) no signature at all  → must NOT create a customer
+curl -s -o /dev/null -w '%{http_code}\n' -X POST "$URL" \
+  -H "Content-Type: application/json" -d "$BODY"
+
+# (b) wrong signature      → must NOT create a customer
+curl -s -o /dev/null -w '%{http_code}\n' -X POST "$URL" \
+  -H "Content-Type: application/json" -H "X-Signature: deadbeef" -d "$BODY"
+```
+Both must fail the workflow (non-2xx / execution error) and leave **no** new row
+in the ERP `customers` table. If either creates a customer, the HMAC gate is open
+— restore the Verify HMAC step (raw-body `timingSafeEqual`) before going live.
+
+> When the Verify and Forward steps are merged into one Code node, the verified
+> object's shape depends on position: a node right after the webhook reads the
+> payload at `item.json.body` (or `$json.body`) and the signature at
+> `item.json.headers['x-signature']`; verify the raw body **before** mapping
+> fields. Don't let the refactor skip the signature check.
+
 ## Notes
 - The Verify node reads the **raw body** before parsing — never re-stringify the
   JSON to check the signature (key order would differ and it would never match).

@@ -49,7 +49,31 @@ Only `email` is guaranteed non-empty. Everything else may be absent — treat as
 ## Response
 - `200 { "ok": true, "contactId": "...", "opportunityId": "..." }` on success.
 - `401` if the Bearer is wrong. `400` on a body with no email.
-- Be **idempotent**: dedupe by `email` (or by `webLeadId = leadId`). The same visitor can submit several times — upsert, don't duplicate.
+- Be **idempotent**: dedupe by `webLeadId` (fall back to `email`). The same visitor can submit several times — upsert, don't duplicate.
+
+### Idempotency — make it a true upsert (required before real traffic)
+
+A plain `INSERT` creates a new customer on every resubmit. Real visitors re-run
+calculators and re-submit forms, so dedupe at the DB level:
+
+```sql
+-- 1) one-time: a unique key to conflict on (partial, so null webleadid is allowed)
+CREATE UNIQUE INDEX IF NOT EXISTS customers_webleadid_uniq
+  ON customers (webleadid) WHERE webleadid IS NOT NULL;
+-- (or, if you'd rather dedupe by email:)
+-- CREATE UNIQUE INDEX IF NOT EXISTS customers_email_uniq ON customers (lower(email));
+
+-- 2) the route's write becomes an upsert
+INSERT INTO customers (webleadid, name, email, phone, company, status, leadscore,
+                       campaign, segment, source, notes, sourcepage, updated_at)
+VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12, now())
+ON CONFLICT (webleadid) WHERE webleadid IS NOT NULL
+DO UPDATE SET name=EXCLUDED.name, phone=EXCLUDED.phone, company=EXCLUDED.company,
+              status=EXCLUDED.status, leadscore=EXCLUDED.leadscore,
+              campaign=EXCLUDED.campaign, notes=EXCLUDED.notes, updated_at=now();
+```
+App-level equivalent (if you don't use raw SQL): `findByWebLeadId(leadId) ?? findByEmail(email)` → `update` else `insert`. Either way a repeat
+`leadId:999` updates the existing row instead of creating a duplicate.
 
 ---
 

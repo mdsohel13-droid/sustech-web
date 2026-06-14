@@ -38,6 +38,8 @@ jobs:
       - run: pnpm test:unit
       # Create the schema + seed initial content so the build and e2e have data.
       - run: pnpm seed
+      # Build before e2e: Playwright runs against the production server in CI
+      # (precompiled, deterministic) instead of the dev server.
+      - run: pnpm build
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e
-      - run: pnpm build

@@ -12,7 +12,7 @@ test.describe("Contact page", () => {
     // Populated from Settings (Part 1 of the brief). Scope to <main> so the footer's
     // contact links don't cause a strict-mode match.
     const main = page.getByRole("main");
-    await expect(main.getByText("+880 1867 655 599")).toBeVisible();
+    await expect(main.getByText("+880 1722-002125")).toBeVisible();
     await expect(main.locator('a[href="mailto:info@sustechltd.com"]')).toBeVisible();
   });
 });

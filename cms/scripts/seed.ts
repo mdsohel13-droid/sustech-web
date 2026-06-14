@@ -967,6 +967,17 @@ async function main(): Promise<void> {
         { label: "Facebook", url: "https://www.facebook.com/sustechltd" },
         { label: "LinkedIn", url: "https://www.linkedin.com/company/71629589" },
       ],
+      // Chat & Engagement widgets: enabled for tests and initial deployment.
+      // Admin can toggle in CMS /admin → Chat & Engagement tab later.
+      whatsapp: {
+        enabled: true,
+        number: "8801722002125",
+        prefilledMessage: "Hi Sustech, I'd like a quote for...",
+      },
+      chatbot: {
+        enabled: true,
+        provider: "hermes",
+      },
       defaultTitle:
         "Sustech Technology Ltd — Solar EPC, BESS & Electrical Engineering in Chattogram, Bangladesh",
       titleTemplate: "%s · Sustech Technology Ltd",

@@ -16,8 +16,8 @@ test.describe("Projects index", () => {
     // per-facet landmark navs).
     const filters = page.getByRole("navigation", { name: "Filter projects" });
     await expect(filters).toBeVisible();
-    await expect(filters.getByText("Sector")).toBeVisible();
-    await expect(filters.getByText("Service")).toBeVisible();
+    await expect(filters.getByText("Sector").first()).toBeVisible();
+    await expect(filters.getByText("Service").first()).toBeVisible();
   });
 
   test("a project card links through to a detail page", async ({ page }) => {

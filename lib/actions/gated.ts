@@ -11,8 +11,8 @@
 import { headers } from "next/headers";
 import { serverCapture } from "@/lib/analytics/server";
 import { signDownload } from "@/lib/gated-download";
-import { isHot } from "@/lib/leads/scoring";
-import { notifyLeadEvent } from "@/lib/leads/notify";
+import { isHot, temperatureOf } from "@/lib/leads/scoring";
+import { notifyLeadEvent, notifyOwnerLead } from "@/lib/leads/notify";
 import { getPayloadClient } from "@/lib/payload";
 import { upsertLead } from "@/lib/leads/upsert-lead";
 import type { KnowledgeResource } from "@/payload-types";
@@ -85,6 +85,18 @@ export async function captureGatedLead(
     source: "gated-asset",
     score: result.score,
     hot: isHot(result.score),
+    utm: input.utm,
+  });
+  notifyOwnerLead({
+    leadId: result.id,
+    name: input.name,
+    email: input.email,
+    company: input.company,
+    segment: input.segment,
+    source: "gated-asset",
+    score: result.score,
+    temperature: temperatureOf(result.score),
+    sourcePath: input.sourcePath,
     utm: input.utm,
   });
   serverCapture("lead_captured", {

@@ -31,6 +31,7 @@ export function EmailReportGate({ payload }: { payload: ReportPayload }) {
   const [optIn, setOptIn] = useState(false); // NEVER pre-ticked
   const [honeypot, setHoneypot] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle");
+  const [reportUrl, setReportUrl] = useState<string | null>(null);
   const formId = useId();
 
   async function onSubmit(e: React.FormEvent) {
@@ -51,7 +52,12 @@ export function EmailReportGate({ payload }: { payload: ReportPayload }) {
         utm: getUtm(),
         company_website: honeypot,
       });
-      setStatus(res.ok ? "done" : "error");
+      if (res.ok) {
+        setReportUrl(res.reportPath ?? null);
+        setStatus("done");
+      } else {
+        setStatus("error");
+      }
     } catch {
       setStatus("error");
     }
@@ -62,19 +68,30 @@ export function EmailReportGate({ payload }: { payload: ReportPayload }) {
       <div className="border-brand/30 bg-brand/5 mt-6 rounded-xl border p-5">
         <p className="text-ink-900 flex items-center gap-2 font-semibold">
           <CheckCircle2 className="text-brand h-5 w-5" aria-hidden />
-          Thanks — your report is on its way.
+          Thanks — your report is ready.
         </p>
         <p className="text-text-soft mt-1 text-sm">
           We&apos;ve recorded your details and an engineer can follow up with a tailored assessment.
-          You can also print this page now.
         </p>
-        <button
-          type="button"
-          onClick={() => window.print()}
-          className="border-border hover:bg-surface-2 mt-3 inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium"
-        >
-          <Printer className="h-4 w-4" aria-hidden /> Print this report
-        </button>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {reportUrl && (
+            <a
+              href={reportUrl}
+              target="_blank"
+              rel="noopener"
+              className="bg-brand hover:bg-brand-600 inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-semibold text-white"
+            >
+              <Printer className="h-4 w-4" aria-hidden /> View / print your report
+            </a>
+          )}
+          <button
+            type="button"
+            onClick={() => window.print()}
+            className="border-border hover:bg-surface-2 inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium"
+          >
+            Print this page
+          </button>
+        </div>
       </div>
     );
   }

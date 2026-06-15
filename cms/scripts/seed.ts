@@ -985,6 +985,24 @@ async function main(): Promise<void> {
         "Integrated engineering & energy company in Chattogram, Bangladesh since 2017 — solar EPC, " +
         "BESS, substation/HV, lightning protection, electrical EPC and inspection & testing for " +
         "industrial, government and commercial clients.",
+      // Engagement widgets — enabled to match the live site. Both `enabled`
+      // fields default to `false` in the global config, so they MUST be set
+      // explicitly here: without this, EngagementWidgets hides the WhatsApp
+      // button (waEnabled = whatsapp.enabled !== false) and the chatbot
+      // (chatEnabled = chatbot.enabled !== false), and the e2e specs that assert
+      // those widgets fail. WhatsApp sits bottom-left so it never overlaps the
+      // chatbot launcher (bottom-right).
+      whatsapp: {
+        enabled: true,
+        number: "8801722002125",
+        prefilledMessage: "Hi Sustech, I'd like a quote for...",
+        position: "bottom-left",
+      },
+      chatbot: {
+        enabled: true,
+        provider: "hermes",
+        chatPosition: "bottom-right",
+      },
     },
   });
 

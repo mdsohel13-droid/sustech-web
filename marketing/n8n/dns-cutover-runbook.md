@@ -84,8 +84,11 @@ Verify with a Host-header probe (no DNS needed):
 curl -s -H "Host: www.sustechltd.com" https://93.127.160.183/ -k -o /dev/null -w "%{http_code}\n"   # 200
 ```
 
-### 1c. (24h before flip) lower TTL
+### 1c. Lower TTL — DO THIS FIRST, NOW
 Hostinger hPanel → Domains → DNS → set TTL = **300** on A `@` and A `www`. Save.
+**Scheduled flip = TODAY ~01:00 (BD).** There isn't a full 24h, so lower the TTL
+*immediately* at the start of Phase 1 — it propagates as far as the current TTL
+allows before the flip, which keeps rollback reasonably fast.
 
 ---
 

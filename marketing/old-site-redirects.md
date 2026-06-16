@@ -6,10 +6,10 @@ and stop indexed old URLs from 404ing. Add them to the **VPS nginx server block*
 for `www.sustechltd.com` / `sustechltd.com`, **above** the `location /` proxy to
 the Next.js app.
 
-> ✅ **Slugs VERIFIED against the live beta sitemap (2026-06-15)** — all
-> `/services/*` targets exist on the new site. The three marked `(check)` have no
-> exact new equivalent (sourcing / PLC automation / panel-board); they point to
-> the closest hub — adjust only if you prefer a different target.
+> ✅ **Slugs VERIFIED against the live beta sitemap, and all targets OWNER-APPROVED
+> (2026-06-15).** Every `/services/*` target exists on the new site. The three that
+> had no exact new equivalent (sourcing → `/services`, PLC automation → electrical-epc,
+> panel-board → electrical-epc) are approved as-is. Map is final.
 >
 > **Coverage:** this map covers every publicly-linked old URL (the old site has no
 > sitemap — all `/sitemap*` 404). If the old DB holds **unlinked** pages, export

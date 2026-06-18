@@ -37,6 +37,36 @@ import { TariffRates } from "./cms/globals/tariff-rates";
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const serverURL = process.env.NEXT_PUBLIC_SERVER_URL ?? "http://localhost:4123";
 
+/**
+ * Origins allowed for cross-site requests (cors) and authenticated mutations (csrf).
+ * Payload's csrf check protects WRITES only — if the admin is reached on a host that
+ * isn't in this list, reads work but every save fails with
+ * "You are not allowed to perform this action". That bites on a domain cutover
+ * (apex vs www, or beta → www) where NEXT_PUBLIC_SERVER_URL no longer matches the
+ * host in the browser. So allow the configured origin, its apex+www siblings (for
+ * https hosts), and any comma-separated EXTRA_ORIGINS (e.g. a beta/staging host) —
+ * no code change to add a host later. Origins are exact scheme+host, no trailing slash.
+ */
+const apexAndWww = (origin: string): string[] => {
+  try {
+    const u = new URL(origin);
+    if (u.protocol !== "https:") return [origin]; // localhost etc. — as-is
+    const apex = u.host.replace(/^www\./, "");
+    return [`https://${apex}`, `https://www.${apex}`];
+  } catch {
+    return [origin];
+  }
+};
+const allowedOrigins = Array.from(
+  new Set(
+    [
+      serverURL,
+      ...apexAndWww(serverURL),
+      ...(process.env.EXTRA_ORIGINS?.split(",").map((o) => o.trim()) ?? []),
+    ].filter(Boolean),
+  ),
+);
+
 export default buildConfig({
   admin: {
     user: Users.slug,
@@ -89,6 +119,6 @@ export default buildConfig({
   })(),
   typescript: { outputFile: path.resolve(dirname, "payload-types.ts") },
   sharp,
-  cors: [serverURL],
-  csrf: [serverURL],
+  cors: allowedOrigins,
+  csrf: allowedOrigins,
 });

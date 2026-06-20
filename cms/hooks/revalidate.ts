@@ -8,6 +8,13 @@ import { pagePath } from "../utils/preview";
 type PathSpec = [path: string, type?: "page" | "layout"];
 
 /**
+ * GEO index routes that list the published URL set. Any content change that
+ * adds/removes/renames a public page must refresh these too, or new URLs (e.g. a
+ * newly-enabled calculator) won't appear until their own 1h ISR window elapses.
+ */
+const SEO_INDEX: PathSpec[] = [["/sitemap.xml"], ["/llms.txt"]];
+
+/**
  * Lazy-load next/cache so the Payload config loads under the seed/CLI (no Next runtime).
  * Revalidation only matters at runtime inside the Next server.
  */
@@ -21,7 +28,7 @@ const revalidate = async (paths: PathSpec[]): Promise<void> => {
 };
 
 export const revalidatePages: CollectionAfterChangeHook = async ({ doc, previousDoc }) => {
-  const paths: PathSpec[] = [[pagePath(doc?.slug as string)]];
+  const paths: PathSpec[] = [[pagePath(doc?.slug as string)], ...SEO_INDEX];
   if (previousDoc?.slug && previousDoc.slug !== doc?.slug) {
     paths.push([pagePath(previousDoc.slug as string)]);
   }
@@ -30,7 +37,10 @@ export const revalidatePages: CollectionAfterChangeHook = async ({ doc, previous
 };
 
 export const revalidatePagesAfterDelete: CollectionAfterDeleteHook = async ({ doc }) => {
-  await revalidate(doc?.slug ? [[pagePath(doc.slug as string)]] : [["/"]]);
+  await revalidate([
+    doc?.slug ? [pagePath(doc.slug as string)] : ["/"],
+    ...SEO_INDEX,
+  ] as PathSpec[]);
   return doc;
 };
 
@@ -38,7 +48,7 @@ export const revalidatePagesAfterDelete: CollectionAfterDeleteHook = async ({ do
 export const revalidateCollectionRoute =
   (prefix: string): CollectionAfterChangeHook =>
   async ({ doc, previousDoc }) => {
-    const paths: PathSpec[] = [["/"], [prefix]];
+    const paths: PathSpec[] = [["/"], [prefix], ...SEO_INDEX];
     if (doc?.slug) paths.push([`${prefix}/${doc.slug}`]);
     if (previousDoc?.slug && previousDoc.slug !== doc?.slug) {
       paths.push([`${prefix}/${previousDoc.slug}`]);
@@ -49,12 +59,12 @@ export const revalidateCollectionRoute =
 
 /** Content surfaced on the home page (services, sectors, clients, testimonials). */
 export const revalidateHome: CollectionAfterChangeHook = async ({ doc }) => {
-  await revalidate([["/"]]);
+  await revalidate([["/"], ...SEO_INDEX]);
   return doc;
 };
 
 export const revalidateHomeAfterDelete: CollectionAfterDeleteHook = async ({ doc }) => {
-  await revalidate([["/"]]);
+  await revalidate([["/"], ...SEO_INDEX]);
   return doc;
 };
 

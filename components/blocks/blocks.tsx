@@ -1580,7 +1580,16 @@ export async function CalculatorEmbedView({ block }: { block: CalculatorEmbedBlo
               {block.body && <p className="text-text-soft mt-3 text-[1.0625rem]">{block.body}</p>}
             </div>
             <Button asChild variant="secondary" size="lg">
-              <Link href="/tools" prefetch={false}>
+              {/* No /tools route exists — link to the Knowledge calculators hub
+                  (or the ROI calculator when that tool is selected). */}
+              <Link
+                href={
+                  block.tool === "roi"
+                    ? "/knowledge/calculators/solar-roi"
+                    : "/knowledge?tab=calculators"
+                }
+                prefetch={false}
+              >
                 {block.ctaLabel ?? "Try the calculator"}{" "}
                 <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>

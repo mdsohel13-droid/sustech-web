@@ -522,7 +522,7 @@ const CalculatorEmbed: Block = {
       admin: {
         description:
           "Embed a live, interactive calculator inline (it captures leads via the report gate). " +
-          "Leave empty to show a CTA card linking to /tools instead.",
+          "Leave empty to show a CTA card linking to the Knowledge calculators hub instead.",
       },
     },
     {

@@ -1,0 +1,120 @@
+{
+  "name": "Sustech — Content Engine (daily, shadow)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [{ "field": "cronExpression", "expression": "0 22 * * *" }] }
+      },
+      "id": "cron",
+      "name": "04:00 Dhaka (22:00 UTC)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [200, 320]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.SITE_URL }}/api/hermes/content-brief",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.HERMES_AGENT_SECRET }}" }
+          ]
+        },
+        "options": { "timeout": 15000 }
+      },
+      "id": "brief",
+      "name": "GET content-brief",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [430, 320]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build one item per topic to generate today (cap to keep cost + review load sane).\nconst b = $input.first().json;\nconst MAX = Number($env.CONTENT_TOPICS_PER_DAY || 2);\nconst topics = (b.suggestedTopics || []).slice(0, MAX);\nconst ctx = {\n  categories: (b.categories || []).filter((c) => c !== 'company-update' && c !== 'product-update'),\n  recentTitles: (b.recentTitles || b.recentNews || []),\n  services: b.services || [],\n  sectors: b.sectors || [],\n};\nreturn topics.map((topic) => ({ json: { topic, ...ctx } }));"
+      },
+      "id": "topics",
+      "name": "Pick topics + context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 320]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "={{ $env.ANTHROPIC_API_KEY }}" },
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "content-type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  model: $env.CONTENT_MODEL || 'claude-opus-4-8',\n  max_tokens: 2200,\n  system: [{ type: 'text', text: $env.CONTENT_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],\n  messages: [{ role: 'user', content:\n    'Allowed categories: ' + ($json.categories||[]).join(', ') +\n    '\\nRecent titles to NOT duplicate: ' + ($json.recentTitles||[]).join(' | ') +\n    '\\nServices (internal links): ' + JSON.stringify($json.services) +\n    '\\nSectors (internal links): ' + JSON.stringify($json.sectors) +\n    '\\n\\nWrite one article for this topic:\\n\"' + $json.topic + '\"\\n\\nReturn ONLY the JSON object.'\n  }]\n}) }}",
+        "options": { "timeout": 120000, "response": { "response": { "neverError": true } } }
+      },
+      "id": "claude",
+      "name": "Claude — generate article",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [890, 320]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse the model's JSON (it returns ONLY the object). Skip on any problem —\n// never throw, so one bad topic doesn't kill the run.\nout = [];\nfor (const item of $input.all()) {\n  try {\n    const txt = item.json?.content?.[0]?.text || '';\n    const json = JSON.parse(txt.trim().replace(/^```(json)?|```$/g, '').trim());\n    if (json && json.title && json.body && json.summary && json.category) out.push({ json });\n  } catch (e) {\n    out.push({ json: { _skip: true, error: String(e) } });\n  }\n}\nreturn out.filter((i) => !i.json._skip);"
+      },
+      "id": "parse",
+      "name": "Parse article JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 320]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SITE_URL }}/api/hermes/ingest",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.HERMES_AGENT_SECRET }}" },
+            { "name": "content-type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ title: $json.title, category: $json.category, summary: $json.summary, body: $json.body, sourceUrl: $json.sourceUrl, tags: $json.tags, faq: $json.faq, model: ($env.CONTENT_MODEL || 'claude-opus-4-8') }) }}",
+        "options": { "timeout": 15000, "response": { "response": { "neverError": true } } }
+      },
+      "id": "ingest",
+      "name": "POST → /api/hermes/ingest (DRAFT)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1350, 320]
+    }
+  ],
+  "connections": {
+    "04:00 Dhaka (22:00 UTC)": {
+      "main": [[{ "node": "GET content-brief", "type": "main", "index": 0 }]]
+    },
+    "GET content-brief": {
+      "main": [[{ "node": "Pick topics + context", "type": "main", "index": 0 }]]
+    },
+    "Pick topics + context": {
+      "main": [[{ "node": "Claude — generate article", "type": "main", "index": 0 }]]
+    },
+    "Claude — generate article": {
+      "main": [[{ "node": "Parse article JSON", "type": "main", "index": 0 }]]
+    },
+    "Parse article JSON": {
+      "main": [[{ "node": "POST → /api/hermes/ingest (DRAFT)", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "pinData": {},
+  "meta": {
+    "templateId": "sustech-content-engine",
+    "description": "Daily evergreen content: content-brief -> Claude -> ingest as DRAFT. Shadow-safe: ingest creates drafts only; AUTO_PUBLISH_ENABLED stays false. Set CONTENT_SYSTEM_PROMPT (from content-engine.prompt.md), ANTHROPIC_API_KEY, HERMES_AGENT_SECRET, SITE_URL in n8n env."
+  }
+}

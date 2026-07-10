@@ -30,7 +30,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Build one item per topic to generate today (cap to keep cost + review load sane).\nconst b = $input.first().json;\nconst MAX = Number($env.CONTENT_TOPICS_PER_DAY || 2);\nconst topics = (b.suggestedTopics || []).slice(0, MAX);\nconst ctx = {\n  categories: (b.categories || []).filter((c) => c !== 'company-update' && c !== 'product-update'),\n  recentTitles: (b.recentTitles || b.recentNews || []),\n  services: b.services || [],\n  sectors: b.sectors || [],\n};\nreturn topics.map((topic) => ({ json: { topic, ...ctx } }));"
+        "jsCode": "// Build one item per topic to generate today (cap to keep cost + review load sane).\nconst b = $input.first().json;\nconst MAX = Number($env.CONTENT_TOPICS_PER_DAY || 2);\nconst topics = (b.suggestedTopics || []).slice(0, MAX);\nconst ctx = {\n  categories: (b.categories || []).filter((c) => c !== 'company-update' && c !== 'product-update'),\n  recentTitles: (b.recentTitles || b.recentNews || []),\n  services: b.services || [],\n  sectors: b.sectors || [],\n  references: [...(b.standardsReferences || []), ...(b.authoritativeSources || [])].slice(0, 20),\n};\nreturn topics.map((topic) => ({ json: { topic, ...ctx } }));"
       },
       "id": "topics",
       "name": "Pick topics + context",
@@ -52,7 +52,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({\n  model: $env.CONTENT_MODEL || 'claude-opus-4-8',\n  max_tokens: 2200,\n  system: [{ type: 'text', text: $env.CONTENT_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],\n  messages: [{ role: 'user', content:\n    'Allowed categories: ' + ($json.categories||[]).join(', ') +\n    '\\nRecent titles to NOT duplicate: ' + ($json.recentTitles||[]).join(' | ') +\n    '\\nServices (internal links): ' + JSON.stringify($json.services) +\n    '\\nSectors (internal links): ' + JSON.stringify($json.sectors) +\n    '\\n\\nWrite one article for this topic:\\n\"' + $json.topic + '\"\\n\\nReturn ONLY the JSON object.'\n  }]\n}) }}",
+        "jsonBody": "={{ JSON.stringify({\n  model: $env.CONTENT_MODEL || 'claude-opus-4-8',\n  max_tokens: 2200,\n  system: [{ type: 'text', text: $env.CONTENT_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],\n  messages: [{ role: 'user', content:\n    'Allowed categories: ' + ($json.categories||[]).join(', ') +\n    '\\nRecent titles to NOT duplicate: ' + ($json.recentTitles||[]).join(' | ') +\n    '\\nServices (internal links): ' + JSON.stringify($json.services) +\n    '\\nSectors (internal links): ' + JSON.stringify($json.sectors) +\n    '\\nReferences you MUST ground claims in (cite at least 2 via the article sources + sourceUrl; never invent a figure or URL): ' + JSON.stringify($json.references) +\n    '\\n\\nWrite one article for this topic:\\n\"' + $json.topic + '\"\\n\\nReturn ONLY the JSON object.'\n  }]\n}) }}",
         "options": { "timeout": 120000, "response": { "response": { "neverError": true } } }
       },
       "id": "claude",

@@ -28,6 +28,11 @@ your tap. `AUTO_PUBLISH_ENABLED` stays `false`. Nothing invents figures.
   - `GET /api/indexnow/key` — serves the verification key (`keyLocation`).
   - `GET|POST /api/cron/indexnow` (`CRON_SECRET`) — weekly full resubmit of the
     whole canonical set (from the sitemap), so nothing is ever missed.
+- **Content-health audit (detect-only).** `GET|POST /api/cron/content-health`
+  (`CRON_SECRET`) sweeps the CMS for missing image alt text, missing SEO meta
+  descriptions on published docs, and unfinished sector funnels — returns a
+  structured report for the weekly digest. `lib/content-health.ts` (pure checks +
+  runner; changes nothing).
 - **Sitemap + llms.txt freshness.** `app/sitemap.ts` / `app/llms.txt` are dynamic
   (ISR, 1h) and the revalidate hook refreshes them on any content change.
 - **Fallback heartbeat / gap detection.** `GET /api/cron/nightly` (`CRON_SECRET`,
@@ -54,6 +59,6 @@ Add a weekly crontab entry (or n8n schedule) hitting
 - **Publishing is already paused by default** (`AUTO_PUBLISH_ENABLED=false`).
 
 ## Not yet automated (candidate Tier-0 follow-ups)
-Internal-linking pass, broken-link / image-alt / schema audit, scheduled
+Internal-linking pass, broken internal-link crawl, schema validation, scheduled
 Lighthouse regression, featured-project rotation. Each should still pass the full
 quality gate before any merge.

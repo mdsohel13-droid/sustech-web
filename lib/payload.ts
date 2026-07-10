@@ -17,6 +17,7 @@ import type {
   Sector,
   Service,
   SiteSetting,
+  Source,
   TariffRate,
   Team,
   Testimonial,
@@ -249,6 +250,24 @@ export const getTestimonials = cache(async (): Promise<Testimonial[]> => {
   try {
     const payload = await getPayloadClient();
     const res = await payload.find({ collection: "testimonials", depth: 1, limit: 50 });
+    return res.docs;
+  } catch {
+    return [];
+  }
+});
+
+/** Active authoritative sources (the citation registry) — used to steer the
+ *  evergreen content engine so every generated article references real, world-class
+ *  resources rather than inventing claims. */
+export const getActiveSources = cache(async (): Promise<Source[]> => {
+  try {
+    const payload = await getPayloadClient();
+    const res = await payload.find({
+      collection: "sources",
+      depth: 0,
+      limit: 200,
+      where: { active: { equals: true } },
+    });
     return res.docs;
   } catch {
     return [];

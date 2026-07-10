@@ -214,6 +214,22 @@ export const getProjectsBySector = cache(async (sectorId: number): Promise<Proje
   }
 });
 
+export const getClientsBySector = cache(async (sectorId: number): Promise<Client[]> => {
+  try {
+    const payload = await getPayloadClient();
+    const res = await payload.find({
+      collection: "clients",
+      depth: 1,
+      limit: 24,
+      where: { sectors: { in: [sectorId] } },
+      sort: "order",
+    });
+    return res.docs;
+  } catch {
+    return [];
+  }
+});
+
 export const getClients = cache(async (): Promise<Client[]> => {
   try {
     const payload = await getPayloadClient();

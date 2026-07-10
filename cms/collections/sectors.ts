@@ -71,6 +71,83 @@ export const Sectors: CollectionConfig = {
       hasMany: true,
       admin: { description: "Relevant services for this sector." },
     },
+    // --- World-class funnel (plan 3·1): quantified proof, testimonial, gated lead
+    //     magnet, FAQ (→ FAQPage schema), tailored CTA. Logos are pulled from the
+    //     Clients collection via each client's own "sectors" relationship.
+    {
+      name: "proofStats",
+      type: "array",
+      maxRows: 4,
+      labels: { singular: "Proof figure", plural: "Proof figures" },
+      admin: {
+        description:
+          "Quantified proof for THIS sector, e.g. 12 · factories powered, 4.2 · MWp on textile " +
+          "roofs. Any figure left at 0 is hidden automatically — the page never shows '0'.",
+      },
+      fields: [
+        {
+          type: "row",
+          fields: [
+            { name: "value", type: "number", required: true, admin: { width: "34%", step: 1 } },
+            {
+              name: "suffix",
+              type: "text",
+              admin: { width: "26%", description: "e.g. +, MWp, %" },
+            },
+            { name: "label", type: "text", required: true, admin: { width: "40%" } },
+          ],
+        },
+      ],
+    },
+    {
+      name: "testimonials",
+      type: "relationship",
+      relationTo: "testimonials",
+      hasMany: true,
+      maxRows: 2,
+      admin: { description: "1–2 testimonials to feature on this sector page." },
+    },
+    {
+      name: "leadMagnet",
+      type: "relationship",
+      relationTo: "knowledge-resources",
+      admin: {
+        description:
+          "Optional gated download for this sector (e.g. an RMG electrical-compliance " +
+          "checklist). Pick a knowledge resource that has a file + a gate; visitors exchange " +
+          "their email to download it, which captures a sector-tagged lead.",
+      },
+    },
+    {
+      name: "faqs",
+      type: "array",
+      maxRows: 6,
+      labels: { singular: "Q&A", plural: "Q&As" },
+      admin: {
+        description:
+          "4–6 sector questions & answers. Rendered on the page AND emitted as FAQPage " +
+          "structured data so AI answer engines can cite Sustech.",
+      },
+      fields: [
+        { name: "question", type: "text", required: true },
+        { name: "answer", type: "textarea", required: true },
+      ],
+    },
+    {
+      type: "row",
+      fields: [
+        {
+          name: "ctaHeading",
+          type: "text",
+          admin: { width: "50%", description: "Optional — overrides the default CTA heading." },
+        },
+        {
+          name: "ctaLede",
+          type: "text",
+          admin: { width: "50%", description: "Optional — overrides the default CTA sub-text." },
+        },
+      ],
+    },
     seoField,
   ],
 };

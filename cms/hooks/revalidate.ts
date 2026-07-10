@@ -27,12 +27,29 @@ const revalidate = async (paths: PathSpec[]): Promise<void> => {
   }
 };
 
+/**
+ * Evergreen Tier-0: tell search engines to re-crawl a just-published URL
+ * (IndexNow). Best-effort + lazy-imported so the config still loads under the
+ * seed/CLI, and a no-op unless IndexNow is configured. Drafts are never pinged.
+ */
+const pingIndexNow = async (doc: unknown, paths: string[]): Promise<void> => {
+  const status = (doc as { _status?: string } | null)?._status;
+  if (status && status !== "published") return;
+  try {
+    const { submitIndexNow } = await import("../../lib/indexnow");
+    await submitIndexNow(paths);
+  } catch {
+    /* best-effort — a failed ping must never block a publish */
+  }
+};
+
 export const revalidatePages: CollectionAfterChangeHook = async ({ doc, previousDoc }) => {
   const paths: PathSpec[] = [[pagePath(doc?.slug as string)], ...SEO_INDEX];
   if (previousDoc?.slug && previousDoc.slug !== doc?.slug) {
     paths.push([pagePath(previousDoc.slug as string)]);
   }
   await revalidate(paths);
+  await pingIndexNow(doc, [pagePath(doc?.slug as string)]);
   return doc;
 };
 
@@ -54,6 +71,7 @@ export const revalidateCollectionRoute =
       paths.push([`${prefix}/${previousDoc.slug}`]);
     }
     await revalidate(paths);
+    if (doc?.slug) await pingIndexNow(doc, [`${prefix}/${doc.slug}`]);
     return doc;
   };
 

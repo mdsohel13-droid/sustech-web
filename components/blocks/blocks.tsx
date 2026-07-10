@@ -545,6 +545,12 @@ export function RichTextView({
 
 export function StatsCountersView({ block }: { block: StatsCountersBlock }) {
   const bs = resolveBlockStyle(getBlockStyle(block), block.appearance);
+  // Never render a placeholder figure. `?? null` only catches null/undefined, so a stat
+  // left at 0 would print "0+"/"0 kWp" — which reads as a dead site (CLAUDE.md: no
+  // placeholder stats). Show only real, positive numbers; if none qualify yet, hide the
+  // whole bar until the CMS carries real values, rather than showing zeros.
+  const stats = (block.stats ?? []).filter((s) => typeof s.value === "number" && s.value > 0);
+  if (stats.length === 0) return null;
   return (
     <Section
       tone={bs.tone}
@@ -564,7 +570,7 @@ export function StatsCountersView({ block }: { block: StatsCountersBlock }) {
         </p>
       )}
       <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-4">
-        {(block.stats ?? []).map((s, i) => (
+        {stats.map((s, i) => (
           <Reveal key={s.id ?? i} {...itemRevealProps(bs, i)}>
             <ProofCounter value={s.value ?? null} label={s.label} suffix={s.suffix ?? undefined} />
           </Reveal>
@@ -763,8 +769,18 @@ export async function ProjectsListView({
   };
 }) {
   const bs = resolveBlockStyle(getBlockStyle(block), block.appearance);
-  const projects =
+  const resolved =
     block.source === "selected" ? objs<Project>(block.projects) : await getFeaturedProjects(3);
+  // Guard: never render the same project twice (e.g. an admin selecting a project twice in
+  // a "selected" list, or a duplicate slipping into the featured set). De-dupe by id,
+  // preserving order. NB: two *distinct* docs for one real project (the United Group case)
+  // are a content merge in /admin, which this cannot detect.
+  const seen = new Set<Project["id"]>();
+  const projects = resolved.filter((p) => {
+    if (seen.has(p.id)) return false;
+    seen.add(p.id);
+    return true;
+  });
   return (
     <Section
       tone={bs.tone}

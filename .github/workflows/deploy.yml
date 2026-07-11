@@ -1,0 +1,65 @@
+name: Deploy (production)
+
+# Continuous deployment. On every push to `main` (i.e. a merged, CI-green PR —
+# branch protection requires the `verify` check to pass before merge), SSH to the
+# VPS and run the existing scripts/deploy.sh (migrate → build → restart → health).
+# Also runnable on demand from the Actions tab.
+#
+# Required repo secrets (Settings → Secrets and variables → Actions):
+#   DEPLOY_HOST      VPS IP / hostname            (e.g. 93.127.160.183)
+#   DEPLOY_USER      ssh user that owns the app   (e.g. deploy)
+#   DEPLOY_PORT      ssh port                     (e.g. 22)
+#   DEPLOY_PATH      repo path on the VPS         (e.g. /var/www/sustech-web)
+#   DEPLOY_SSH_KEY   PRIVATE key of a dedicated deploy keypair (its PUBLIC key is
+#                    in the VPS user's ~/.ssh/authorized_keys)
+# NOTE: the APP's runtime secrets (DATABASE_URI, PAYLOAD_SECRET, ANTHROPIC/OPENROUTER
+# key, CLOUDFLARE_*, INDEXNOW_KEY, HERMES_AGENT_SECRET, …) live in the VPS .env and
+# are NOT needed here — GitHub only needs SSH access to run the deploy script.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check CD is configured
+        id: cfg
+        env:
+          HOST: ${{ secrets.DEPLOY_HOST }}
+          KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          if [ -z "$HOST" ] || [ -z "$KEY" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::CD secrets not set yet — skipping deploy. Add DEPLOY_* secrets to enable."
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy over SSH
+        if: steps.cfg.outputs.configured == 'true'
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p "${DEPLOY_PORT:-22}" -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          echo "==> Deploying main to $DEPLOY_HOST:$DEPLOY_PATH"
+          ssh -i ~/.ssh/deploy_key -p "${DEPLOY_PORT:-22}" \
+            -o StrictHostKeyChecking=yes "$DEPLOY_USER@$DEPLOY_HOST" \
+            "bash -lc 'cd \"$DEPLOY_PATH\" && bash scripts/deploy.sh main'"

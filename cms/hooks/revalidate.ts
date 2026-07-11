@@ -43,6 +43,24 @@ const pingIndexNow = async (doc: unknown, paths: string[]): Promise<void> => {
   }
 };
 
+/**
+ * Purge Cloudflare's edge cache for the changed paths, so a publish is visible to
+ * visitors immediately instead of after the CDN TTL. Best-effort + lazy-imported;
+ * no-op unless Cloudflare purge is configured. `all` purges the whole zone (for a
+ * global/nav change that affects every page's header).
+ */
+const edgePurge = async (paths: string[], all = false): Promise<void> => {
+  try {
+    const cf = await import("../../lib/cloudflare-purge");
+    if (all) await cf.purgeCloudflareEverything();
+    else await cf.purgeCloudflare(paths);
+  } catch {
+    /* best-effort */
+  }
+};
+
+const pathsOf = (specs: PathSpec[]): string[] => specs.map(([p]) => p);
+
 export const revalidatePages: CollectionAfterChangeHook = async ({ doc, previousDoc }) => {
   const paths: PathSpec[] = [[pagePath(doc?.slug as string)], ...SEO_INDEX];
   if (previousDoc?.slug && previousDoc.slug !== doc?.slug) {
@@ -50,14 +68,14 @@ export const revalidatePages: CollectionAfterChangeHook = async ({ doc, previous
   }
   await revalidate(paths);
   await pingIndexNow(doc, [pagePath(doc?.slug as string)]);
+  await edgePurge(pathsOf(paths));
   return doc;
 };
 
 export const revalidatePagesAfterDelete: CollectionAfterDeleteHook = async ({ doc }) => {
-  await revalidate([
-    doc?.slug ? [pagePath(doc.slug as string)] : ["/"],
-    ...SEO_INDEX,
-  ] as PathSpec[]);
+  const paths: PathSpec[] = [doc?.slug ? [pagePath(doc.slug as string)] : ["/"], ...SEO_INDEX];
+  await revalidate(paths);
+  await edgePurge(pathsOf(paths));
   return doc;
 };
 
@@ -72,22 +90,28 @@ export const revalidateCollectionRoute =
     }
     await revalidate(paths);
     if (doc?.slug) await pingIndexNow(doc, [`${prefix}/${doc.slug}`]);
+    await edgePurge(pathsOf(paths));
     return doc;
   };
 
 /** Content surfaced on the home page (services, sectors, clients, testimonials). */
 export const revalidateHome: CollectionAfterChangeHook = async ({ doc }) => {
-  await revalidate([["/"], ...SEO_INDEX]);
+  const paths: PathSpec[] = [["/"], ...SEO_INDEX];
+  await revalidate(paths);
+  await edgePurge(pathsOf(paths));
   return doc;
 };
 
 export const revalidateHomeAfterDelete: CollectionAfterDeleteHook = async ({ doc }) => {
-  await revalidate([["/"], ...SEO_INDEX]);
+  const paths: PathSpec[] = [["/"], ...SEO_INDEX];
+  await revalidate(paths);
+  await edgePurge(pathsOf(paths));
   return doc;
 };
 
 /** Globals (nav, settings) live in the root layout → revalidate the whole tree. */
 export const revalidateLayout: GlobalAfterChangeHook = async ({ doc }) => {
   await revalidate([["/", "layout"]]);
+  await edgePurge([], true); // header/footer change → purge the whole zone
   return doc;
 };

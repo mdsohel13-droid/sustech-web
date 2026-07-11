@@ -17,7 +17,16 @@ export function pageMetadata(page: Page | null, settings: SiteSetting, path: str
       : settings.defaultTitle || settings.companyName);
   const description =
     seo?.description || settings.defaultDescription || settings.description || undefined;
-  const og = mediaUrl(seo?.image) || mediaUrl(settings.ogImage) || "/og-default.jpg";
+  // Prefer an explicit image; otherwise generate a titled, on-brand card per page
+  // (plan 3·4) rather than falling back to one static jpg for every page.
+  const ogTitle =
+    page?.title && page.slug !== "home"
+      ? page.title
+      : settings.defaultTitle || settings.companyName;
+  const og =
+    mediaUrl(seo?.image) ||
+    mediaUrl(settings.ogImage) ||
+    `/api/og?title=${encodeURIComponent(ogTitle)}`;
   const noindex = !indexable || Boolean(seo?.noindex);
 
   return {

@@ -34,11 +34,20 @@ export async function generateMetadata({
   const service = await getServiceBySlug(slug);
   if (!service) return {};
   const noindex = process.env.SITE_INDEXABLE !== "true";
+  const desc = service.seo?.description ?? service.summary;
+  const ogUrl = `/api/og?title=${encodeURIComponent(service.title)}&section=Service${desc ? `&description=${encodeURIComponent(desc.slice(0, 120))}` : ""}`;
   return {
     title: { absolute: service.seo?.title ?? `${service.title} · Sustech Technology Ltd` },
-    description: service.seo?.description ?? service.summary,
+    description: desc,
     alternates: { canonical: `/services/${service.slug}` },
     robots: noindex ? { index: false, follow: false } : undefined,
+    openGraph: {
+      title: service.title,
+      description: desc ?? undefined,
+      url: `/services/${service.slug}`,
+      images: [{ url: ogUrl, width: 1200, height: 630, alt: service.title }],
+    },
+    twitter: { card: "summary_large_image" },
   };
 }
 

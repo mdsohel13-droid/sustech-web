@@ -42,6 +42,7 @@ export async function generateMetadata({
   const item = await getNewsItemBySlug(slug);
   if (!item) return {};
   const noindex = process.env.SITE_INDEXABLE !== "true";
+  const ogUrl = `/api/og?title=${encodeURIComponent(item.title)}&section=Insight${item.summary ? `&description=${encodeURIComponent(item.summary.slice(0, 120))}` : ""}`;
   return {
     title: { absolute: `${item.title} · Sustech Technology Ltd` },
     description: item.summary ?? undefined,
@@ -49,8 +50,13 @@ export async function generateMetadata({
     robots: noindex ? { index: false, follow: false } : undefined,
     openGraph: {
       type: "article",
+      title: item.title,
+      description: item.summary ?? undefined,
+      url: `/news/${item.slug}`,
       publishedTime: item.publishedDate ?? undefined,
+      images: [{ url: ogUrl, width: 1200, height: 630, alt: item.title }],
     },
+    twitter: { card: "summary_large_image" },
   };
 }
 

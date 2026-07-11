@@ -27,11 +27,13 @@ test.describe("SEO / GEO endpoints", () => {
     expect(body).toContain("## Sectors");
   });
 
-  test("pages carry a default Open Graph image", async ({ page }) => {
+  test("pages carry an Open Graph image (dynamic card or explicit upload)", async ({ page }) => {
     await page.goto("/");
+    // Pages now default to a titled, on-brand /api/og card (plan 3·4); an explicit
+    // seo.image / settings.ogImage upload — or the static jpg — is also valid.
     await expect(page.locator('meta[property="og:image"]').first()).toHaveAttribute(
       "content",
-      /og-default\.jpg/,
+      /\/api\/og\?|og-default\.jpg|\/media\//,
     );
   });
 

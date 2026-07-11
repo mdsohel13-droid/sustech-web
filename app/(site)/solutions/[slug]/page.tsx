@@ -51,11 +51,20 @@ export async function generateMetadata({
   const sector = await getSectorBySlug(slug);
   if (!sector) return {};
   const noindex = process.env.SITE_INDEXABLE !== "true";
+  const desc = sector.seo?.description ?? sector.summary;
+  const ogUrl = `/api/og?title=${encodeURIComponent(sector.title)}&section=Sector+solution${desc ? `&description=${encodeURIComponent(desc.slice(0, 120))}` : ""}`;
   return {
     title: { absolute: sector.seo?.title ?? `${sector.title} · Sustech Technology Ltd` },
-    description: sector.seo?.description ?? sector.summary,
+    description: desc,
     alternates: { canonical: `/solutions/${sector.slug}` },
     robots: noindex ? { index: false, follow: false } : undefined,
+    openGraph: {
+      title: sector.title,
+      description: desc ?? undefined,
+      url: `/solutions/${sector.slug}`,
+      images: [{ url: ogUrl, width: 1200, height: 630, alt: sector.title }],
+    },
+    twitter: { card: "summary_large_image" },
   };
 }
 

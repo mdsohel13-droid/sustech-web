@@ -13,11 +13,11 @@
 #     every deploy reflect current CMS content immediately.
 #
 # Usage:
-#   ./scripts/deploy.sh [branch]      # default branch: feat/ui-improvements
+#   ./scripts/deploy.sh [branch]      # default branch: main
 #
 set -euo pipefail
 
-BRANCH="${1:-feat/ui-improvements}"
+BRANCH="${1:-main}"
 APP="sustech-web"
 
 echo "==> [1/6] Fetch + checkout origin/$BRANCH"

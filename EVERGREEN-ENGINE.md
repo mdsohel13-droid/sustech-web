@@ -33,6 +33,11 @@ your tap. `AUTO_PUBLISH_ENABLED` stays `false`. Nothing invents figures.
   descriptions on published docs, and unfinished sector funnels — returns a
   structured report for the weekly digest. `lib/content-health.ts` (pure checks +
   runner; changes nothing).
+- **Edge-cache purge on publish.** Cloudflare caches the HTML, so after Next
+  revalidates a page the hook also purges the CDN edge — the change is visible
+  immediately instead of after the CDN TTL. `lib/cloudflare-purge.ts`; no-op unless
+  `CLOUDFLARE_ZONE_ID` + `CLOUDFLARE_API_TOKEN` are set (token needs Cache-Purge on
+  the zone). A global/nav change purges the whole zone.
 - **Sitemap + llms.txt freshness.** `app/sitemap.ts` / `app/llms.txt` are dynamic
   (ISR, 1h) and the revalidate hook refreshes them on any content change.
 - **Fallback heartbeat / gap detection.** `GET /api/cron/nightly` (`CRON_SECRET`,

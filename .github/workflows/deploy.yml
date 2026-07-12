@@ -56,7 +56,14 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p ~/.ssh && chmod 700 ~/.ssh
-          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          # Write the deploy key robustly: accept either a raw PEM key or a
+          # base64-encoded one, and strip CR so a CRLF-pasted secret still parses
+          # (CRLF is the usual cause of "error in libcrypto").
+          if printf '%s' "$DEPLOY_SSH_KEY" | base64 -d 2>/dev/null | grep -q "PRIVATE KEY"; then
+            printf '%s' "$DEPLOY_SSH_KEY" | base64 -d > ~/.ssh/deploy_key
+          else
+            printf '%s\n' "$DEPLOY_SSH_KEY" | tr -d '\r' > ~/.ssh/deploy_key
+          fi
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -p "${DEPLOY_PORT:-22}" -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null
           echo "==> Deploying main to $DEPLOY_HOST:$DEPLOY_PATH"

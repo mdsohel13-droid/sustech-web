@@ -28,6 +28,9 @@ const eslintConfig = defineConfig([
     "scripts/**",
     // Payload-generated DB migrations — run by Payload's own tooling, not the app build
     "migrations/**",
+    // n8n Code-node snippets + operator runbooks. These execute inside n8n (its own
+    // CJS sandbox), never in our bundle, so app lint rules don't apply to them.
+    "marketing/**",
   ]),
 ]);
 

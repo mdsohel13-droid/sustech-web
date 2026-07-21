@@ -1,0 +1,75 @@
+SUSTECH — HERMES CUTOVER INSTRUCTIONS
+=====================================
+Context: new Next.js site = VPS 93.127.160.183 (live as beta). www/apex = OLD
+Laravel site (intentional, until cutover). Leads: β-CMS -> n8n -> ERP + GrowthOS.
+
+────────────────────────────────────────────────────────
+PHASE A — finish trial validation (DO NOW)
+────────────────────────────────────────────────────────
+1. beta .env — stop double-posting to GrowthOS + keep beta out of Google:
+     LEADENGINE_EVENTS_URL=            # <- empty it (n8n owns GrowthOS now)
+     SITE_INDEXABLE=false              # <- currently true; beta must stay noindex
+   then: pnpm build && pm2 restart sustech-web --update-env
+
+2. Resend dashboard -> verify domain sustechltd.com (add the TXT/DKIM records).
+   (Needed for the owner-email hop. Keys already set: RESEND_API_KEY,
+    LEAD_ALERT_EMAIL, LEAD_ALERT_FROM.)
+
+3. Submit ONE test RFQ on https://beta.sustechltd.com/request-quote
+   Then report these 5 hops:
+     1) β /admin -> Leads        : new lead, scored, source=rfq
+     2) n8n executions           : output {"ok":true,"erp":200,"growth":200}
+     3) ERP customers            : new customer, all fields
+     4) GrowthOS leads           : lead arrived (ONE entry, after step 1)
+     5) owner inbox              : email (only if Resend domain verified)
+
+────────────────────────────────────────────────────────
+PHASE B — pre-cutover prep (before flipping DNS)
+────────────────────────────────────────────────────────
+4. Apply the 301 redirect map (marketing/old-site-redirects.md) on the VPS nginx,
+   ABOVE `location /`. Verify the new service slugs match the live CMS first.
+5. Export the FULL old-site URL list (old DB / server logs / old sitemap) and send
+   to dev to extend the redirect map beyond the homepage links.
+6. Google Search Console + Bing: register ownership of www.sustechltd.com now.
+   DO NOT submit the sitemap yet (www still serves the old site).
+7. One day before cutover: lower DNS TTL on apex + www to ~300s (fast rollback).
+
+────────────────────────────────────────────────────────
+PHASE C — the cutover (switch www -> new site; on the agreed date)
+────────────────────────────────────────────────────────
+8. DNS: point sustechltd.com + www.sustechltd.com  A -> 93.127.160.183
+   (turn OFF the Hostinger CDN/proxy for these so it stops serving the old app).
+9. On the VPS:
+     certbot --nginx -d sustechltd.com -d www.sustechltd.com
+   Redirect apex -> www (301).
+10. beta/prod .env:
+     NEXT_PUBLIC_SERVER_URL=https://www.sustechltd.com
+     SITE_URL=https://www.sustechltd.com
+     SITE_INDEXABLE=true
+   then: pnpm build && pm2 restart sustech-web --update-env
+   (Enable HSTS only AFTER both hosts serve clean HTTPS.)
+11. Verify the PUBLIC host (not the VPS origin):
+     curl -I https://www.sustechltd.com/            # no laravel_session cookie
+     curl https://www.sustechltd.com/robots.txt     # GPTBot/ClaudeBot/Googlebot + Sitemap + Host
+     curl https://www.sustechltd.com/sitemap.xml     # real XML (not a 404 page)
+     curl -s https://www.sustechltd.com/single/service/page/8   # 301 -> /services/solar-renewable
+12. GSC + Bing: submit sitemap.xml. Fire IndexNow for the new site.
+
+────────────────────────────────────────────────────────
+PHASE D — post-cutover (first week)
+────────────────────────────────────────────────────────
+13. Wire the content n8n workflows: 04:00 source-watch, hourly sweep,
+    08:00 daily report + the Resend `delivered` webhook.
+14. Watch: n8n execution error rate, GSC Pages coverage, no 404 spikes.
+15. KEEP AUTO_PUBLISH_ENABLED=false until >= 2 weeks of shadow-mode logs reviewed.
+
+────────────────────────────────────────────────────────
+REFERENCE VALUES
+────────────────────────────────────────────────────────
+VPS                : 93.127.160.183
+n8n webhook        : https://n8n.sustechltd.com/webhook/lead-to-erp
+ERP ingest         : http://127.0.0.1:3010/api/leads/from-web   (Bearer ERP_WEB_INGEST_KEY)
+GrowthOS leads     : https://growth.sustechltd.com/api/v1/public/leads
+n8n fan-out code   : marketing/n8n/lead-fanout.code.js
+redirect map       : marketing/old-site-redirects.md
+NODE_FUNCTION_ALLOW_BUILTIN = crypto,http,https

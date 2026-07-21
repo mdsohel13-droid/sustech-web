@@ -105,6 +105,12 @@ export async function captureGatedLead(
     score: result.score,
     created: result.created,
   });
+  // Which asset actually pulls leads — the lead_captured event alone can't tell
+  // us that, and sector lead magnets (plan 3·1) are measured by segment + asset.
+  serverCapture("gated_asset_downloaded", {
+    asset: resource.slug ?? String(resource.id),
+    segment: input.segment ?? "other",
+  });
 
   const token = signDownload(resource.id);
   const downloadUrl = token

@@ -21,8 +21,9 @@
  *   />
  */
 
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { AlertTriangle, RefreshCw } from "lucide-react";
+import { capture } from "@/lib/analytics/client";
 import { EmailReportGate, type ReportPayload } from "./email-report-gate";
 
 interface CalculatorShellProps {
@@ -53,6 +54,26 @@ export function CalculatorShell({
   onReset,
   reportPayload,
 }: CalculatorShellProps) {
+  // Calculator funnel (plan 3·4). Calculators run entirely in the browser, so
+  // unlike the RFQ/chat events these can only be measured client-side. Each fires
+  // at most once per mount: "started" on the first real input change (a view is
+  // already covered by $pageview), "completed" when results first appear.
+  const startedRef = useRef(false);
+  const completedRef = useRef(false);
+
+  useEffect(() => {
+    if (hasResults && !completedRef.current) {
+      completedRef.current = true;
+      capture("calculator_completed", { calculator: title });
+    }
+  }, [hasResults, title]);
+
+  const markStarted = () => {
+    if (startedRef.current) return;
+    startedRef.current = true;
+    capture("calculator_started", { calculator: title });
+  };
+
   return (
     <div className="w-full">
       {/* ── Header ──────────────────────────────────────────────────────── */}
@@ -67,7 +88,14 @@ export function CalculatorShell({
       <div className="grid gap-8 lg:grid-cols-[1fr_1fr]">
         {/* Inputs */}
         <div>
-          <div className="bg-surface-2 border-border rounded-xl border p-6">{inputs}</div>
+          {/* onChangeCapture catches any input change from the children (capture
+              phase), so every calculator reports engagement without its own wiring. */}
+          <div
+            className="bg-surface-2 border-border rounded-xl border p-6"
+            onChangeCapture={markStarted}
+          >
+            {inputs}
+          </div>
 
           {hasResults && (
             <button

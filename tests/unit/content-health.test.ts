@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  checkConfig,
   checkMediaAlt,
   checkSectorFunnel,
   checkSeoDescription,
@@ -44,6 +45,15 @@ describe("content-health checks", () => {
     expect(issues[0]?.problem).toContain("proof figures");
     expect(issues[0]?.problem).toContain("lead magnet");
     expect(issues[0]?.problem).not.toContain("FAQ");
+  });
+
+  it("flags silently-disabled analytics when the PostHog key is missing", () => {
+    expect(checkConfig({ NEXT_PUBLIC_POSTHOG_KEY: "phc_abc" })).toEqual([]);
+    const issues = checkConfig({});
+    expect(issues).toHaveLength(1);
+    expect(issues[0]?.title).toBe("Analytics disabled");
+    expect(issues[0]?.problem).toContain("NEXT_PUBLIC_POSTHOG_KEY");
+    expect(issues[0]?.problem).toContain("REBUILD");
   });
 
   it("summarise groups by problem prefix", () => {

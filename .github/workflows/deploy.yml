@@ -11,7 +11,7 @@ name: Deploy (production)
 #   DEPLOY_PORT      ssh port                     (e.g. 22)
 #   DEPLOY_PATH      repo path on the VPS         (e.g. /var/www/sustech-web)
 #   DEPLOY_SSH_KEY   PRIVATE key of a dedicated deploy keypair (its PUBLIC key is
-#                    in the VPS user's ~/.ssh/authorized_keys)
+#                    in the VPS user's ~/.ssh/authorized_keys). Raw PEM or base64.
 # NOTE: the APP's runtime secrets (DATABASE_URI, PAYLOAD_SECRET, ANTHROPIC/OPENROUTER
 # key, CLOUDFLARE_*, INDEXNOW_KEY, HERMES_AGENT_SECRET, …) live in the VPS .env and
 # are NOT needed here — GitHub only needs SSH access to run the deploy script.
@@ -45,6 +45,51 @@ jobs:
             echo "configured=true" >> "$GITHUB_OUTPUT"
           fi
 
+      # Secrets often lose their line breaks when pasted. Accept the key in any of
+      # the three shapes we see in practice and normalise to a valid PEM file:
+      #   1. base64-encoded (recommended — immune to newline mangling)
+      #   2. proper multi-line PEM
+      #   3. single-line PEM whose newlines became spaces → rebuild the wrapping
+      # Then prove it parses and print only the FINGERPRINT (never the key), so a
+      # mismatch against the VPS authorized_keys is immediately visible.
+      - name: Prepare + validate deploy key
+        if: steps.cfg.outputs.configured == 'true'
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          KEY_FILE=~/.ssh/deploy_key
+
+          if printf '%s' "$DEPLOY_SSH_KEY" | tr -d '\r\n ' | base64 -d 2>/dev/null | grep -q "PRIVATE KEY"; then
+            echo "Detected base64-encoded key."
+            printf '%s' "$DEPLOY_SSH_KEY" | tr -d '\r\n ' | base64 -d > "$KEY_FILE"
+          elif [ "$(printf '%s' "$DEPLOY_SSH_KEY" | grep -c '')" -gt 2 ]; then
+            echo "Detected multi-line PEM key."
+            printf '%s\n' "$DEPLOY_SSH_KEY" | tr -d '\r' > "$KEY_FILE"
+          elif printf '%s' "$DEPLOY_SSH_KEY" | grep -q "BEGIN .*PRIVATE KEY"; then
+            echo "Detected single-line PEM (newlines flattened) — rebuilding wrapping."
+            HDR=$(printf '%s' "$DEPLOY_SSH_KEY" | sed -E 's/.*(-----BEGIN [A-Z ]*PRIVATE KEY-----).*/\1/')
+            FTR=$(printf '%s' "$DEPLOY_SSH_KEY" | sed -E 's/.*(-----END [A-Z ]*PRIVATE KEY-----).*/\1/')
+            BODY=$(printf '%s' "$DEPLOY_SSH_KEY" \
+              | sed -E 's/.*-----BEGIN [A-Z ]*PRIVATE KEY-----//; s/-----END [A-Z ]*PRIVATE KEY-----.*//' \
+              | tr -d ' \t\r\n')
+            { printf '%s\n' "$HDR"; printf '%s' "$BODY" | fold -w 70; printf '\n%s\n' "$FTR"; } > "$KEY_FILE"
+          else
+            echo "Unrecognised key shape — writing as-is."
+            printf '%s\n' "$DEPLOY_SSH_KEY" | tr -d '\r' > "$KEY_FILE"
+          fi
+          chmod 600 "$KEY_FILE"
+
+          if ! ssh-keygen -y -f "$KEY_FILE" > ~/.ssh/deploy_key.pub 2>/tmp/keyerr; then
+            echo "::error::DEPLOY_SSH_KEY could not be parsed as a private key."
+            echo "Fix: on the VPS run  base64 -w0 ~/.ssh/gha_deploy  and paste that single line as the DEPLOY_SSH_KEY secret."
+            sed -e 's/^/  /' /tmp/keyerr
+            exit 1
+          fi
+          echo "Key parsed OK. Fingerprint (must match the VPS authorized_keys entry):"
+          ssh-keygen -lf ~/.ssh/deploy_key.pub
+
       - name: Deploy over SSH
         if: steps.cfg.outputs.configured == 'true'
         env:
@@ -52,21 +97,11 @@ jobs:
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
         run: |
           set -euo pipefail
-          mkdir -p ~/.ssh && chmod 700 ~/.ssh
-          # Write the deploy key robustly: accept either a raw PEM key or a
-          # base64-encoded one, and strip CR so a CRLF-pasted secret still parses
-          # (CRLF is the usual cause of "error in libcrypto").
-          if printf '%s' "$DEPLOY_SSH_KEY" | base64 -d 2>/dev/null | grep -q "PRIVATE KEY"; then
-            printf '%s' "$DEPLOY_SSH_KEY" | base64 -d > ~/.ssh/deploy_key
-          else
-            printf '%s\n' "$DEPLOY_SSH_KEY" | tr -d '\r' > ~/.ssh/deploy_key
-          fi
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -p "${DEPLOY_PORT:-22}" -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          PORT="${DEPLOY_PORT:-22}"
+          ssh-keyscan -p "$PORT" -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null
           echo "==> Deploying main to $DEPLOY_HOST:$DEPLOY_PATH"
-          ssh -i ~/.ssh/deploy_key -p "${DEPLOY_PORT:-22}" \
-            -o StrictHostKeyChecking=yes "$DEPLOY_USER@$DEPLOY_HOST" \
+          ssh -i ~/.ssh/deploy_key -p "$PORT" \
+            -o StrictHostKeyChecking=yes -o BatchMode=yes "$DEPLOY_USER@$DEPLOY_HOST" \
             "bash -lc 'cd \"$DEPLOY_PATH\" && bash scripts/deploy.sh main'"

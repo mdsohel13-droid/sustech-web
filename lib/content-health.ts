@@ -93,6 +93,29 @@ export function checkSectorFunnel(sectors: SectorDoc[]): HealthIssue[] {
   return issues;
 }
 
+/**
+ * Runtime configuration gaps that fail SILENTLY in production. Analytics is the
+ * dangerous one: every capture() is a no-op unless NEXT_PUBLIC_POSTHOG_KEY is set
+ * at BUILD time, so the whole funnel can read as "no traffic" instead of
+ * "not recording". Surfacing it weekly means it can't go unnoticed again.
+ */
+export function checkConfig(env: Record<string, string | undefined>): HealthIssue[] {
+  const issues: HealthIssue[] = [];
+  if (!env.NEXT_PUBLIC_POSTHOG_KEY) {
+    issues.push({
+      collection: "config",
+      id: "analytics",
+      title: "Analytics disabled",
+      path: "/admin",
+      problem:
+        "config: NEXT_PUBLIC_POSTHOG_KEY is not set — ALL analytics (pageviews, CTA, " +
+        "calculator, RFQ, chat, lead) are silently no-ops. Set it in the server .env and " +
+        "REBUILD (NEXT_PUBLIC_* is baked in at build time).",
+    });
+  }
+  return issues;
+}
+
 export interface HealthReport {
   checkedAt: string;
   total: number;
@@ -110,7 +133,7 @@ export function summarise(issues: HealthIssue[]): HealthReport {
 }
 
 export async function runContentHealthAudit(): Promise<HealthReport> {
-  const issues: HealthIssue[] = [];
+  const issues: HealthIssue[] = [...checkConfig(process.env)];
   try {
     // Lazy import so the pure checks above stay unit-testable without loading the
     // Payload config (which needs the Next/runtime alias).

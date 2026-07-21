@@ -11,13 +11,18 @@ export const ANALYTICS_EVENTS = {
   CHAT_STARTED: "chat_started",
   CHAT_LEAD_SUBMITTED: "chat_lead_submitted",
   LEAD_CAPTURED: "lead_captured",
-  CALCULATOR_COMPLETED: "calculator_completed",
   REPORT_EMAIL_REQUESTED: "report_email_requested",
   GATED_ASSET_DOWNLOADED: "gated_asset_downloaded",
-  /** Client-side (engagement) */
+  /**
+   * Client-side (engagement). The calculators run entirely in the browser, so
+   * their funnel can only be measured here — both fire from CalculatorShell, at
+   * most once per mount. `cta_clicked` carries the `cta` (and `segment` on
+   * sector pages) so conversion can be read per sector.
+   */
   PAGEVIEW: "$pageview",
   CTA_CLICKED: "cta_clicked",
   CALCULATOR_STARTED: "calculator_started",
+  CALCULATOR_COMPLETED: "calculator_completed",
 } as const;
 
 export type AnalyticsEvent = (typeof ANALYTICS_EVENTS)[keyof typeof ANALYTICS_EVENTS];

@@ -13,11 +13,11 @@
 #     every deploy reflect current CMS content immediately.
 #
 # Usage:
-#   ./scripts/deploy.sh [branch]      # default branch: feat/ui-improvements
+#   ./scripts/deploy.sh [branch]      # default branch: main
 #
 set -euo pipefail
 
-BRANCH="${1:-feat/ui-improvements}"
+BRANCH="${1:-main}"
 APP="sustech-web"
 
 echo "==> [1/6] Fetch + checkout origin/$BRANCH"
@@ -42,5 +42,11 @@ pm2 status "$APP"
 
 sleep 6   # give the app a moment to come up
 pnpm health   # non-zero exit here = something is red; investigate before walking away
+
+# A deploy changes the rendered HTML but never fires the CMS revalidate hook, so
+# the CDN would keep serving the previous build until its TTL expires. Best-effort
+# and never fatal — the site is already live and healthy at this point.
+echo "==> Purge CDN edge cache (best-effort)"
+pnpm purge:cdn || true
 
 echo "==> Deploy complete."

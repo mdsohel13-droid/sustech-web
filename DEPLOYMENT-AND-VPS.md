@@ -160,8 +160,27 @@ exists.
 **Every deploy** (use the script — it runs migrate before build):
 
 ```bash
-./scripts/deploy.sh feat/ui-improvements
+./scripts/deploy.sh main       # default branch is main
 ```
+
+### Continuous deployment (GitHub Actions)
+
+`.github/workflows/deploy.yml` runs the above script automatically on every push
+to `main` (a merged, CI-green PR). Manual runs: Actions tab → "Deploy (production)"
+→ Run workflow. It only needs SSH access — the app's runtime secrets stay in the
+VPS `.env`, never in GitHub. One-time setup — add these repo secrets
+(Settings → Secrets and variables → Actions):
+
+| Secret | Value |
+|--------|-------|
+| `DEPLOY_HOST` | VPS IP / hostname |
+| `DEPLOY_USER` | ssh user that owns the app |
+| `DEPLOY_PORT` | ssh port (usually 22) |
+| `DEPLOY_PATH` | repo path on the VPS |
+| `DEPLOY_SSH_KEY` | private key of a **dedicated deploy keypair** (public key in the VPS user's `~/.ssh/authorized_keys`) |
+
+Until the secrets exist the workflow no-ops (it doesn't fail). Generate a
+dedicated key — never reuse a personal key: `ssh-keygen -t ed25519 -C sustech-deploy -f deploy_key -N ""`.
 
 **When you change a collection/global/field**, ship a migration in the same change:
 

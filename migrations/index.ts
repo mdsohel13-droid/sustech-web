@@ -17,6 +17,7 @@ import * as migration_20260613_100000_segments_gated_suggestions from "./2026061
 import * as migration_20260613_120000_pipeline_approval from "./20260613_120000_pipeline_approval";
 import * as migration_20260613_140000_daily_reports from "./20260613_140000_daily_reports";
 import * as migration_20260613_160000_calculatorembed_calctype from "./20260613_160000_calculatorembed_calctype";
+import * as migration_20260626_170000_sector_funnel from "./20260626_170000_sector_funnel";
 
 export const migrations = [
   {
@@ -113,5 +114,10 @@ export const migrations = [
     up: migration_20260613_160000_calculatorembed_calctype.up,
     down: migration_20260613_160000_calculatorembed_calctype.down,
     name: "20260613_160000_calculatorembed_calctype",
+  },
+  {
+    up: migration_20260626_170000_sector_funnel.up,
+    down: migration_20260626_170000_sector_funnel.down,
+    name: "20260626_170000_sector_funnel",
   },
 ];

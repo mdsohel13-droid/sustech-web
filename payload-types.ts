@@ -945,6 +945,46 @@ export interface Sector {
    */
   services?: (number | Service)[] | null;
   /**
+   * Quantified proof for THIS sector, e.g. 12 · factories powered, 4.2 · MWp on textile roofs. Any figure left at 0 is hidden automatically — the page never shows '0'.
+   */
+  proofStats?:
+    | {
+        value: number;
+        /**
+         * e.g. +, MWp, %
+         */
+        suffix?: string | null;
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * 1–2 testimonials to feature on this sector page.
+   */
+  testimonials?: (number | Testimonial)[] | null;
+  /**
+   * Optional gated download for this sector (e.g. an RMG electrical-compliance checklist). Pick a knowledge resource that has a file + a gate; visitors exchange their email to download it, which captures a sector-tagged lead.
+   */
+  leadMagnet?: (number | null) | KnowledgeResource;
+  /**
+   * 4–6 sector questions & answers. Rendered on the page AND emitted as FAQPage structured data so AI answer engines can cite Sustech.
+   */
+  faqs?:
+    | {
+        question: string;
+        answer: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Optional — overrides the default CTA heading.
+   */
+  ctaHeading?: string | null;
+  /**
+   * Optional — overrides the default CTA sub-text.
+   */
+  ctaLede?: string | null;
+  /**
    * Search & social. Leave blank to use the site defaults.
    */
   seo?: {
@@ -966,6 +1006,95 @@ export interface Sector {
     image?: (number | null) | Media;
     noindex?: boolean | null;
   };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonials".
+ */
+export interface Testimonial {
+  id: number;
+  quote: string;
+  person: string;
+  role?: string | null;
+  company: string;
+  /**
+   * Optional company logo.
+   */
+  logo?: (number | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Calculators and sample documents shown in the Knowledge Hub. Toggle enabled/disabled without a code deploy.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "knowledge-resources".
+ */
+export interface KnowledgeResource {
+  id: number;
+  title: string;
+  /**
+   * The URL path segment. Auto-filled from the title — edit only if you must.
+   */
+  slug: string;
+  /**
+   * Calculator = built-in interactive tool. Sample = downloadable document or link.
+   */
+  type: 'calculator' | 'sample';
+  /**
+   * Short description shown on the resource card (1–2 sentences).
+   */
+  description?: string | null;
+  /**
+   * Display order within the tab. Lower numbers appear first.
+   */
+  order?: number | null;
+  /**
+   * Tick to show in the Knowledge Hub. Untick to hide without deleting.
+   */
+  enabled?: boolean | null;
+  /**
+   * Which built-in calculator to render. New calc types require a developer deploy.
+   */
+  calcType?:
+    | (
+        | 'solar-roi'
+        | 'earthing-resistance'
+        | 'cable-sizing'
+        | 'lightning-zone'
+        | 'solar-yield'
+        | 'diesel-vs-bess'
+        | 'atm-ups-sizing'
+        | 'outage-cost'
+      )
+    | null;
+  /**
+   * Upload PDF, DOCX, or XLSX directly. If the file is large or already hosted elsewhere, use the External URL field below instead.
+   */
+  fileUpload?: (number | null) | Media;
+  /**
+   * Google Drive link, SharePoint URL, or any direct download link. Leave blank if you uploaded the file above.
+   */
+  fileUrl?: string | null;
+  /**
+   * Human-readable size, e.g. "420 KB" or "1.2 MB".
+   */
+  fileSize?: string | null;
+  fileFormat?: ('pdf' | 'docx' | 'xlsx' | 'image' | 'zip' | 'other') | null;
+  /**
+   * View opens the file in the browser (PDFs and images render inline); Download saves it to the visitor's device. Choose one or both.
+   */
+  openMode?: ('both' | 'view' | 'download') | null;
+  /**
+   * Text on the download button. Default: "Download".
+   */
+  downloadLabel?: string | null;
+  /**
+   * Gated assets stay open & indexable (summary visible); only the file download is behind a short form that captures a consented lead and a signed 24-hour link.
+   */
+  gateLevel?: ('open' | 'email' | 'email-company') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1922,23 +2051,6 @@ export interface TestimonialsBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "testimonials".
- */
-export interface Testimonial {
-  id: number;
-  quote: string;
-  person: string;
-  role?: string | null;
-  company: string;
-  /**
-   * Optional company logo.
-   */
-  logo?: (number | null) | Media;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "TeamGridBlock".
  */
 export interface TeamGridBlock {
@@ -2304,7 +2416,7 @@ export interface CalculatorEmbedBlock {
   appearance?: ('default' | 'muted' | 'dark') | null;
   body?: string | null;
   /**
-   * Embed a live, interactive calculator inline (it captures leads via the report gate). Leave empty to show a CTA card linking to /tools instead.
+   * Embed a live, interactive calculator inline (it captures leads via the report gate). Leave empty to show a CTA card linking to the Knowledge calculators hub instead.
    */
   calcType?:
     | (
@@ -2462,78 +2574,6 @@ export interface GatedAssetBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'gatedAsset';
-}
-/**
- * Calculators and sample documents shown in the Knowledge Hub. Toggle enabled/disabled without a code deploy.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "knowledge-resources".
- */
-export interface KnowledgeResource {
-  id: number;
-  title: string;
-  /**
-   * The URL path segment. Auto-filled from the title — edit only if you must.
-   */
-  slug: string;
-  /**
-   * Calculator = built-in interactive tool. Sample = downloadable document or link.
-   */
-  type: 'calculator' | 'sample';
-  /**
-   * Short description shown on the resource card (1–2 sentences).
-   */
-  description?: string | null;
-  /**
-   * Display order within the tab. Lower numbers appear first.
-   */
-  order?: number | null;
-  /**
-   * Tick to show in the Knowledge Hub. Untick to hide without deleting.
-   */
-  enabled?: boolean | null;
-  /**
-   * Which built-in calculator to render. New calc types require a developer deploy.
-   */
-  calcType?:
-    | (
-        | 'solar-roi'
-        | 'earthing-resistance'
-        | 'cable-sizing'
-        | 'lightning-zone'
-        | 'solar-yield'
-        | 'diesel-vs-bess'
-        | 'atm-ups-sizing'
-        | 'outage-cost'
-      )
-    | null;
-  /**
-   * Upload PDF, DOCX, or XLSX directly. If the file is large or already hosted elsewhere, use the External URL field below instead.
-   */
-  fileUpload?: (number | null) | Media;
-  /**
-   * Google Drive link, SharePoint URL, or any direct download link. Leave blank if you uploaded the file above.
-   */
-  fileUrl?: string | null;
-  /**
-   * Human-readable size, e.g. "420 KB" or "1.2 MB".
-   */
-  fileSize?: string | null;
-  fileFormat?: ('pdf' | 'docx' | 'xlsx' | 'image' | 'zip' | 'other') | null;
-  /**
-   * View opens the file in the browser (PDFs and images render inline); Download saves it to the visitor's device. Choose one or both.
-   */
-  openMode?: ('both' | 'view' | 'download') | null;
-  /**
-   * Text on the download button. Default: "Download".
-   */
-  downloadLabel?: string | null;
-  /**
-   * Gated assets stay open & indexable (summary visible); only the file download is behind a short form that captures a consented lead and a signed 24-hour link.
-   */
-  gateLevel?: ('open' | 'email' | 'email-company') | null;
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -4815,6 +4855,25 @@ export interface SectorsSelect<T extends boolean = true> {
   summary?: T;
   challenges?: T;
   services?: T;
+  proofStats?:
+    | T
+    | {
+        value?: T;
+        suffix?: T;
+        label?: T;
+        id?: T;
+      };
+  testimonials?: T;
+  leadMagnet?: T;
+  faqs?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  ctaHeading?: T;
+  ctaLede?: T;
   seo?:
     | T
     | {

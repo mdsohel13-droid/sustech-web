@@ -47,6 +47,32 @@ export async function GET(req: NextRequest): Promise<ImageResponse> {
         }}
       />
 
+      {/* Wordmark */}
+      <div style={{ display: "flex", alignItems: "center", marginBottom: 40 }}>
+        <div style={{ width: 16, height: 16, borderRadius: 8, backgroundColor: "#FCC200" }} />
+        <span
+          style={{
+            marginLeft: 14,
+            fontSize: 30,
+            fontWeight: 800,
+            letterSpacing: "-0.02em",
+            color: "#ffffff",
+          }}
+        >
+          SUSTECH
+        </span>
+        <span
+          style={{
+            marginLeft: 12,
+            fontSize: 16,
+            letterSpacing: "0.28em",
+            color: "rgba(255,255,255,0.7)",
+          }}
+        >
+          TECHNOLOGY LTD
+        </span>
+      </div>
+
       {/* Green accent bar */}
       <div
         style={{
@@ -134,6 +160,22 @@ export async function GET(req: NextRequest): Promise<ImageResponse> {
           Sustech Technology Ltd
         </span>
         <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 18 }}>sustechltd.com</span>
+      </div>
+
+      {/* Tri-colour brand rule */}
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          bottom: 0,
+          width: "100%",
+          height: 10,
+          display: "flex",
+        }}
+      >
+        <div style={{ flex: 3, backgroundColor: "#0073CF" }} />
+        <div style={{ flex: 1, backgroundColor: "#32CD32" }} />
+        <div style={{ flex: 1, backgroundColor: "#FCC200" }} />
       </div>
     </div>,
     {

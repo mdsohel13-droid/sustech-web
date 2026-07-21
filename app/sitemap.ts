@@ -40,6 +40,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: url("/news"), changeFrequency: "daily", priority: 0.7 },
     { url: url("/request-quote"), changeFrequency: "yearly", priority: 0.9 },
     { url: url("/contact"), changeFrequency: "yearly", priority: 0.5 },
+    { url: url("/privacy"), changeFrequency: "yearly", priority: 0.2 },
   ];
 
   // Published CMS pages (capabilities, about-when-published, etc.) — skip home (already above).

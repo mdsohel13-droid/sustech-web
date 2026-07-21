@@ -1,0 +1,111 @@
+name: Deploy (production)
+
+# Continuous deployment. On every push to `main` (i.e. a merged, CI-green PR —
+# branch protection requires the `verify` check to pass before merge), SSH to the
+# VPS and run the existing scripts/deploy.sh (migrate → build → restart → health).
+# Also runnable on demand from the Actions tab.
+#
+# Required repo secrets (Settings → Secrets and variables → Actions):
+#   DEPLOY_HOST      VPS IP / hostname            (e.g. 93.127.160.183)
+#   DEPLOY_USER      ssh user that owns the app   (e.g. deploy)
+#   DEPLOY_PORT      ssh port                     (e.g. 22)
+#   DEPLOY_PATH      repo path on the VPS         (e.g. /var/www/sustech-web)
+#   DEPLOY_SSH_KEY   PRIVATE key of a dedicated deploy keypair (its PUBLIC key is
+#                    in the VPS user's ~/.ssh/authorized_keys). Raw PEM or base64.
+# NOTE: the APP's runtime secrets (DATABASE_URI, PAYLOAD_SECRET, ANTHROPIC/OPENROUTER
+# key, CLOUDFLARE_*, INDEXNOW_KEY, HERMES_AGENT_SECRET, …) live in the VPS .env and
+# are NOT needed here — GitHub only needs SSH access to run the deploy script.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check CD is configured
+        id: cfg
+        env:
+          HOST: ${{ secrets.DEPLOY_HOST }}
+          KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          if [ -z "$HOST" ] || [ -z "$KEY" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::CD secrets not set yet — skipping deploy. Add DEPLOY_* secrets to enable."
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Secrets often lose their line breaks when pasted. Accept the key in any of
+      # the three shapes we see in practice and normalise to a valid PEM file:
+      #   1. base64-encoded (recommended — immune to newline mangling)
+      #   2. proper multi-line PEM
+      #   3. single-line PEM whose newlines became spaces → rebuild the wrapping
+      # Then prove it parses and print only the FINGERPRINT (never the key), so a
+      # mismatch against the VPS authorized_keys is immediately visible.
+      - name: Prepare + validate deploy key
+        if: steps.cfg.outputs.configured == 'true'
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          KEY_FILE=~/.ssh/deploy_key
+
+          if printf '%s' "$DEPLOY_SSH_KEY" | tr -d '\r\n ' | base64 -d 2>/dev/null | grep -q "PRIVATE KEY"; then
+            echo "Detected base64-encoded key."
+            printf '%s' "$DEPLOY_SSH_KEY" | tr -d '\r\n ' | base64 -d > "$KEY_FILE"
+          elif [ "$(printf '%s' "$DEPLOY_SSH_KEY" | grep -c '')" -gt 2 ]; then
+            echo "Detected multi-line PEM key."
+            printf '%s\n' "$DEPLOY_SSH_KEY" | tr -d '\r' > "$KEY_FILE"
+          elif printf '%s' "$DEPLOY_SSH_KEY" | grep -q "BEGIN .*PRIVATE KEY"; then
+            echo "Detected single-line PEM (newlines flattened) — rebuilding wrapping."
+            HDR=$(printf '%s' "$DEPLOY_SSH_KEY" | sed -E 's/.*(-----BEGIN [A-Z ]*PRIVATE KEY-----).*/\1/')
+            FTR=$(printf '%s' "$DEPLOY_SSH_KEY" | sed -E 's/.*(-----END [A-Z ]*PRIVATE KEY-----).*/\1/')
+            BODY=$(printf '%s' "$DEPLOY_SSH_KEY" \
+              | sed -E 's/.*-----BEGIN [A-Z ]*PRIVATE KEY-----//; s/-----END [A-Z ]*PRIVATE KEY-----.*//' \
+              | tr -d ' \t\r\n')
+            { printf '%s\n' "$HDR"; printf '%s' "$BODY" | fold -w 70; printf '\n%s\n' "$FTR"; } > "$KEY_FILE"
+          else
+            echo "Unrecognised key shape — writing as-is."
+            printf '%s\n' "$DEPLOY_SSH_KEY" | tr -d '\r' > "$KEY_FILE"
+          fi
+          chmod 600 "$KEY_FILE"
+
+          if ! ssh-keygen -y -f "$KEY_FILE" > ~/.ssh/deploy_key.pub 2>/tmp/keyerr; then
+            echo "::error::DEPLOY_SSH_KEY could not be parsed as a private key."
+            echo "Fix: on the VPS run  base64 -w0 ~/.ssh/gha_deploy  and paste that single line as the DEPLOY_SSH_KEY secret."
+            sed -e 's/^/  /' /tmp/keyerr
+            exit 1
+          fi
+          echo "Key parsed OK. Fingerprint (must match the VPS authorized_keys entry):"
+          ssh-keygen -lf ~/.ssh/deploy_key.pub
+
+      - name: Deploy over SSH
+        if: steps.cfg.outputs.configured == 'true'
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          set -euo pipefail
+          PORT="${DEPLOY_PORT:-22}"
+          ssh-keyscan -p "$PORT" -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          echo "==> Deploying main to $DEPLOY_HOST:$DEPLOY_PATH"
+          # Update the checkout BEFORE invoking deploy.sh. The script also resets the
+          # repo, but doing it here first means bash parses the CURRENT version of the
+          # script — otherwise a change to deploy.sh only takes effect one deploy later
+          # (bash is already executing the old copy when git rewrites the file).
+          ssh -i ~/.ssh/deploy_key -p "$PORT" \
+            -o StrictHostKeyChecking=yes -o BatchMode=yes "$DEPLOY_USER@$DEPLOY_HOST" \
+            "bash -lc 'cd \"$DEPLOY_PATH\" && git fetch origin && git reset --hard origin/main && bash scripts/deploy.sh main'"

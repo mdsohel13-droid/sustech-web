@@ -102,6 +102,10 @@ jobs:
           PORT="${DEPLOY_PORT:-22}"
           ssh-keyscan -p "$PORT" -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null
           echo "==> Deploying main to $DEPLOY_HOST:$DEPLOY_PATH"
+          # Update the checkout BEFORE invoking deploy.sh. The script also resets the
+          # repo, but doing it here first means bash parses the CURRENT version of the
+          # script — otherwise a change to deploy.sh only takes effect one deploy later
+          # (bash is already executing the old copy when git rewrites the file).
           ssh -i ~/.ssh/deploy_key -p "$PORT" \
             -o StrictHostKeyChecking=yes -o BatchMode=yes "$DEPLOY_USER@$DEPLOY_HOST" \
-            "bash -lc 'cd \"$DEPLOY_PATH\" && bash scripts/deploy.sh main'"
+            "bash -lc 'cd \"$DEPLOY_PATH\" && git fetch origin && git reset --hard origin/main && bash scripts/deploy.sh main'"

@@ -18,6 +18,7 @@ import * as migration_20260613_120000_pipeline_approval from "./20260613_120000_
 import * as migration_20260613_140000_daily_reports from "./20260613_140000_daily_reports";
 import * as migration_20260613_160000_calculatorembed_calctype from "./20260613_160000_calculatorembed_calctype";
 import * as migration_20260626_170000_sector_funnel from "./20260626_170000_sector_funnel";
+import * as migration_20260723_180000_chatbot_provider_growthos from "./20260723_180000_chatbot_provider_growthos";
 
 export const migrations = [
   {
@@ -119,5 +120,10 @@ export const migrations = [
     up: migration_20260626_170000_sector_funnel.up,
     down: migration_20260626_170000_sector_funnel.down,
     name: "20260626_170000_sector_funnel",
+  },
+  {
+    up: migration_20260723_180000_chatbot_provider_growthos.up,
+    down: migration_20260723_180000_chatbot_provider_growthos.down,
+    name: "20260723_180000_chatbot_provider_growthos",
   },
 ];

@@ -104,6 +104,15 @@ export async function EngagementWidgets() {
             />
           )}
 
+          {chatProvider === "growthos" && (
+            <Script
+              id="growthos-widget"
+              strategy="afterInteractive"
+              src="https://growth.sustechltd.com/api/v1/public/support-widget.js"
+              data-base="https://growth.sustechltd.com"
+            />
+          )}
+
           {chatProvider === "custom" && chat?.customScript && (
             <Script
               id="custom-chat-widget"

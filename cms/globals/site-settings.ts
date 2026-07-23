@@ -494,6 +494,10 @@ export const SiteSettings: GlobalConfig = {
                     },
                     { label: "Crisp — free live chat + chatbot", value: "crisp" },
                     {
+                      label: "GrowthOS — AI support (bilingual, Beng+Eng)",
+                      value: "growthos",
+                    },
+                    {
                       label: "Custom embed script",
                       value: "custom",
                     },

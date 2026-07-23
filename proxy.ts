@@ -55,14 +55,14 @@ export function proxy(_request: NextRequest) {
     // chunks ('self') + Next's inline streaming scripts ('unsafe-inline').
     // 'unsafe-eval' only in dev (React error overlay + Turbopack HMR).
     process.env.NODE_ENV === "development"
-      ? `script-src 'self' 'unsafe-inline' 'unsafe-eval'`
-      : `script-src 'self' 'unsafe-inline'`,
+      ? `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://growth.sustechltd.com`
+      : `script-src 'self' 'unsafe-inline' https://growth.sustechltd.com`,
     `img-src ${imgSrc}`,
     `font-src 'self'`,
     // connect-src: self + WebSocket for Next.js HMR in dev
     process.env.NODE_ENV === "development"
-      ? `connect-src 'self' ws://localhost:* wss://localhost:*`
-      : `connect-src 'self'`,
+      ? `connect-src 'self' ws://localhost:* wss://localhost:* https://growth.sustechltd.com`
+      : `connect-src 'self' https://growth.sustechltd.com`,
     `media-src 'self' blob: ${mediaHost && `https://${mediaHost}`}`,
     frameSrc,
     `object-src 'none'`,

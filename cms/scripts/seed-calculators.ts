@@ -68,7 +68,7 @@ async function main(): Promise<void> {
   }
 
   payload.logger.info(
-    `Calculators synced to Knowledge Hub: ${created} created, ${updated} updated (${created + updated}/8).`,
+    `Calculators synced to Knowledge Hub: ${created} created, ${updated} updated (${created + updated}/10).`,
   );
   process.exit(0);
 }

@@ -24,6 +24,8 @@ export const CALC_TYPES = [
   { label: "Diesel vs Lithium BESS — running cost", value: "diesel-vs-bess" },
   { label: "ATM / branch UPS sizing", value: "atm-ups-sizing" },
   { label: "Cost of power outages", value: "outage-cost" },
+  { label: "SolarFin Pro — Bankable Tariff & LCOE", value: "solarfin-pro" },
+  { label: "BAESS — Free Solar Engineering Tools (External Reference)", value: "external-reference" },
 ] as const;
 
 export type CalcType = (typeof CALC_TYPES)[number]["value"];

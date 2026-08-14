@@ -24,6 +24,8 @@ import { OutageCostCalculator } from "./outage-cost-calculator";
 import { LightningZoneCalculator } from "./lightning-zone-calculator";
 import { SolarRoiCalculator } from "./solar-roi-calculator";
 import { SolarYieldCalculator } from "./solar-yield-calculator";
+import { SolarfinProCalculator } from "./solarfin-pro-calculator";
+import { ExternalReferenceCalculator } from "./external-reference-calculator";
 
 /** Props every calculator may receive. Rate-driven ones use `rates`; others ignore it. */
 export interface CalculatorProps {
@@ -45,6 +47,8 @@ const CALCULATOR_COMPONENTS: Record<CalcType, ComponentType<CalculatorProps>> = 
   "diesel-vs-bess": DieselVsBessCalculator,
   "atm-ups-sizing": AtmUpsSizingCalculator,
   "outage-cost": OutageCostCalculator,
+  "solarfin-pro": SolarfinProCalculator,
+  "external-reference": ExternalReferenceCalculator,
 };
 
 export const CALCULATOR_REGISTRY: Record<CalcType, CalcMeta> = Object.fromEntries(

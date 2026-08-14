@@ -103,16 +103,39 @@ export const CALCULATOR_META: Record<CalcType, CalcMetaBase> = {
     category: "Solar & Energy",
     standards: ["BERC tariff", "BPC diesel price"],
   },
+  "solarfin-pro": {
+    title: "SolarFin Pro — Bankable Tariff & LCOE",
+    description:
+      "Calculate the Levelized Cost of Energy (LCOE) and minimum bankable solar tariff " +
+      "for commercial and industrial projects in Bangladesh. Includes debt financing, NPV, " +
+      "IRR, and DSCR analysis with Bangladesh-specific cost parameters.",
+    icon: "💹",
+    iconSrc: "/icons-3d/chart_increasing.webp",
+    category: "Solar & Energy",
+    standards: ["NREL LCOE model", "SREDA net metering", "BPDB tariff"],
+  },
+  "external-reference": {
+    title: "BAESS — Free Solar Engineering Tools (External Reference)",
+    description:
+      "A curated reference of free external tools, databases, and standards for solar " +
+      "engineering and compliance in Bangladesh — PVGIS, NASA POWER, SAM, RETScreen, and more.",
+    icon: "🔗",
+    iconSrc: "/icons-3d/electric_plug.webp",
+    category: "Reference",
+    standards: [],
+  },
 };
 
 /** Stable display order for the Knowledge Hub (lower = first). */
 export const CALC_ORDER: CalcType[] = [
   "diesel-vs-bess",
   "solar-roi",
+  "solarfin-pro",
   "solar-yield",
   "outage-cost",
   "atm-ups-sizing",
   "earthing-resistance",
   "lightning-zone",
   "cable-sizing",
+  "external-reference",
 ];

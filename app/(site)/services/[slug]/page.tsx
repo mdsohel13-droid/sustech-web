@@ -72,10 +72,22 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
           "@type": "Service",
           name: service.title,
           serviceType: service.title,
+          category: "Engineering, Procurement and Construction (EPC)",
           description: service.summary,
           url: `${serverUrl}/services/${service.slug}`,
-          provider: { "@type": "Organization", name: "Sustech Technology Ltd", url: serverUrl },
+          // Link to the same Organization entity declared site-wide, so the
+          // service resolves to Sustech in the knowledge/entity graph.
+          provider: {
+            "@type": "Organization",
+            "@id": `${serverUrl}/#organization`,
+            name: "Sustech Technology Ltd",
+            url: serverUrl,
+          },
           areaServed: { "@type": "Country", name: "Bangladesh" },
+          audience: {
+            "@type": "BusinessAudience",
+            name: "Commercial & industrial (C&I) buyers in Bangladesh",
+          },
         }}
       />
       <JsonLd

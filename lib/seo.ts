@@ -8,6 +8,30 @@ const indexable = process.env.SITE_INDEXABLE === "true";
 const mediaUrl = (m?: number | Media | null): string | undefined =>
   m && typeof m === "object" && m.url ? m.url : undefined;
 
+/**
+ * The topics Sustech is authoritative on (Schema.org `knowsAbout`). This is the
+ * single strongest entity/GEO signal: it tells Google's Knowledge Graph and the
+ * AI answer engines exactly which subjects to cite this organisation for. Every
+ * item is a real service line or a published standard the firm designs to — never
+ * an invented capability.
+ */
+const KNOWS_ABOUT = [
+  "Solar photovoltaic (PV) EPC",
+  "On-grid, off-grid and hybrid solar power systems",
+  "Rooftop solar net metering (SREDA guidelines)",
+  "Battery energy storage systems (BESS / LiFePO4)",
+  "Electrical substation design and installation",
+  "HT/LT switchgear and PFI panels",
+  "Industrial electrical EPC",
+  "Lightning protection systems (IEC 62305 / NFPA 780)",
+  "Earthing and grounding design (IEEE 80)",
+  "Low-voltage electrical installations (IEC 60364)",
+  "Energy audits and energy efficiency",
+  "Industrial LED and solar street lighting",
+  "Fire detection and public address (PA) systems",
+  "Occupational electrical safety training",
+];
+
 export function pageMetadata(page: Page | null, settings: SiteSetting, path: string): Metadata {
   const seo = page?.seo;
   const fullTitle =
@@ -75,15 +99,32 @@ export function siteJsonLd(settings: SiteSetting): Record<string, unknown> {
     "@type": "Organization",
     "@id": orgId,
     name: settings.companyName,
+    legalName: settings.companyName,
     url: serverUrl,
     description: settings.description || undefined,
+    slogan: settings.tagline || undefined,
     foundingDate: settings.foundingYear ? String(settings.foundingYear) : undefined,
     areaServed: settings.areaServed || undefined,
+    knowsAbout: KNOWS_ABOUT,
+    knowsLanguage: ["en", "bn"],
   };
   const logo = mediaUrl(settings.logo);
   if (logo) org.logo = logo.startsWith("http") ? logo : `${serverUrl}${logo}`;
   const social = (settings.social ?? []).map((s) => s.url).filter(Boolean);
   if (social.length) org.sameAs = social;
+  // A structured contact point improves entity resolution + rich results.
+  const orgPhone = settings.phones?.[0]?.number;
+  const orgEmail = settings.emails?.[0]?.address;
+  if (orgPhone || orgEmail) {
+    org.contactPoint = {
+      "@type": "ContactPoint",
+      contactType: "sales",
+      ...(orgPhone ? { telephone: orgPhone } : {}),
+      ...(orgEmail ? { email: orgEmail } : {}),
+      areaServed: settings.areaServed || "Bangladesh",
+      availableLanguage: ["English", "Bengali"],
+    };
+  }
 
   const lb: Record<string, unknown> = {
     "@type": "LocalBusiness",

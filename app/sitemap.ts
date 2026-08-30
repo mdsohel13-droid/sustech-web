@@ -33,11 +33,35 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const url = (path: string) => `${serverUrl}${path}`;
 
+  // <lastmod> is the sitemap signal Google actually uses to schedule re-crawls
+  // (changefreq/priority are largely ignored). Give the index/listing routes an
+  // accurate lastmod = the freshest item they surface, so an added project or
+  // article marks the listing as changed.
+  const newest = (arr: { updatedAt?: string | null }[]): Date | undefined => {
+    let max = 0;
+    for (const d of arr) {
+      const t = d.updatedAt ? new Date(d.updatedAt).getTime() : 0;
+      if (t > max) max = t;
+    }
+    return max ? new Date(max) : undefined;
+  };
+  const newestAll = newest([...services, ...sectors, ...projects, ...articles, ...newsItems]);
+
   const fixed: MetadataRoute.Sitemap = [
-    { url: url("/"), changeFrequency: "weekly", priority: 1 },
-    { url: url("/projects"), changeFrequency: "weekly", priority: 0.8 },
-    { url: url("/knowledge"), changeFrequency: "weekly", priority: 0.6 },
-    { url: url("/news"), changeFrequency: "daily", priority: 0.7 },
+    { url: url("/"), lastModified: newestAll, changeFrequency: "weekly", priority: 1 },
+    {
+      url: url("/projects"),
+      lastModified: newest(projects),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
+      url: url("/knowledge"),
+      lastModified: newest(articles),
+      changeFrequency: "weekly",
+      priority: 0.6,
+    },
+    { url: url("/news"), lastModified: newest(newsItems), changeFrequency: "daily", priority: 0.7 },
     { url: url("/request-quote"), changeFrequency: "yearly", priority: 0.9 },
     { url: url("/contact"), changeFrequency: "yearly", priority: 0.5 },
     { url: url("/privacy"), changeFrequency: "yearly", priority: 0.2 },
@@ -50,12 +74,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const serviceUrls: MetadataRoute.Sitemap = services.map((s) => ({
     url: url(`/services/${s.slug}`),
+    lastModified: lastMod(s.updatedAt),
     changeFrequency: "monthly",
     priority: 0.7,
   }));
 
   const sectorUrls: MetadataRoute.Sitemap = sectors.map((s) => ({
     url: url(`/solutions/${s.slug}`),
+    lastModified: lastMod(s.updatedAt),
     changeFrequency: "monthly",
     priority: 0.7,
   }));

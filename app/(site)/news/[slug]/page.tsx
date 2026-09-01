@@ -13,6 +13,7 @@ import { draftMode } from "next/headers";
 import { notFound } from "next/navigation";
 import type { ComponentProps } from "react";
 import { JsonLd } from "@/components/seo/json-ld";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Container } from "@/components/ui/container";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { Section } from "@/components/ui/section";
@@ -99,28 +100,6 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
           ...(item.source ? { creditText: item.source, acquireLicensePage: item.sourceUrl } : {}),
         }}
       />
-      {/* BreadcrumbList */}
-      <JsonLd
-        data={{
-          "@context": "https://schema.org",
-          "@type": "BreadcrumbList",
-          itemListElement: [
-            { "@type": "ListItem", position: 1, name: "Home", item: serverUrl },
-            {
-              "@type": "ListItem",
-              position: 2,
-              name: "News & Updates",
-              item: `${serverUrl}/news`,
-            },
-            {
-              "@type": "ListItem",
-              position: 3,
-              name: item.title,
-              item: `${serverUrl}/news/${item.slug}`,
-            },
-          ],
-        }}
-      />
       {/* FAQPage schema (highest-citability GEO signal) */}
       {faq.length > 0 && (
         <JsonLd
@@ -139,6 +118,15 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
       {/* Article header */}
       <section className="bg-ink-900 text-text-invert relative isolate overflow-hidden">
         <Container className="relative py-14 md:py-20">
+          <Breadcrumbs
+            items={[
+              { name: "Home", href: "/" },
+              { name: "News", href: "/news" },
+              { name: item.title },
+            ]}
+            onDark
+            className="mb-6"
+          />
           <div className="mb-4 flex flex-wrap items-center gap-3">
             <Link
               href={`/news?category=${item.category}`}

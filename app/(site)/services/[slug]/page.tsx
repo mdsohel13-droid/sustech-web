@@ -6,6 +6,7 @@ import type { ComponentProps } from "react";
 import { serviceIcons } from "@/components/icons";
 import { EntityIcon } from "@/components/ui/entity-icon";
 import { JsonLd } from "@/components/seo/json-ld";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { Eyebrow } from "@/components/ui/eyebrow";
@@ -90,21 +91,6 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
           },
         }}
       />
-      <JsonLd
-        data={{
-          "@context": "https://schema.org",
-          "@type": "BreadcrumbList",
-          itemListElement: [
-            { "@type": "ListItem", position: 1, name: "Home", item: serverUrl },
-            {
-              "@type": "ListItem",
-              position: 2,
-              name: service.title,
-              item: `${serverUrl}/services/${service.slug}`,
-            },
-          ],
-        }}
-      />
       {faq.length > 0 && (
         <JsonLd
           data={{
@@ -132,6 +118,15 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
           />
         ) : null}
         <Container className="relative py-20 md:py-28">
+          <Breadcrumbs
+            items={[
+              { name: "Home", href: "/" },
+              { name: "Services", href: "/services" },
+              { name: service.title },
+            ]}
+            onDark
+            className="mb-6"
+          />
           <span className="bg-brand/15 text-brand-300 mb-6 inline-flex h-12 w-12 items-center justify-center rounded-md">
             <EntityIcon customIcon={service.customIcon} Fallback={Icon} />
           </span>

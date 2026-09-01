@@ -9,6 +9,7 @@ import { sectorIcons, serviceIcons } from "@/components/icons";
 import { JsonLd } from "@/components/seo/json-ld";
 import { GatedAssetForm } from "@/components/sections/gated-asset";
 import { TrackedCta } from "@/components/sections/tracked-cta";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card } from "@/components/ui/card";
 import { Container } from "@/components/ui/container";
 import { EntityIcon } from "@/components/ui/entity-icon";
@@ -22,7 +23,6 @@ import {
   getSectorBySlug,
   getSectors,
 } from "@/lib/payload";
-import { serverUrl } from "@/lib/seo";
 import type {
   Client,
   KnowledgeResource,
@@ -124,21 +124,6 @@ export default async function SectorPage({ params }: { params: Promise<{ slug: s
 
   return (
     <>
-      <JsonLd
-        data={{
-          "@context": "https://schema.org",
-          "@type": "BreadcrumbList",
-          itemListElement: [
-            { "@type": "ListItem", position: 1, name: "Home", item: serverUrl },
-            {
-              "@type": "ListItem",
-              position: 2,
-              name: sector.title,
-              item: `${serverUrl}/solutions/${sector.slug}`,
-            },
-          ],
-        }}
-      />
       {faqs.length > 0 && (
         <JsonLd
           data={{
@@ -156,6 +141,15 @@ export default async function SectorPage({ params }: { params: Promise<{ slug: s
       <section className="bg-ink-900 text-text-invert relative isolate overflow-hidden">
         <GridMotif tone="dark" />
         <Container className="relative py-20 md:py-28">
+          <Breadcrumbs
+            items={[
+              { name: "Home", href: "/" },
+              { name: "Solutions", href: "/solutions" },
+              { name: sector.title },
+            ]}
+            onDark
+            className="mb-6"
+          />
           <span className="bg-brand/15 text-brand-300 mb-6 inline-flex h-12 w-12 items-center justify-center rounded-md">
             <EntityIcon customIcon={sector.customIcon} Fallback={Icon} />
           </span>

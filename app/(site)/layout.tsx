@@ -59,6 +59,16 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
       data-design={design}
       className={`${cabinet.variable} ${switzer.variable} ${jetbrains.variable}`}
     >
+      {/* Warm up the analytics origin ONLY when analytics is actually enabled,
+          so the first pageview beacon doesn't pay full TCP+TLS setup (CWV/INP).
+          Gated on the key so we never open an unused connection. */}
+      {process.env.NEXT_PUBLIC_POSTHOG_KEY && (
+        <link
+          rel="preconnect"
+          href={process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://app.posthog.com"}
+          crossOrigin="anonymous"
+        />
+      )}
       <body>
         <a
           href="#main"

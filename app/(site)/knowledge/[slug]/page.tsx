@@ -6,10 +6,11 @@ import type { ComponentProps } from "react";
 import { CitedRichText } from "@/components/sections/cited-rich-text";
 import { SourcesReferences } from "@/components/sections/sources-references";
 import { JsonLd } from "@/components/seo/json-ld";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { Section } from "@/components/ui/section";
 import { getArticleBySlug } from "@/lib/payload";
-import { articleJsonLd, breadcrumbJsonLd, serverUrl } from "@/lib/seo";
+import { articleJsonLd } from "@/lib/seo";
 
 type RichData = ComponentProps<typeof RichText>["data"];
 
@@ -54,16 +55,16 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   return (
     <>
       <JsonLd data={articleJsonLd(a, "/knowledge")} />
-      {/* BreadcrumbList: Home › Knowledge › {article title} */}
-      <JsonLd
-        data={breadcrumbJsonLd([
-          { name: "Home", url: serverUrl },
-          { name: "Knowledge", url: `${serverUrl}/knowledge` },
-          { name: a.title },
-        ])}
-      />
       <Section containerSize="default">
         <article className="mx-auto max-w-3xl">
+          <Breadcrumbs
+            items={[
+              { name: "Home", href: "/" },
+              { name: "Knowledge", href: "/knowledge" },
+              { name: a.title },
+            ]}
+            className="mb-4"
+          />
           <Eyebrow>Knowledge</Eyebrow>
           <h1 className="text-h1 mt-3 font-bold text-balance">{a.title}</h1>
           {(a.author || a.publishedDate) && (

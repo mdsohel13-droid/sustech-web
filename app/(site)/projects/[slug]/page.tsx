@@ -9,7 +9,8 @@ import { Eyebrow } from "@/components/ui/eyebrow";
 import { GridMotif } from "@/components/ui/grid-motif";
 import { Section } from "@/components/ui/section";
 import { getProjectBySlug } from "@/lib/payload";
-import { breadcrumbJsonLd, serverUrl } from "@/lib/seo";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { serverUrl } from "@/lib/seo";
 
 type RichData = ComponentProps<typeof RichText>["data"];
 
@@ -62,14 +63,6 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
 
   return (
     <>
-      {/* BreadcrumbList: Home › Projects › {project name} */}
-      <JsonLd
-        data={breadcrumbJsonLd([
-          { name: "Home", url: serverUrl },
-          { name: "Projects", url: `${serverUrl}/projects` },
-          { name: p.name },
-        ])}
-      />
       {/* CreativeWork — mirrors only confirmed visible content (CLAUDE.md §6) */}
       <JsonLd
         data={{
@@ -96,6 +89,15 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
       <section className="bg-ink-900 text-text-invert relative isolate overflow-hidden">
         <GridMotif tone="dark" />
         <Container className="relative py-20 md:py-28">
+          <Breadcrumbs
+            items={[
+              { name: "Home", href: "/" },
+              { name: "Projects", href: "/projects" },
+              { name: p.name },
+            ]}
+            onDark
+            className="mb-6"
+          />
           <Eyebrow onDark>Case study</Eyebrow>
           <h1 className="text-display mt-4 max-w-3xl font-bold text-balance">{p.name}</h1>
           <p className="text-lede text-text-invert-soft mt-4 max-w-2xl">{p.summary}</p>

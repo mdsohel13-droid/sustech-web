@@ -3,37 +3,10 @@ import path from "node:path";
 import { getPayload } from "payload";
 import config from "../../payload.config";
 
-/* Minimal Lexical builders so we can author rich text in the seed. */
-const txt = (text: string, bold = false) => ({
-  type: "text",
-  text,
-  format: bold ? 1 : 0,
-  detail: 0,
-  mode: "normal",
-  style: "",
-  version: 1,
-});
-const para = (...children: unknown[]) => ({
-  type: "paragraph",
-  children,
-  direction: "ltr",
-  format: "",
-  indent: 0,
-  version: 1,
-  textFormat: 0,
-});
-const heading = (tag: "h2" | "h3", text: string) => ({
-  type: "heading",
-  tag,
-  children: [txt(text)],
-  direction: "ltr",
-  format: "",
-  indent: 0,
-  version: 1,
-});
-const doc = (...children: unknown[]) => ({
-  root: { type: "root", children, direction: "ltr", format: "", indent: 0, version: 1 },
-});
+/* Rich-text + link builders and the About page content live in shared modules so
+   the full seed and the targeted apply-about script never drift. */
+import { aboutData } from "./about-content";
+import { customLink, doc, heading, para, txt } from "./lexical";
 
 const SERVICES = [
   {
@@ -418,63 +391,8 @@ const SECTOR_DETAIL: Record<string, { challenges: unknown; serviceSlugs: string[
   ),
 };
 
-// --- About content (Brief Parts 2–5) ---------------------------------------
-const MISSION =
-  "To engineer a smarter, cleaner and safer built environment across Bangladesh — delivering " +
-  "energy-efficient, compliant and technology-forward solutions that help industries grow, " +
-  "communities thrive and the nation lead the clean-energy transition.";
-
-const VISION =
-  "To become South Asia's most trusted integrated energy-engineering brand — manufacturing our own " +
-  "products, powering microgrids and operating at scale across Bangladesh and beyond by 2032.";
-
-const VALUES = [
-  {
-    title: "Integrity",
-    body: "We never compromise on safety, compliance or honest advice.",
-  },
-  {
-    title: "Excellence",
-    body: "CUET-trained engineers, calibrated test equipment and international standards (IEC, NFPA, IEEE, BNBC).",
-  },
-  {
-    title: "Innovation",
-    body: "AI-powered proposals, IoT energy management and BESS technology — tomorrow's tools, today.",
-  },
-  {
-    title: "Partnership",
-    body: "We grow with our clients; 52 of our 175 relationships have become long-term accounts.",
-  },
-  {
-    title: "Sustainability",
-    body: "Every solar kWp we install reduces Bangladesh's carbon load. We mean it.",
-  },
-];
-
-const cert = (name: string, detail: string) => para(txt(`${name} — `, true), txt(detail));
-const CERTIFICATIONS = [
-  cert("RJSC Registered", "Private Limited Company (CH-12343/2017)."),
-  cert("TIN & VAT Registered", "Bangladesh NBR."),
-  cert("PWD Empanelled", "Public Works Department."),
-  cert("e-GP Registered", "Government eTendering platform."),
-  cert("SREDA Certified", "Energy Auditor (MD personal certification)."),
-  cert("BFSCD Certified", "Fire Safety Manager."),
-  cert("Bureau Veritas Channel Partner", "OH&S training."),
-  cert("Chittagong Chamber of Commerce", "Member."),
-  cert("ISO 9001", "In progress."),
-  cert("Standards compliance", "IEC · IEEE · NFPA · BNBC · NEC · ACCORD/RSC."),
-];
-
-const PARTNERSHIPS = [
-  cert("Atomberg Technologies", "Sole Distributor, Bangladesh (India)."),
-  cert("Growatt New Energy", "Authorized Distributor (China)."),
-  cert("Hithium Energy Storage", "Bangladesh Agent (China)."),
-  cert("Jinko Solar", "Authorized Dealer (China)."),
-  cert("JA Solar", "Authorized Dealer (China)."),
-  cert("Bureau Veritas", "Channel Partner — training (France)."),
-  cert("Fairmate", "Sole Distributor, Chittagong (BD/India)."),
-  cert("IE Energy", "Bangladesh Agent — BESS (China)."),
-];
+// About page content (mission, vision, values, certifications, partnerships and
+// the full block layout) now lives in ./about-content, imported as `aboutData`.
 
 const ENGINEER_BIO = "Field execution, LPS/earthing design and MEP works.";
 const TEAM = [
@@ -773,13 +691,6 @@ const ARTICLES = [
     ],
   ),
 ];
-
-const customLink = (label: string, url: string, extra: Record<string, unknown> = {}) => ({
-  label,
-  type: "custom" as const,
-  url,
-  ...extra,
-});
 
 async function main(): Promise<void> {
   const payload = await getPayload({ config });
@@ -1497,116 +1408,12 @@ async function main(): Promise<void> {
     else await payload.update({ collection: "team", id: found.docs[0]!.id, data });
   }
 
-  const aboutLayout = [
-    {
-      blockType: "hero",
-      eyebrow: "About Sustech",
-      heading: "Smart Energy. Strong Engineering. Sustainable Solution.",
-      subhead:
-        "Sustech Technology Ltd is one of Bangladesh's integrated engineering and energy solutions " +
-        "companies — delivering Smart Energy, Strong Engineering and Sustainable Solutions since 2017.",
-      tone: "dark",
-      ctas: [
-        customLink("Request a Consultation", "/request-quote", { style: "primary" }),
-        customLink("See Our Projects", "/projects", { style: "secondary" }),
-      ],
-    },
-    {
-      blockType: "richText",
-      content: doc(
-        heading("h2", "Our story"),
-        para(
-          txt(
-            "Founded in Chattogram in September 2017 by Md. Sohel Sikder — a CUET-educated engineer, " +
-              "SREDA-certified Energy Auditor and Government-certified Fire Safety Manager — Sustech " +
-              "began with a single commitment: deliver world-class electrical engineering to " +
-              "Bangladesh's industrial heartland.",
-          ),
-        ),
-        para(
-          txt(
-            "Eight years and 175+ client relationships later, Sustech operates across four verticals: " +
-              "EPC & Electrical Works, Solar & Renewable Energy, Product Supply & Distribution, and " +
-              "Inspection, Testing & Compliance. The company holds e-GP registration, PWD empanelment, " +
-              "and references that span UN agencies (WFP), heritage institutions (CWGC / British " +
-              "Embassy) and Bangladesh's largest garments exporters.",
-          ),
-        ),
-        para(
-          txt(
-            "Headquartered in Chattogram's GEC corridor — the nerve centre of Bangladesh's engineering " +
-              "and export economy — Sustech serves 40+ active clients across Chittagong Division, " +
-              "Dhaka, Cox's Bazar and beyond.",
-          ),
-        ),
-      ),
-    },
-    {
-      blockType: "statsCounters",
-      appearance: "muted",
-      intro: "Eight years of engineering for Bangladesh's industrial sector.",
-      stats: [
-        { value: 175, suffix: "+", label: "Clients served" },
-        { value: 103, suffix: "+", label: "Projects executed" },
-        { value: 8, suffix: "+", label: "Years in operation" },
-        { value: 100, suffix: "+ kWp", label: "Solar installed" },
-      ],
-    },
-    {
-      blockType: "richText",
-      content: doc(
-        heading("h2", "Mission & vision"),
-        para(txt("Mission. ", true), txt(MISSION)),
-        para(txt("Vision. ", true), txt(VISION)),
-      ),
-    },
-    {
-      blockType: "steps",
-      eyebrow: "What we stand for",
-      heading: "Our values.",
-      steps: VALUES,
-    },
-    {
-      blockType: "teamGrid",
-      appearance: "muted",
-      source: "auto",
-      heading: "Leadership & team",
-      lede: "Engineers and leaders behind Sustech's projects.",
-    },
-    {
-      blockType: "richText",
-      content: doc(heading("h2", "Certifications & credentials"), ...CERTIFICATIONS),
-    },
-    {
-      blockType: "richText",
-      appearance: "muted",
-      content: doc(heading("h2", "Strategic partnerships"), ...PARTNERSHIPS),
-    },
-    {
-      blockType: "ctaBand",
-      heading: "Want to work with us?",
-      subhead: "Tell us about your project — our engineers will scope it with you, no obligation.",
-      ctas: [customLink("Request a Consultation", "/request-quote", { style: "primary" })],
-    },
-  ];
   const existingAbout = await payload.find({
     collection: "pages",
     where: { slug: { equals: "about" } },
     limit: 1,
     draft: true,
   });
-  const aboutData = {
-    title: "About",
-    slug: "about",
-    _status: "published" as const,
-    layout: aboutLayout,
-    seo: {
-      title: "About Sustech Technology Ltd — Engineering & Energy in Chattogram, Bangladesh",
-      description:
-        "Founded 2017 in Chattogram, Sustech delivers solar EPC, BESS, electrical works, lightning " +
-        "protection, substation and inspection & testing across Bangladesh — 175+ clients, 103+ projects.",
-    },
-  };
   if (existingAbout.docs.length > 0) {
     await payload.update({ collection: "pages", id: existingAbout.docs[0]!.id, data: aboutData });
   } else {

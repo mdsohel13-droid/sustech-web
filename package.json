@@ -23,6 +23,7 @@
     "health": "node scripts/healthcheck.mjs",
     "purge:cdn": "node scripts/purge-cdn.mjs",
     "seed": "node --import jiti/register cms/scripts/seed.ts",
+    "apply:about": "node --import jiti/register cms/scripts/apply-about.ts",
     "seed:sources": "node --import jiti/register cms/scripts/seed-sources.ts",
     "seed:leadengine": "node --import jiti/register cms/scripts/seed-leadengine.ts",
     "seed:calculators": "node --import jiti/register cms/scripts/seed-calculators.ts",

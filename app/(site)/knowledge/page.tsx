@@ -25,7 +25,7 @@ import { CALCULATOR_REGISTRY } from "@/components/calculators/calculator-registr
 import { getArticles, getKnowledgeResources, getSiteSettings } from "@/lib/payload";
 import { isHorizontal } from "@/lib/content-layout";
 import { pageIntro } from "@/lib/page-intro";
-import { serverUrl } from "@/lib/seo";
+import { listingOpenGraph, serverUrl } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 
 export const revalidate = 3600;
@@ -47,6 +47,7 @@ export function generateMetadata(): Metadata {
     title: { absolute: `${TITLE} · Sustech Technology Ltd` },
     description: LEDE,
     alternates: { canonical: "/knowledge" },
+    openGraph: listingOpenGraph(TITLE, LEDE, "/knowledge"),
     robots: noindex ? { index: false, follow: false } : undefined,
   };
 }

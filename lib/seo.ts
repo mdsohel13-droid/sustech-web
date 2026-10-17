@@ -72,6 +72,28 @@ export function pageMetadata(page: Page | null, settings: SiteSetting, path: str
   };
 }
 
+/**
+ * OpenGraph block for a static / listing page (services, projects, contact, …).
+ * These pages otherwise fall back to the site-default OG card with no per-page
+ * title; this gives each a titled /api/og image. Twitter inherits it (the root
+ * layout no longer pins a twitter image). Spread into the page's Metadata:
+ *   return { title, description, …, openGraph: listingOpenGraph(TITLE, LEDE, "/x") }
+ */
+export function listingOpenGraph(
+  title: string,
+  description: string,
+  path: string,
+): NonNullable<Metadata["openGraph"]> {
+  return {
+    type: "website",
+    siteName: "Sustech Technology Ltd",
+    title,
+    description,
+    url: path,
+    images: [`/api/og?title=${encodeURIComponent(title)}`],
+  };
+}
+
 // ── Structured data helpers ──────────────────────────────────────────────────
 
 /**

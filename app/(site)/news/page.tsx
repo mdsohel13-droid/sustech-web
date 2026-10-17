@@ -11,7 +11,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { Container } from "@/components/ui/container";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { getNewsItems, getSiteSettings } from "@/lib/payload";
-import { serverUrl } from "@/lib/seo";
+import { listingOpenGraph, serverUrl } from "@/lib/seo";
 import type { NewsItem } from "@/payload-types";
 
 export const revalidate = 3600;
@@ -37,6 +37,11 @@ export async function generateMetadata(): Promise<Metadata> {
       "Daily updates on the solar energy sector, electrical EPC, smart buildings, " +
       "and market insights from Sustech Technology Ltd, Bangladesh.",
     alternates: { canonical: "/news" },
+    openGraph: listingOpenGraph(
+      "News & Updates",
+      "Daily updates on solar, electrical EPC, energy storage and market insights from Sustech Technology Ltd, Bangladesh.",
+      "/news",
+    ),
     robots: noindex ? { index: false, follow: false } : undefined,
   };
 }

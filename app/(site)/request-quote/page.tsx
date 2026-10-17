@@ -8,7 +8,7 @@ import { Eyebrow } from "@/components/ui/eyebrow";
 import { GridMotif } from "@/components/ui/grid-motif";
 import { getServices, getSiteSettings } from "@/lib/payload";
 import { pageIntro } from "@/lib/page-intro";
-import { serverUrl } from "@/lib/seo";
+import { listingOpenGraph, serverUrl } from "@/lib/seo";
 
 export const revalidate = 3600;
 
@@ -22,6 +22,7 @@ export function generateMetadata(): Metadata {
     title: { absolute: `${TITLE} · Sustech Technology Ltd` },
     description: LEDE,
     alternates: { canonical: "/request-quote" },
+    openGraph: listingOpenGraph(TITLE, LEDE, "/request-quote"),
     robots: noindex ? { index: false, follow: false } : undefined,
   };
 }

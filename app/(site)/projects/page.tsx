@@ -17,7 +17,7 @@ import { getProjects, getSiteSettings } from "@/lib/payload";
 import { isHorizontal } from "@/lib/content-layout";
 import { pageIntro } from "@/lib/page-intro";
 import { ProofCounter } from "@/components/ui/proof-counter";
-import { serverUrl } from "@/lib/seo";
+import { listingOpenGraph, serverUrl } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 import type { Project, Service } from "@/payload-types";
 
@@ -33,6 +33,7 @@ export function generateMetadata(): Metadata {
     title: { absolute: `${TITLE} · Sustech Technology Ltd` },
     description: LEDE,
     alternates: { canonical: "/projects" },
+    openGraph: listingOpenGraph(TITLE, LEDE, "/projects"),
     robots: noindex ? { index: false, follow: false } : undefined,
   };
 }

@@ -13,7 +13,7 @@ import { Section } from "@/components/ui/section";
 import { getServices, getSiteSettings } from "@/lib/payload";
 import { isHorizontal } from "@/lib/content-layout";
 import { pageIntro } from "@/lib/page-intro";
-import { serverUrl } from "@/lib/seo";
+import { listingOpenGraph, serverUrl } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 
 export const revalidate = 3600;
@@ -28,6 +28,7 @@ export function generateMetadata(): Metadata {
     title: { absolute: `${TITLE} · Sustech Technology Ltd` },
     description: LEDE,
     alternates: { canonical: "/services" },
+    openGraph: listingOpenGraph(TITLE, LEDE, "/services"),
     robots: noindex ? { index: false, follow: false } : undefined,
   };
 }

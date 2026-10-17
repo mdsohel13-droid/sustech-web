@@ -11,7 +11,7 @@ import { GridMotif } from "@/components/ui/grid-motif";
 import { Section } from "@/components/ui/section";
 import { getSiteSettings } from "@/lib/payload";
 import { pageIntro } from "@/lib/page-intro";
-import { serverUrl } from "@/lib/seo";
+import { listingOpenGraph, serverUrl } from "@/lib/seo";
 
 export const revalidate = 3600;
 
@@ -25,6 +25,7 @@ export function generateMetadata(): Metadata {
     title: { absolute: `${TITLE} · Sustech Technology Ltd` },
     description: LEDE,
     alternates: { canonical: "/contact" },
+    openGraph: listingOpenGraph(TITLE, LEDE, "/contact"),
     robots: noindex ? { index: false, follow: false } : undefined,
   };
 }

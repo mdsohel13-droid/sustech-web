@@ -39,6 +39,7 @@ export const Services: CollectionConfig = {
             { label: "Substation / HV", value: "substation" },
             { label: "Fire & Safety", value: "fire" },
             { label: "Lighting / Products", value: "lighting" },
+            { label: "Energy-Saving Fans", value: "fan" },
             { label: "Training", value: "training" },
             { label: "Consultancy", value: "consultancy" },
           ],

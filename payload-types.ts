@@ -729,6 +729,7 @@ export interface Service {
     | 'substation'
     | 'fire'
     | 'lighting'
+    | 'fan'
     | 'training'
     | 'consultancy';
   order?: number | null;

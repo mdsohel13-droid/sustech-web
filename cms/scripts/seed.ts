@@ -67,18 +67,34 @@ const SERVICES = [
       "Fire detection and alarm systems, safety compliance and commissioning for industrial facilities.",
   },
   {
-    slug: "lighting-distribution",
-    title: "Lighting & Product Supply",
+    slug: "industrial-lighting",
+    title: "Industrial Lighting",
     icon: "lighting" as const,
     order: 8,
     summary:
-      "Energy-efficient industrial lighting and the supply of solar, BLDC fans, LED and electrical products.",
+      "Energy-efficient LED and solar lighting — high-bay, floodlight, street and architectural — engineered for lux, uptime and lower running cost.",
+  },
+  {
+    slug: "energy-saving-fans",
+    title: "Energy-Saving Fans",
+    icon: "fan" as const,
+    order: 9,
+    summary:
+      "Atomberg BLDC ceiling and industrial fans (sole Bangladesh distributor) — up to 65% less energy than conventional induction fans.",
+  },
+  {
+    slug: "lighting-distribution",
+    title: "Product Supply & Distribution",
+    icon: "electrical" as const,
+    order: 10,
+    summary:
+      "Authorised supply of solar modules, inverters, batteries, LED lighting, BLDC fans and electrical products from our partner brands.",
   },
   {
     slug: "training-safety",
     title: "OH&S Training",
     icon: "training" as const,
-    order: 9,
+    order: 11,
     summary:
       "Bureau Veritas channel-partner occupational health & safety, electrical safety and LOTO training.",
   },
@@ -86,7 +102,7 @@ const SERVICES = [
     slug: "consultancy",
     title: "Consultancy & Compliance",
     icon: "consultancy" as const,
-    order: 10,
+    order: 12,
     summary:
       "Energy audits (SREDA), compliance consultancy, e-GP tender support and engineering advisory.",
   },
@@ -307,15 +323,57 @@ const SERVICE_DETAIL: Record<
       },
     ],
   ),
-  "lighting-distribution": sd(
+  "industrial-lighting": sd(
     [
-      "Energy-efficient industrial and high-bay LED lighting and solar street lighting, plus supply and distribution of solar components, BLDC fans (Atomberg) and electrical products.",
+      "Energy-efficient industrial and architectural lighting — LED high-bay, floodlight, street, yard and solar lighting — designed to the required lux levels for factories, warehouses, yards and public spaces.",
     ],
-    "Lighting designed to required lux levels and energy-efficiency best practice.",
+    "Lighting designed to required lux levels (BNBC / illumination best practice) with energy-efficient LED and solar fixtures.",
     [
       {
-        question: "Are you an Atomberg distributor?",
-        answer: "Yes — Sustech is the sole distributor of Atomberg BLDC fans in Bangladesh.",
+        question: "What kinds of lighting does Sustech design and install?",
+        answer:
+          "LED high-bay and low-bay, floodlights, street and high-mast lighting, architectural and solar lighting — engineered to the required lux levels for the space.",
+      },
+      {
+        question: "How does efficient lighting cut running cost?",
+        answer:
+          "LED fixtures draw far less power than conventional lighting and last longer, cutting both energy and maintenance cost; solar lighting removes the running cost entirely for suitable outdoor areas.",
+      },
+    ],
+  ),
+  "energy-saving-fans": sd(
+    [
+      "Supply and installation of Atomberg BLDC ceiling and industrial fans — Sustech is the sole distributor for Bangladesh — for factories, offices, commercial and institutional spaces.",
+    ],
+    "BLDC (brushless DC) fan technology rated at up to 65% lower energy use than conventional induction fans.",
+    [
+      {
+        question: "How much energy do BLDC fans save?",
+        answer:
+          "Atomberg BLDC fans use up to 65% less energy than conventional induction fans while delivering the same airflow — the saving scales with the number of fans and running hours.",
+      },
+      {
+        question: "Is Sustech the official Atomberg distributor in Bangladesh?",
+        answer:
+          "Yes — Sustech is the sole distributor of Atomberg BLDC fans in Bangladesh, so products are supplied and warranted through official channels.",
+      },
+    ],
+  ),
+  "lighting-distribution": sd(
+    [
+      "Authorised supply and distribution of solar modules, inverters, batteries and energy-storage cabinets, LED lighting, BLDC fans and electrical products from our partner brands — Growatt, Hithium, Jinko, JA Solar, Atomberg and more.",
+    ],
+    "Genuine, warranty-backed products sourced through official distribution and authorised-dealer channels.",
+    [
+      {
+        question: "Which brands does Sustech supply?",
+        answer:
+          "Solar and inverters from Growatt, Jinko and JA Solar; energy storage from Hithium and IE Energy; BLDC fans from Atomberg (sole distributor); plus LED lighting and electrical products — all through official channels.",
+      },
+      {
+        question: "Can Sustech supply products without a full installation?",
+        answer:
+          "Yes — Sustech supplies and distributes genuine, warranty-backed products on their own, as well as installing them as part of a full EPC scope.",
       },
     ],
   ),
@@ -384,7 +442,7 @@ const SECTOR_DETAIL: Record<string, { challenges: unknown; serviceSlugs: string[
   ),
   commercial: cd(
     "Commercial buildings and hospitality balance running cost, occupant safety and code compliance — efficient electrical, solar and smart systems.",
-    ["electrical-epc", "solar-renewable", "lighting-distribution", "fire-safety"],
+    ["electrical-epc", "solar-renewable", "industrial-lighting", "fire-safety"],
   ),
   heritage: cd(
     "Heritage and cultural sites need sensitive, low-intrusion engineering — renewable energy and safety that respects irreplaceable structures.",
@@ -474,7 +532,7 @@ const FEATURED_PROJECTS: FeaturedProject[] = [
   {
     name: "Syngenta Bangladesh — Multi-Line Account",
     sectorSlug: "industrial-chemical",
-    serviceSlugs: ["substation-hv", "inspection-testing", "lps-earthing", "lighting-distribution"],
+    serviceSlugs: ["substation-hv", "inspection-testing", "lps-earthing", "industrial-lighting"],
     summary:
       "Substation renovation, transformer testing, DIFE compliance, thermography and flood lighting — 18 jobs over five years for a long-term industrial account.",
     location: "Bangladesh",

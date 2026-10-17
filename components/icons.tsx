@@ -5,6 +5,7 @@ import {
   Castle,
   ClipboardCheck,
   Factory,
+  Fan,
   Flame,
   Globe,
   GraduationCap,
@@ -31,6 +32,7 @@ export type ServiceIconKey =
   | "substation"
   | "fire"
   | "lighting"
+  | "fan"
   | "training"
   | "consultancy";
 
@@ -56,6 +58,7 @@ export const serviceIcons: Record<ServiceIconKey, LucideIcon> = {
   substation: PlugZap,
   fire: Flame,
   lighting: Lightbulb,
+  fan: Fan,
   training: GraduationCap,
   consultancy: ClipboardCheck,
 };

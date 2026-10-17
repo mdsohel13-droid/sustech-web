@@ -13,7 +13,7 @@ import { Eyebrow } from "@/components/ui/eyebrow";
 import { GridMotif } from "@/components/ui/grid-motif";
 import { Section } from "@/components/ui/section";
 import { getProjectsByService, getServiceBySlug, getServices } from "@/lib/payload";
-import { breadcrumbJsonLd, serverUrl } from "@/lib/seo";
+import { serverUrl } from "@/lib/seo";
 import type { Project } from "@/payload-types";
 
 type RichData = ComponentProps<typeof RichText>["data"];
@@ -69,13 +69,6 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
 
   return (
     <>
-      <JsonLd
-        data={breadcrumbJsonLd([
-          { name: "Home", url: serverUrl },
-          { name: "Services", url: `${serverUrl}/services` },
-          { name: service.title },
-        ])}
-      />
       <JsonLd
         data={{
           "@context": "https://schema.org",

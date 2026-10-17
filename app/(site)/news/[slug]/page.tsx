@@ -18,7 +18,7 @@ import { Container } from "@/components/ui/container";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { Section } from "@/components/ui/section";
 import { getNewsItemBySlug, getNewsItems } from "@/lib/payload";
-import { breadcrumbJsonLd, serverUrl } from "@/lib/seo";
+import { serverUrl } from "@/lib/seo";
 
 type RichData = ComponentProps<typeof RichText>["data"];
 
@@ -76,13 +76,6 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
 
   return (
     <>
-      <JsonLd
-        data={breadcrumbJsonLd([
-          { name: "Home", url: serverUrl },
-          { name: "News", url: `${serverUrl}/news` },
-          { name: item.title },
-        ])}
-      />
       {/* NewsArticle schema — primary GEO/AEO signal */}
       <JsonLd
         data={{

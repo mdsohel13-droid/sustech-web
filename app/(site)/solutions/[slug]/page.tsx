@@ -23,6 +23,7 @@ import {
   getSectorBySlug,
   getSectors,
 } from "@/lib/payload";
+import { breadcrumbJsonLd, serverUrl } from "@/lib/seo";
 import type {
   Client,
   KnowledgeResource,
@@ -124,6 +125,13 @@ export default async function SectorPage({ params }: { params: Promise<{ slug: s
 
   return (
     <>
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Home", url: serverUrl },
+          { name: "Solutions", url: `${serverUrl}/solutions` },
+          { name: sector.title },
+        ])}
+      />
       {faqs.length > 0 && (
         <JsonLd
           data={{

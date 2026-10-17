@@ -10,7 +10,7 @@ import { GridMotif } from "@/components/ui/grid-motif";
 import { Section } from "@/components/ui/section";
 import { getProjectBySlug } from "@/lib/payload";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { serverUrl } from "@/lib/seo";
+import { breadcrumbJsonLd, serverUrl } from "@/lib/seo";
 
 type RichData = ComponentProps<typeof RichText>["data"];
 
@@ -63,6 +63,13 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
 
   return (
     <>
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Home", url: serverUrl },
+          { name: "Projects", url: `${serverUrl}/projects` },
+          { name: p.name },
+        ])}
+      />
       {/* CreativeWork — mirrors only confirmed visible content (CLAUDE.md §6) */}
       <JsonLd
         data={{

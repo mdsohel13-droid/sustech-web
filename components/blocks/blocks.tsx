@@ -991,6 +991,29 @@ export async function TeamGridView({
       : [];
   const showGroups = grouped.length > 1;
 
+  // Person JSON-LD for each visible member, tied to the site-wide Organization
+  // (worksFor → #organization). A strong entity/GEO signal: it resolves the
+  // leadership team to Sustech in the knowledge graph. Mirrors visible content only.
+  const orgId = `${serverUrl}/#organization`;
+  const peopleLd = {
+    "@context": "https://schema.org",
+    "@graph": visible.map((m) => {
+      const photo = mediaUrl(m.photo);
+      const image = photo
+        ? photo.url.startsWith("http")
+          ? photo.url
+          : `${serverUrl}${photo.url}`
+        : undefined;
+      return {
+        "@type": "Person",
+        name: m.name,
+        jobTitle: m.role,
+        worksFor: { "@id": orgId },
+        ...(image ? { image } : {}),
+      };
+    }),
+  };
+
   return (
     <Section
       tone={bs.tone}
@@ -1006,6 +1029,7 @@ export async function TeamGridView({
       title={block.heading ?? undefined}
       lede={block.lede ?? undefined}
     >
+      <JsonLd data={peopleLd} />
       {showGroups ? (
         <div className="space-y-12 md:space-y-16">
           {grouped.map((g) => (

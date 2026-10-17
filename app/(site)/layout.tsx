@@ -32,7 +32,11 @@ export const metadata: Metadata = {
     siteName: "Sustech Technology Ltd",
     images: [{ url: "/og-default.jpg", width: 1200, height: 630 }],
   },
-  twitter: { card: "summary_large_image", images: ["/og-default.jpg"] },
+  // No twitter.images here on purpose: Next falls back to each page's
+  // openGraph.images, so detail pages get their per-page /api/og card on X/Twitter
+  // instead of being pinned to the static default. Listing pages still fall back to
+  // the openGraph default above.
+  twitter: { card: "summary_large_image" },
 };
 
 export const viewport: Viewport = {

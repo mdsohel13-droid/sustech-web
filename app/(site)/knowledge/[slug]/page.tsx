@@ -10,7 +10,7 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { Section } from "@/components/ui/section";
 import { getArticleBySlug } from "@/lib/payload";
-import { articleJsonLd } from "@/lib/seo";
+import { articleJsonLd, breadcrumbJsonLd, serverUrl } from "@/lib/seo";
 
 type RichData = ComponentProps<typeof RichText>["data"];
 
@@ -54,6 +54,13 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
   return (
     <>
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Home", url: serverUrl },
+          { name: "Knowledge", url: `${serverUrl}/knowledge` },
+          { name: a.title },
+        ])}
+      />
       <JsonLd data={articleJsonLd(a, "/knowledge")} />
       <Section containerSize="default">
         <article className="mx-auto max-w-3xl">

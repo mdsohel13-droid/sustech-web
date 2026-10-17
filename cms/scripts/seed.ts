@@ -7,6 +7,7 @@ import config from "../../payload.config";
    the full seed and the targeted apply-about script never drift. */
 import { aboutData } from "./about-content";
 import { customLink, doc, heading, para, txt } from "./lexical";
+import { SECTOR_FAQS } from "./sector-faqs";
 
 const SERVICES = [
   {
@@ -741,7 +742,11 @@ async function main(): Promise<void> {
     const serviceIds = (detail?.serviceSlugs ?? [])
       .map((sl) => serviceIdBySlug.get(sl))
       .filter((id): id is number => typeof id === "number");
-    const detailData = detail ? { challenges: detail.challenges, services: serviceIds } : {};
+    const faqs = SECTOR_FAQS[s.slug];
+    const detailData = {
+      ...(detail ? { challenges: detail.challenges, services: serviceIds } : {}),
+      ...(faqs ? { faqs } : {}),
+    };
     const found = await payload.find({
       collection: "sectors",
       where: { slug: { equals: s.slug } },

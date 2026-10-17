@@ -24,6 +24,7 @@
     "purge:cdn": "node scripts/purge-cdn.mjs",
     "seed": "node --import jiti/register cms/scripts/seed.ts",
     "apply:about": "node --import jiti/register cms/scripts/apply-about.ts",
+    "apply:sector-faqs": "node --import jiti/register cms/scripts/apply-sector-faqs.ts",
     "seed:sources": "node --import jiti/register cms/scripts/seed-sources.ts",
     "seed:leadengine": "node --import jiti/register cms/scripts/seed-leadengine.ts",
     "seed:calculators": "node --import jiti/register cms/scripts/seed-calculators.ts",

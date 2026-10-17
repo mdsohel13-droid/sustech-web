@@ -28,6 +28,8 @@ const KNOWS_ABOUT = [
   "Low-voltage electrical installations (IEC 60364)",
   "Energy audits and energy efficiency",
   "Industrial LED and solar street lighting",
+  "Energy-efficient BLDC ceiling and industrial fans",
+  "Electrical testing, inspection and compliance auditing",
   "Fire detection and public address (PA) systems",
   "Occupational electrical safety training",
 ];

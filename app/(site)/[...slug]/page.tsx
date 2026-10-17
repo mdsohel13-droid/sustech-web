@@ -54,13 +54,22 @@ export default async function CatchAllPage({ params }: { params: Promise<Params>
       <JsonLd
         data={{
           "@context": "https://schema.org",
-          "@type": "WebPage",
+          // The /about page is the authoritative page *about the organisation*, so
+          // type it as AboutPage and point its subject at the Organization node
+          // (emitted once in the root layout). This is a strong entity/GEO signal.
+          "@type": joined === "about" ? ["WebPage", "AboutPage"] : "WebPage",
           "@id": pageUrl,
           url: pageUrl,
           name: page.title,
           description: page.seo?.description || undefined,
           inLanguage: "en",
           isPartOf: { "@type": "WebSite", url: serverUrl },
+          ...(joined === "about"
+            ? {
+                about: { "@id": `${serverUrl}/#organization` },
+                mainEntity: { "@id": `${serverUrl}/#organization` },
+              }
+            : {}),
         }}
       />
       <RenderBlocks blocks={page.layout} cardLayout={cardLayout} />

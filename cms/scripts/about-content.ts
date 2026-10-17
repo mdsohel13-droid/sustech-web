@@ -205,6 +205,60 @@ const aboutLayout = [
     content: doc(heading("h2", "Strategic partnerships"), ...PARTNERSHIPS),
   },
   {
+    // A direct-answer FAQ: strong for human skim-reading AND for AI answer engines
+    // (GEO/AEO). The FAQ block auto-emits FAQPage JSON-LD, and every answer mirrors
+    // visible, confirmed facts — no invented figures.
+    blockType: "faq",
+    heading: "Frequently asked questions",
+    items: [
+      {
+        question: "What does Sustech Technology Ltd do?",
+        answer:
+          "Sustech is a Bangladeshi engineering and energy company delivering six capabilities in " +
+          "parallel: solar power, battery energy storage (BESS), electrical EPC, industrial " +
+          "lighting, energy-saving BLDC fans, and complete electrical compliance — testing, " +
+          "inspection and auditing. One accountable team designs, supplies, installs, tests and " +
+          "certifies the full scope for industrial, commercial and institutional clients.",
+      },
+      {
+        question: "Where is Sustech located and which areas do you serve?",
+        answer:
+          "Sustech is headquartered in the GEC corridor of Chattogram, Bangladesh, and serves " +
+          "clients across Chittagong Division, Dhaka, Cox's Bazar and nationwide. Founded in 2017, " +
+          "the company has delivered 103+ projects for 175+ clients across the country.",
+      },
+      {
+        question: "Is Sustech a certified and government-registered contractor?",
+        answer:
+          "Yes. Sustech is an RJSC-registered private limited company, PWD-empanelled and e-GP " +
+          "registered, with SREDA-certified energy auditing and BFSCD fire-safety certification. " +
+          "Projects are engineered to IEC, IEEE, NFPA, BNBC and NEC standards.",
+      },
+      {
+        question: "Which brands does Sustech supply and distribute?",
+        answer:
+          "Sustech is the sole Bangladesh distributor for Atomberg energy-saving BLDC fans, and an " +
+          "authorised partner for Growatt, Hithium (BESS), Jinko Solar, JA Solar, Fairmate and " +
+          "IE Energy — so solar, storage and electrical products are sourced and warranted through " +
+          "official channels.",
+      },
+      {
+        question: "Can Sustech handle a complete turnkey (EPC) project?",
+        answer:
+          "Yes. Sustech delivers full EPC — engineering, procurement and construction — under " +
+          "single-point accountability: site assessment, design, supply, installation, testing, " +
+          "certification and after-sales support, without sub-contracting the critical scope.",
+      },
+      {
+        question: "How do I request a quote or consultation?",
+        answer:
+          "Use the Request a Consultation button on any page, or contact Sustech directly. Our " +
+          "engineers will scope your project — solar, storage, electrical, lighting, fans or " +
+          "compliance — with no obligation.",
+      },
+    ],
+  },
+  {
     blockType: "ctaBand",
     heading: "Want to work with us?",
     subhead: "Tell us about your project — our engineers will scope it with you, no obligation.",

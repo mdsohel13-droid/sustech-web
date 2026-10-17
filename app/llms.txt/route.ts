@@ -96,6 +96,21 @@ export async function GET() {
   lines.push(mdLink("Home", "/", "Overview of services, sectors, and completed EPC projects."));
   lines.push(
     mdLink(
+      "About",
+      "/about",
+      "Company profile — six capabilities in parallel (solar, BESS, electrical EPC, industrial " +
+        "lighting, energy-saving fans, electrical compliance), founding, certifications and partners.",
+    ),
+  );
+  lines.push(
+    mdLink(
+      "Capabilities",
+      "/capabilities",
+      "Full EPC engineering capability across all service lines for C&I clients.",
+    ),
+  );
+  lines.push(
+    mdLink(
       "Request a Consultation",
       "/request-quote",
       "Project enquiry and RFQ form — no obligation.",

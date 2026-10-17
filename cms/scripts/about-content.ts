@@ -205,6 +205,15 @@ const aboutLayout = [
     content: doc(heading("h2", "Strategic partnerships"), ...PARTNERSHIPS),
   },
   {
+    // Links the About page to every service detail page — strengthens the internal
+    // link graph (About is a top entity page) and lets visitors jump straight into a
+    // capability. `auto` pulls the live services list from the CMS.
+    blockType: "servicesGrid",
+    source: "auto",
+    heading: "Explore our services",
+    lede: "Each capability, engineered and delivered by one accountable team.",
+  },
+  {
     // A direct-answer FAQ: strong for human skim-reading AND for AI answer engines
     // (GEO/AEO). The FAQ block auto-emits FAQPage JSON-LD, and every answer mirrors
     // visible, confirmed facts — no invented figures.

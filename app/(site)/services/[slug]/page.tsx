@@ -64,6 +64,8 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
   const Icon = serviceIcons[service.icon] ?? serviceIcons.solar;
   const faq = service.faq ?? [];
   const related = await getProjectsByService(service.id);
+  // Sibling services, for cross-linking the capabilities (internal link graph / GEO).
+  const otherServices = (await getServices()).filter((s) => s.slug !== service.slug);
 
   return (
     <>
@@ -251,6 +253,27 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
               </div>
             ))}
           </dl>
+        </Section>
+      )}
+
+      {otherServices.length > 0 && (
+        <Section tone="muted" title="Explore our other services" eyebrow="One accountable team">
+          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {otherServices.map((s) => (
+              <li key={s.id}>
+                <Link
+                  href={`/services/${s.slug}`}
+                  prefetch={false}
+                  className="border-border bg-surface ease-brand hover:border-brand/30 focus-visible:outline-brand block h-full rounded-lg border p-5 shadow-sm transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2"
+                >
+                  <span className="text-h3 text-ink-900 block font-semibold">{s.title}</span>
+                  {s.summary && (
+                    <span className="text-text-soft mt-2 block text-sm">{s.summary}</span>
+                  )}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </Section>
       )}
 
